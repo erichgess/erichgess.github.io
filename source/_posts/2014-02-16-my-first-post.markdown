@@ -32,3 +32,6 @@ val q : Quotations.Expr<int> =
 ```
 The Quotation gives you the Abstract Syntax Tree (AST) for a given F# expression.  Which, when I first started learning F# a year ago, was nothing but a curiousity.  In fact, it wasn't until just the other day that I actually started to get excited about Quotations.
 
+Whenever I read about Code Quotations, it seems it's always about using Quotations to handle translating F# code into another language.  The best example of this use case, in my opinion, is WebSharper; which takes F# code and translates it into JavaScript.
+
+However, it's the possibilities of using Quotations with distributed computing which caused my sudden spike in interest.  What's been bouncing around in my brain is:  can I write code in F#, break it apart into discrete chunks, send those chunks to be executing on different servers and then collect the results (MapReduce for sure).
