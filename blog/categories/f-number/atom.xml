@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: F# | My Octopress Blog]]></title>
+  <link href="http://erichgess.github.io/blog/categories/f-number/atom.xml" rel="self"/>
+  <link href="http://erichgess.github.io/"/>
+  <updated>2014-03-04T21:32:26-08:00</updated>
+  <id>http://erichgess.github.io/</id>
+  <author>
+    <name><![CDATA[Your Name]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Using RabbitMQ With F#]]></title>
+    <link href="http://erichgess.github.io/blog/2014/03/04/using-rabbitmq-with-f-number/"/>
+    <updated>2014-03-04T19:56:20-08:00</updated>
+    <id>http://erichgess.github.io/blog/2014/03/04/using-rabbitmq-with-f-number</id>
+    <content type="html"><![CDATA[<p>Over the last few years, one of the topics on which I have done much of my work has been distributed computing using message queues.  Recently, I&rsquo;ve been playing around with RabbitMQ, not for any reason other than that I wanted a simple, easy to setup, and easy to use messaging framework, which I could use for little experiments at home.</p>
+
+<p>I&rsquo;m not going to talk about RabbitMQ.  What I am going to talk about is one of the many ways in which F# makes programming just an absolute blast.</p>
+
+<p>Outside of work, most of my programming has been with F# (with a tiny bit of Clojure).  Naturally, I&rsquo;ve done some experiments with using F# and RabbitMQ.  I&rsquo;ll cover that, but that&rsquo;s not really what this post is about.</p>
+
+<p>My first attempt at this was to just follow the basic C# tutorial from www.rabbitmq.com, twisting it here and there for F#.  The tutorial you build a simple sender/receiver system:  one app sends messages to another app, which prints them to the console.  Which got me with some good workable boring code:
+```
+let factory = new ConnectionFactory(HostName = &ldquo;localhost&rdquo;)
+use connection = factory.CreateConnection()
+use channel = connection.CreateModel()</p>
+
+<p>channel.QueueDeclare( &ldquo;hello&rdquo;, false, false, false, null )
+let consumer = new QueueingBasicConsumer(channel)
+channel.BasicConsume(&ldquo;hello&rdquo;, true, consumer)</p>
+
+<p>while true do</p>
+
+<pre><code>let ea = consumer.Queue.Dequeue() :&gt; BasicDeliverEventArgs
+let body = ea.Body
+let message = Encoding.UTF8.GetString(body)
+printfn "%s" message
+</code></pre>
+
+<p>```
+This will do its job.  Listening on the queue and writing the messages as they come in.  It&rsquo;s not spectaculor and it doesn&rsquo;t use any of the Consumer class framework which comes with RabbitMQ.  But again, this post isn&rsquo;t about using RabbitMQ, it&rsquo;s about using <em>sequence expressions</em>.</p>
+
+<p>The Sequence Expression is a fun little construct in F# that lets you write programmatic enumerables.  For example, I want an enumerable with the numbers from 1 to 100, I would just write
+<code>
+let example = seq{ 1 .. 100 }
+</code>
+Or, what if I want a sequence of data, where everytime I ask for an element it gives me the current time:
+```
+let example2 = seq {</p>
+
+<pre><code>                    while true do
+                        yield DateTime.Now
+               }
+</code></pre>
+
+<p>```</p>
+
+<p>The sequence expression got me to thinking about trying that out with the message queues.  So, I changed my receiver code to look like this:
+```
+let factory = new ConnectionFactory(HostName = &ldquo;localhost&rdquo;)
+use connection = factory.CreateConnection()
+use channel = connection.CreateModel()</p>
+
+<p>channel.QueueDeclare( &ldquo;hello&rdquo;, false, false, false, null )
+let consumer = new QueueingBasicConsumer(channel)
+channel.BasicConsume(&ldquo;hello&rdquo;, true, consumer)</p>
+
+<p>// I wrap the queue in a sequence expression
+let queue = seq{</p>
+
+<pre><code>            while true do
+                let ea = consumer.Queue.Dequeue() :&gt; BasicDeliverEventArgs
+                let body = ea.Body
+                let message = Encoding.UTF8.GetString(body)
+                yield message
+        }
+</code></pre>
+
+<p><code>
+This creates an enumerable data structure called `queue`.  And this is where things get awesome, because I can now write *queries* to my queue of messages, exactly as I would to a database or list:
+</code>
+let qQuery = query{</p>
+
+<pre><code>            for message in queue do
+            select i.ToUpper()
+         }
+</code></pre>
+
+<p>qQuery |> Seq.iter (printfn &ldquo;%d&rdquo;)
+<code>``
+This query will select each message from the queue and convert it to all capital letters.  The Seq.iter will then pull each message from the query result and print it to the screen.  Do note that the</code>seq{&hellip;}<code>I bound to</code>queue<code>is an infinite loop, so</code>qQuery |> Seq.iter (printfn &ldquo;%d&rdquo;)` will run forever, printing out each message as it arrives in the queue.</p>
+
+<p>If you take a look at the <a href="http://msdn.microsoft.com/en-us/library/hh225374.aspx">MSDN</a> article on F#&rsquo;s Query Expressions, you&rsquo;ll see that there is a lot that can be done.  For example, if we had two different queues:
+```
+let doubleQuery = query{</p>
+
+<pre><code>                for m1 in queue do
+                join m2 in queue2 on
+                    (m1 = m2)
+                select (m1, m2)
+              }
+</code></pre>
+
+<p>```
+Or maybe even a join between the message queue and a database query.</p>
+
+<p>The long and short of all this is that I keep falling more in love with F#.  I get to spend so much time not writing boilerplate code and squiggly braces and so much time just doing.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Experimenting With Quotations]]></title>
+    <link href="http://erichgess.github.io/blog/2014/02/16/my-first-post/"/>
+    <updated>2014-02-16T20:37:19-08:00</updated>
+    <id>http://erichgess.github.io/blog/2014/02/16/my-first-post</id>
+    <content type="html"><![CDATA[<p>One of the more interesting featuers of F# is the Code Quotation.  Though I do find this interesting now, it has taken over a year before I saw any reason I might have even slight interest.  Even now, as I have taken a much greater interest in the topic, it&rsquo;s been difficult finding anything detailed on the topic.</p>
+
+<p>Anyone familiar with Lisp or one of its dialects, such as Clojure, will find Quotations familiar.  To put it simply, Quotations allow you to represent F# code as data.  Take the following example, where I bind a Quotation to <code>q</code>:</p>
+
+<p><code>
+let q = &lt;@ 2 @&gt;
+</code></p>
+
+<p>Running this in the FSI gives the following output:
+<code>
+val q : Quotations.Expr&lt;int&gt; = Value (2)
+</code></p>
+
+<p>The operator <code>&lt;@ @&gt;</code> takes the F# code which it wraps and converts it into a Quotation data structure.  In this case, it takes the value 2 and creates a Value type, which is part of the <code>Quotations.Expr</code> discriminated union.</p>
+
+<p>I&rsquo;ll do a more interesting example, which will better show what a Quotation actually gives you, using the FSI:
+```</p>
+
+<blockquote><p>let q = &lt;@ (2 + 3) * ( 3 &ndash; 1 ) @>;;</p></blockquote>
+
+<p>val q : Quotations.Expr<int> =
+  Call (None, op_Multiply,</p>
+
+<pre><code>  [Call (None, op_Addition, [Value (2), Value (3)]),
+   Call (None, op_Subtraction, [Value (3), Value (1)])])
+</code></pre>
+
+<p>```
+The Quotation gives you the Abstract Syntax Tree (AST) for a given F# expression.  Which, when I first started learning F# a year ago, was nothing but a curiousity.  In fact, it wasn&rsquo;t until just the other day that I actually started to get excited about Quotations.</p>
+
+<p>Whenever I read about Code Quotations, it seems it&rsquo;s always about using Quotations to handle translating F# code into another language.  The best example of this use case, in my opinion, is WebSharper; which takes F# code and translates it into JavaScript.</p>
+
+<p>However, it&rsquo;s the possibilities of using Quotations with distributed computing which caused my sudden spike in interest.  What&rsquo;s been bouncing around in my brain is:  can I write code in F#, break it apart into discrete chunks, send those chunks to be executing on different servers and then collect the results (MapReduce for sure).</p>
+]]></content>
+  </entry>
+  
+</feed>
