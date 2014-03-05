@@ -81,3 +81,5 @@ let doubleQuery = query{
                   }
 ```
 Or maybe even a join between the message queue and a database query.
+
+The long and short of all this is that I keep falling more in love with F#.  I get to spend so much time not writing boilerplate code and squiggly braces and so much time just doing.
