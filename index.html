@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
 <!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
@@ -5,10 +6,10 @@
 <head>
   <meta charset="utf-8">
   <title>My Octopress Blog</title>
-  <meta name="author" content="Erich Ess">
+  <meta name="author" content="Your Name">
 
   
-  <meta name="description" content=" Blog Archives Recent Posts ">
+  <meta name="description" content="Over the last few years, one of the topics on which I have done much of my work has been distributed computing using message queues. Recently, I& &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -65,6 +66,240 @@
       <div class="blog-index">
   
   
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/03/04/using-rabbitmq-with-f-number/">Using RabbitMQ With F#</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-04T19:56:20-08:00" pubdate data-updated="true">Mar 4<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Over the last few years, one of the topics on which I have done much of my work has been distributed computing using message queues.  Recently, I&rsquo;ve been playing around with RabbitMQ, not for any reason other than that I wanted a simple, easy to setup, and easy to use messaging framework, which I could use for little experiments at home.</p>
+
+<p>I&rsquo;m not going to talk about RabbitMQ.  What I am going to talk about is one of the many ways in which F# makes programming just an absolute blast.</p>
+
+<p>Outside of work, most of my programming has been with F# (with a tiny bit of Clojure).  Naturally, I&rsquo;ve done some experiments with using F# and RabbitMQ.  I&rsquo;ll cover that, but that&rsquo;s not really what this post is about.</p>
+
+<p>My first attempt at this was to just follow the basic C# tutorial from www.rabbitmq.com, twisting it here and there for F#.  The tutorial you build a simple sender/receiver system:  one app sends messages to another app, which prints them to the console.  Which got me with some good workable boring code:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>let factory = new ConnectionFactory(HostName = "localhost")
+</span><span class='line'>use connection = factory.CreateConnection()
+</span><span class='line'>use channel = connection.CreateModel()
+</span><span class='line'>
+</span><span class='line'>channel.QueueDeclare( "hello", false, false, false, null )
+</span><span class='line'>let consumer = new QueueingBasicConsumer(channel)
+</span><span class='line'>channel.BasicConsume("hello", true, consumer)
+</span><span class='line'>
+</span><span class='line'>while true do
+</span><span class='line'>    let ea = consumer.Queue.Dequeue() :&gt; BasicDeliverEventArgs
+</span><span class='line'>    let body = ea.Body
+</span><span class='line'>    let message = Encoding.UTF8.GetString(body)
+</span><span class='line'>    printfn "%s" message</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This will do its job.  Listening on the queue and writing the messages as they come in.  It&rsquo;s not spectaculor and it doesn&rsquo;t use any of the Consumer class framework which comes with RabbitMQ.  But again, this post isn&rsquo;t about using RabbitMQ, it&rsquo;s about using <em>sequence expressions</em>.</p>
+
+<p>The Sequence Expression is a fun little construct in F# that lets you write programmatic enumerables.  For example, I want an enumerable with the numbers from 1 to 100, I would just write</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>let example = seq{ 1 .. 100 }</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Or, what if I want a sequence of data, where everytime I ask for an element it gives me the current time:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>let example2 = seq { 
+</span><span class='line'>                      while true do
+</span><span class='line'>                          yield DateTime.Now
+</span><span class='line'>                 }</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The sequence expression got me to thinking about trying that out with the message queues.  So, I changed my receiver code to look like this:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>let factory = new ConnectionFactory(HostName = "localhost")
+</span><span class='line'>use connection = factory.CreateConnection()
+</span><span class='line'>use channel = connection.CreateModel()
+</span><span class='line'>
+</span><span class='line'>channel.QueueDeclare( "hello", false, false, false, null )
+</span><span class='line'>let consumer = new QueueingBasicConsumer(channel)
+</span><span class='line'>channel.BasicConsume("hello", true, consumer)
+</span><span class='line'>
+</span><span class='line'>// I wrap the queue in a sequence expression
+</span><span class='line'>let queue = seq{
+</span><span class='line'>                while true do
+</span><span class='line'>                    let ea = consumer.Queue.Dequeue() :&gt; BasicDeliverEventArgs
+</span><span class='line'>                    let body = ea.Body
+</span><span class='line'>                    let message = Encoding.UTF8.GetString(body)
+</span><span class='line'>                    yield message
+</span><span class='line'>            }</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This creates an enumerable data structure called <code>queue</code>.  And this is where things get awesome, because I can now write <em>queries</em> to my queue of messages, exactly as I would to a database or list:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>let qQuery = query{
+</span><span class='line'>                for message in queue do
+</span><span class='line'>                select i.ToUpper()
+</span><span class='line'>             }
+</span><span class='line'>qQuery |&gt; Seq.iter (printfn "%d")</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This query will select each message from the queue and convert it to all capital letters.  The Seq.iter will then pull each message from the query result and print it to the screen.  Do note that the <code>seq{...}</code> I bound to <code>queue</code> is an infinite loop, so <code>qQuery |&gt; Seq.iter (printfn "%d")</code> will run forever, printing out each message as it arrives in the queue.</p>
+
+<p>If you take a look at the <a href="http://msdn.microsoft.com/en-us/library/hh225374.aspx">MSDN</a> article on F#&rsquo;s Query Expressions, you&rsquo;ll see that there is a lot that can be done.  For example, if we had two different queues:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>let doubleQuery = query{
+</span><span class='line'>                    for m1 in queue do
+</span><span class='line'>                    join m2 in queue2 on
+</span><span class='line'>                        (m1 = m2)
+</span><span class='line'>                    select (m1, m2)
+</span><span class='line'>                  }</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Or maybe even a join between the message queue and a database query.</p>
+
+<p>The long and short of all this is that I keep falling more in love with F#.  I get to spend so much time not writing boilerplate code and squiggly braces and so much time just doing.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/02/16/my-first-post/">Experimenting With Quotations</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-02-16T20:37:19-08:00" pubdate data-updated="true">Feb 16<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>One of the more interesting featuers of F# is the Code Quotation.  Though I do find this interesting now, it has taken over a year before I saw any reason I might have even slight interest.  Even now, as I have taken a much greater interest in the topic, it&rsquo;s been difficult finding anything detailed on the topic.</p>
+
+<p>Anyone familiar with Lisp or one of its dialects, such as Clojure, will find Quotations familiar.  To put it simply, Quotations allow you to represent F# code as data.  Take the following example, where I bind a Quotation to <code>q</code>:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>let q = &lt;@ 2 @&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Running this in the FSI gives the following output:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>val q : Quotations.Expr&lt;int&gt; = Value (2)</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The operator <code>&lt;@ @&gt;</code> takes the F# code which it wraps and converts it into a Quotation data structure.  In this case, it takes the value 2 and creates a Value type, which is part of the <code>Quotations.Expr</code> discriminated union.</p>
+
+<p>I&rsquo;ll do a more interesting example, which will better show what a Quotation actually gives you, using the FSI:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&gt; let q = &lt;@ (2 + 3) * ( 3 - 1 ) @&gt;;;
+</span><span class='line'>
+</span><span class='line'>val q : Quotations.Expr&lt;int&gt; =
+</span><span class='line'>  Call (None, op_Multiply,
+</span><span class='line'>      [Call (None, op_Addition, [Value (2), Value (3)]),
+</span><span class='line'>       Call (None, op_Subtraction, [Value (3), Value (1)])])</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The Quotation gives you the Abstract Syntax Tree (AST) for a given F# expression.  Which, when I first started learning F# a year ago, was nothing but a curiousity.  In fact, it wasn&rsquo;t until just the other day that I actually started to get excited about Quotations.</p>
+
+<p>Whenever I read about Code Quotations, it seems it&rsquo;s always about using Quotations to handle translating F# code into another language.  The best example of this use case, in my opinion, is WebSharper; which takes F# code and translates it into JavaScript.</p>
+
+<p>However, it&rsquo;s the possibilities of using Quotations with distributed computing which caused my sudden spike in interest.  What&rsquo;s been bouncing around in my brain is:  can I write code in F#, break it apart into discrete chunks, send those chunks to be executing on different servers and then collect the results (MapReduce for sure).</p>
+</div>
+  
+  
+
+
+    </article>
+  
   <div class="pagination">
     
     <a href="/blog/archives">Blog Archives</a>
@@ -76,6 +311,14 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/03/04/using-rabbitmq-with-f-number/">Using RabbitMQ With F#</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/02/16/my-first-post/">Experimenting With Quotations</a>
+      </li>
     
   </ul>
 </section>
@@ -90,7 +333,7 @@
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2014 - Erich Ess -
+  Copyright &copy; 2014 - Your Name -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 
