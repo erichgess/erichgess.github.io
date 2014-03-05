@@ -96,13 +96,15 @@
 <p>Anyone familiar with Lisp or one of its dialects, such as Clojure, will find Quotations familiar.  To put it simply, Quotations allow you to represent F# code as data.  Take the following example, where I bind a Quotation to <code>q</code>:</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>let q = &lt;@ 2 @&gt;</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">q</span> <span class="o">=</span> <span class="o">&lt;@</span> <span class="mi">2</span> <span class="o">@&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>Running this in the FSI gives the following output:</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>val q : Quotations.Expr&lt;int&gt; = Value (2)</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">val</span> <span class="n">q</span> <span class="o">:</span> <span class="nn">Quotations</span><span class="p">.</span><span class="nc">Expr</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="o">=</span> <span class="nc">Value</span> <span class="o">(</span><span class="mi">2</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>The operator <code>&lt;@ @&gt;</code> takes the F# code which it wraps and converts it into a Quotation data structure.  In this case, it takes the value 2 and creates a Value type, which is part of the <code>Quotations.Expr</code> discriminated union.</p>
@@ -115,12 +117,13 @@
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>&gt; let q = &lt;@ (2 + 3) * ( 3 - 1 ) @&gt;;;
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="o">&gt;</span> <span class="k">let</span> <span class="n">q</span> <span class="o">=</span> <span class="o">&lt;@</span> <span class="o">(</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span><span class="o">)</span> <span class="o">*</span> <span class="o">(</span> <span class="mi">3</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">)</span> <span class="o">@&gt;;;</span>
 </span><span class='line'>
-</span><span class='line'>val q : Quotations.Expr&lt;int&gt; =
-</span><span class='line'>  Call (None, op_Multiply,
-</span><span class='line'>      [Call (None, op_Addition, [Value (2), Value (3)]),
-</span><span class='line'>       Call (None, op_Subtraction, [Value (3), Value (1)])])</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'><span class="k">val</span> <span class="n">q</span> <span class="o">:</span> <span class="nn">Quotations</span><span class="p">.</span><span class="nc">Expr</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="o">=</span>
+</span><span class='line'>  <span class="nc">Call</span> <span class="o">(</span><span class="nc">None</span><span class="o">,</span> <span class="n">op_Multiply</span><span class="o">,</span>
+</span><span class='line'>      <span class="o">[</span><span class="nc">Call</span> <span class="o">(</span><span class="nc">None</span><span class="o">,</span> <span class="n">op_Addition</span><span class="o">,</span> <span class="o">[</span><span class="nc">Value</span> <span class="o">(</span><span class="mi">2</span><span class="o">),</span> <span class="nc">Value</span> <span class="o">(</span><span class="mi">3</span><span class="o">)]),</span>
+</span><span class='line'>       <span class="nc">Call</span> <span class="o">(</span><span class="nc">None</span><span class="o">,</span> <span class="n">op_Subtraction</span><span class="o">,</span> <span class="o">[</span><span class="nc">Value</span> <span class="o">(</span><span class="mi">3</span><span class="o">),</span> <span class="nc">Value</span> <span class="o">(</span><span class="mi">1</span><span class="o">)])])</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>The Quotation gives you the Abstract Syntax Tree (AST) for a given F# expression.  Which, when I first started learning F# a year ago, was nothing but a curiousity.  In fact, it wasn&rsquo;t until just the other day that I actually started to get excited about Quotations.</p>

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: RabbitMQ | My Octopress Blog]]></title>
   <link href="http://erichgess.github.io/blog/categories/rabbitmq/atom.xml" rel="self"/>
   <link href="http://erichgess.github.io/"/>
-  <updated>2014-03-04T21:32:26-08:00</updated>
+  <updated>2014-03-04T22:48:13-08:00</updated>
   <id>http://erichgess.github.io/</id>
   <author>
     <name><![CDATA[Your Name]]></name>
@@ -25,88 +25,150 @@
 <p>Outside of work, most of my programming has been with F# (with a tiny bit of Clojure).  Naturally, I&rsquo;ve done some experiments with using F# and RabbitMQ.  I&rsquo;ll cover that, but that&rsquo;s not really what this post is about.</p>
 
 <p>My first attempt at this was to just follow the basic C# tutorial from www.rabbitmq.com, twisting it here and there for F#.  The tutorial you build a simple sender/receiver system:  one app sends messages to another app, which prints them to the console.  Which got me with some good workable boring code:
-```
-let factory = new ConnectionFactory(HostName = &ldquo;localhost&rdquo;)
-use connection = factory.CreateConnection()
-use channel = connection.CreateModel()</p>
-
-<p>channel.QueueDeclare( &ldquo;hello&rdquo;, false, false, false, null )
-let consumer = new QueueingBasicConsumer(channel)
-channel.BasicConsume(&ldquo;hello&rdquo;, true, consumer)</p>
-
-<p>while true do</p>
-
-<pre><code>let ea = consumer.Queue.Dequeue() :&gt; BasicDeliverEventArgs
-let body = ea.Body
-let message = Encoding.UTF8.GetString(body)
-printfn "%s" message
-</code></pre>
-
-<p>```
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">factory</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ConnectionFactory</span><span class="o">(</span><span class="nc">HostName</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">localhost</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;)</span>
+</span><span class='line'><span class="k">use</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="nc">CreateConnection</span><span class="bp">()</span>
+</span><span class='line'><span class="k">use</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="nc">CreateModel</span><span class="bp">()</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="n">channel</span><span class="o">.</span><span class="nc">QueueDeclare</span><span class="o">(</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">hello</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;,</span> <span class="bp">false</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="k">null</span> <span class="o">)</span>
+</span><span class='line'><span class="k">let</span> <span class="n">consumer</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">QueueingBasicConsumer</span><span class="o">(</span><span class="n">channel</span><span class="o">)</span>
+</span><span class='line'><span class="n">channel</span><span class="o">.</span><span class="nc">BasicConsume</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">hello</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;,</span> <span class="bp">true</span><span class="o">,</span> <span class="n">consumer</span><span class="o">)&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">while</span> <span class="bp">true</span> <span class="k">do</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="k">let</span> <span class="n">ea</span> <span class="o">=</span> <span class="n">consumer</span><span class="o">.</span><span class="nn">Queue</span><span class="p">.</span><span class="nc">Dequeue</span><span class="bp">()</span> <span class="o">:&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="nc">BasicDeliverEventArgs</span>
+</span><span class='line'><span class="k">let</span> <span class="n">body</span> <span class="o">=</span> <span class="n">ea</span><span class="o">.</span><span class="nc">Body</span>
+</span><span class='line'><span class="k">let</span> <span class="n">message</span> <span class="o">=</span> <span class="nn">Encoding</span><span class="p">.</span><span class="nn">UTF8</span><span class="p">.</span><span class="nc">GetString</span><span class="o">(</span><span class="n">body</span><span class="o">)</span>
+</span><span class='line'><span class="n">printfn</span> <span class="s2">&quot;%s&quot;</span> <span class="n">message</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 This will do its job.  Listening on the queue and writing the messages as they come in.  It&rsquo;s not spectaculor and it doesn&rsquo;t use any of the Consumer class framework which comes with RabbitMQ.  But again, this post isn&rsquo;t about using RabbitMQ, it&rsquo;s about using <em>sequence expressions</em>.</p>
 
 <p>The Sequence Expression is a fun little construct in F# that lets you write programmatic enumerables.  For example, I want an enumerable with the numbers from 1 to 100, I would just write
-<code>
-let example = seq{ 1 .. 100 }
-</code>
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">example</span> <span class="o">=</span> <span class="n">seq</span><span class="o">{</span> <span class="mi">1</span> <span class="o">..</span> <span class="mi">100</span> <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 Or, what if I want a sequence of data, where everytime I ask for an element it gives me the current time:
-```
-let example2 = seq {</p>
-
-<pre><code>                    while true do
-                        yield DateTime.Now
-               }
-</code></pre>
-
-<p>```</p>
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">example2</span> <span class="o">=</span> <span class="n">seq</span> <span class="o">{&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span>                    <span class="k">while</span> <span class="bp">true</span> <span class="k">do</span>
+</span><span class='line'>                        <span class="k">yield</span> <span class="nn">DateTime</span><span class="p">.</span><span class="nc">Now</span>
+</span><span class='line'>               <span class="o">}</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>The sequence expression got me to thinking about trying that out with the message queues.  So, I changed my receiver code to look like this:
-```
-let factory = new ConnectionFactory(HostName = &ldquo;localhost&rdquo;)
-use connection = factory.CreateConnection()
-use channel = connection.CreateModel()</p>
-
-<p>channel.QueueDeclare( &ldquo;hello&rdquo;, false, false, false, null )
-let consumer = new QueueingBasicConsumer(channel)
-channel.BasicConsume(&ldquo;hello&rdquo;, true, consumer)</p>
-
-<p>// I wrap the queue in a sequence expression
-let queue = seq{</p>
-
-<pre><code>            while true do
-                let ea = consumer.Queue.Dequeue() :&gt; BasicDeliverEventArgs
-                let body = ea.Body
-                let message = Encoding.UTF8.GetString(body)
-                yield message
-        }
-</code></pre>
-
-<p><code>
-This creates an enumerable data structure called `queue`.  And this is where things get awesome, because I can now write *queries* to my queue of messages, exactly as I would to a database or list:
-</code>
-let qQuery = query{</p>
-
-<pre><code>            for message in queue do
-            select i.ToUpper()
-         }
-</code></pre>
-
-<p>qQuery |> Seq.iter (printfn &ldquo;%d&rdquo;)
-<code>``
-This query will select each message from the queue and convert it to all capital letters.  The Seq.iter will then pull each message from the query result and print it to the screen.  Do note that the</code>seq{&hellip;}<code>I bound to</code>queue<code>is an infinite loop, so</code>qQuery |> Seq.iter (printfn &ldquo;%d&rdquo;)` will run forever, printing out each message as it arrives in the queue.</p>
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">factory</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ConnectionFactory</span><span class="o">(</span><span class="nc">HostName</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">localhost</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;)</span>
+</span><span class='line'><span class="k">use</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="nc">CreateConnection</span><span class="bp">()</span>
+</span><span class='line'><span class="k">use</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="nc">CreateModel</span><span class="bp">()</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="n">channel</span><span class="o">.</span><span class="nc">QueueDeclare</span><span class="o">(</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">hello</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;,</span> <span class="bp">false</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="k">null</span> <span class="o">)</span>
+</span><span class='line'><span class="k">let</span> <span class="n">consumer</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">QueueingBasicConsumer</span><span class="o">(</span><span class="n">channel</span><span class="o">)</span>
+</span><span class='line'><span class="n">channel</span><span class="o">.</span><span class="nc">BasicConsume</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">hello</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;,</span> <span class="bp">true</span><span class="o">,</span> <span class="n">consumer</span><span class="o">)&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="c1">// I wrap the queue in a sequence expression</span>
+</span><span class='line'><span class="k">let</span> <span class="n">queue</span> <span class="o">=</span> <span class="n">seq</span><span class="o">{&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span>            <span class="k">while</span> <span class="bp">true</span> <span class="k">do</span>
+</span><span class='line'>                <span class="k">let</span> <span class="n">ea</span> <span class="o">=</span> <span class="n">consumer</span><span class="o">.</span><span class="nn">Queue</span><span class="p">.</span><span class="nc">Dequeue</span><span class="bp">()</span> <span class="o">:&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="nc">BasicDeliverEventArgs</span>
+</span><span class='line'>                <span class="k">let</span> <span class="n">body</span> <span class="o">=</span> <span class="n">ea</span><span class="o">.</span><span class="nc">Body</span>
+</span><span class='line'>                <span class="k">let</span> <span class="n">message</span> <span class="o">=</span> <span class="nn">Encoding</span><span class="p">.</span><span class="nn">UTF8</span><span class="p">.</span><span class="nc">GetString</span><span class="o">(</span><span class="n">body</span><span class="o">)</span>
+</span><span class='line'>                <span class="k">yield</span> <span class="n">message</span>
+</span><span class='line'>        <span class="o">}</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+This creates an enumerable data structure called <code>queue</code>.  And this is where things get awesome, because I can now write <em>queries</em> to my queue of messages, exactly as I would to a database or list:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">qQuery</span> <span class="o">=</span> <span class="n">query</span><span class="o">{&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span>            <span class="k">for</span> <span class="n">message</span> <span class="k">in</span> <span class="n">queue</span> <span class="k">do</span>
+</span><span class='line'>            <span class="n">select</span> <span class="n">i</span><span class="o">.</span><span class="nc">ToUpper</span><span class="bp">()</span>
+</span><span class='line'>         <span class="o">}</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="n">qQuery</span> <span class="o">|&gt;</span> <span class="nn">Seq</span><span class="p">.</span><span class="n">iter</span> <span class="o">(</span><span class="n">printfn</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;%</span><span class="n">d</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+This query will select each message from the queue and convert it to all capital letters.  The Seq.iter will then pull each message from the query result and print it to the screen.  Do note that the <code>seq{...}</code> I bound to <code>queue</code> is an infinite loop, so <code>qQuery |&gt; Seq.iter (printfn "%d")</code> will run forever, printing out each message as it arrives in the queue.</p>
 
 <p>If you take a look at the <a href="http://msdn.microsoft.com/en-us/library/hh225374.aspx">MSDN</a> article on F#&rsquo;s Query Expressions, you&rsquo;ll see that there is a lot that can be done.  For example, if we had two different queues:
-```
-let doubleQuery = query{</p>
-
-<pre><code>                for m1 in queue do
-                join m2 in queue2 on
-                    (m1 = m2)
-                select (m1, m2)
-              }
-</code></pre>
-
-<p>```
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">doubleQuery</span> <span class="o">=</span> <span class="n">query</span><span class="o">{&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span>                <span class="k">for</span> <span class="n">m1</span> <span class="k">in</span> <span class="n">queue</span> <span class="k">do</span>
+</span><span class='line'>                <span class="n">join</span> <span class="n">m2</span> <span class="k">in</span> <span class="n">queue2</span> <span class="n">on</span>
+</span><span class='line'>                    <span class="o">(</span><span class="n">m1</span> <span class="o">=</span> <span class="n">m2</span><span class="o">)</span>
+</span><span class='line'>                <span class="n">select</span> <span class="o">(</span><span class="n">m1</span><span class="o">,</span> <span class="n">m2</span><span class="o">)</span>
+</span><span class='line'>              <span class="o">}</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 Or maybe even a join between the message queue and a database query.</p>
 
 <p>The long and short of all this is that I keep falling more in love with F#.  I get to spend so much time not writing boilerplate code and squiggly braces and so much time just doing.</p>
