@@ -14,5 +14,15 @@ I want to use this as an opportuntity to practice all of my engineering skills. 
 
 #### The Problem(s)
 Right now, I have two problems when I'm trying to do a messaging experiment in F#:
+
 1. I have to rewrite the RabbitMQ setup code every time I make a new endpoint.
 1. It's OO/C# focused design doesn't fit very well with F#.  It works, but, I think, it will be better if it's functional.
+1. Long term, I'd like to make up a simple RabbitMQ F# Client library which anyone could use.
+
+I threw number 3 on there, not because it is a problem I am trying to solve right now, but because this something which could contribute to the F# community.  By keeping this in mind as a long term goal, it will help me write my solution so that it is easy to expand.
+
+#### The Scope
+For scope, I'll look at the first two problems and ignore the third.  Problem 2 shouldn't impact the scope very much, as it's really a restriction on my design:  make the design fit the functional paradigm.  Problem 1 definitely can impact the scope of work:  there is a lot to RabbitMQ and doing a full client implementation in F# would be a LOT of work.  To define the scope of work I am going to do, I'll focus on explicitly writing out my needs and then only do the amount of work necessary to meet those needs.
+
+##### Problem 1 Needs
+I am doing very little with RabbitMQ in my experiments.  I am not using subjects, or fan-out exchanges, or anything; except making queues, publishing messages to the queue, and reading from the queue.
