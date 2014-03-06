@@ -11,3 +11,8 @@ I've been doing a lot of experimenting with F# and distributed computing via mes
 Design
 ------
 I want to use this as an opportuntity to practice all of my engineering skills.  So, I'm going to start by defining the problem I want to solve, the scope of work, and then the design itself.  For the problem: I will try to understand what my needs are, right now, and predict what they will be in the future.  For the scope of work:  RabbitMQ has a lot of stuff, so I will use the definition of the problem to decide how much of the RabbitMQ framework I will expose with my wrapper.  The design:  this is when I will figure out how I want to use this library and how to make it fit the F#/functional paradigm.  I will do all of this, before I start writing any code!
+
+#### The Problem(s)
+Right now, I have two problems when I'm trying to do a messaging experiment in F#:
+1. I have to rewrite the RabbitMQ setup code every time I make a new endpoint.
+1. It's OO/C# focused design doesn't fit very well with F#.  It works, but, I think, it will be better if it's functional.
