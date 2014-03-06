@@ -38,3 +38,11 @@ Easy Enough!  My first version of the RabbitMQ F# client will only do those 3 th
 ##### Problem 2 Needs
 This is purely aesthetic.  The more I worke in F#, the more I find writing up classes and implementing interfaces to feel a bit "ehhh".  So I want to make the way a developer uses and interacts with RabbitMQ to be more functional.  This is a bit more vague than I'd like, because this will require a bit more learning on my part; which is why I put it here!
 
+##### Scope
+At the end of all of this, my library will do just provide these three features:
+
+1. Connect to or create a specified queue on a RabbitMQ server
+1. Provide a way to publish messages to the queue
+1. Provide a way to read messages from the queue
+
+Behind the scenes it will do whatever setup/teardown is needed to get those 3 features to work.
