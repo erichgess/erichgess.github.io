@@ -27,10 +27,14 @@ I threw number 3 on there, not because it is a problem I am trying to solve righ
 For scope, I'll look at the first two problems and ignore the third.  Problem 2 shouldn't impact the scope very much, as it's really a restriction on my design:  make the design fit the functional paradigm.  Problem 1 definitely can impact the scope of work:  there is a lot to RabbitMQ and doing a full client implementation in F# would be a LOT of work.  To define the scope of work I am going to do, I'll focus on explicitly writing out my needs and then only do the amount of work necessary to meet those needs.
 
 ##### Problem 1 Needs
-I am doing very little with RabbitMQ in my experiments.  I am not using subjects, or fan-out exchanges, or anything; except making queues, publishing messages to the queue, and reading from the queue.  So that's all I need (in version 1 :) ), ways to:
+I am doing very little with RabbitMQ in my experiments.  I am not using subjects, or fan-out exchanges, or anything; except making queues, publishing messages to the queue, and reading from the queue.  So this is all I need (in version 1 :) ):
 
 1. Create a queue on a RabbitMQ server
 1. Publish a message to a specific queue
 1. Read messages from a specific queue
 
 Easy Enough!  My first version of the RabbitMQ F# client will only do those 3 things.
+
+##### Problem 2 Needs
+This is purely aesthetic.  The more I worke in F#, the more I find writing up classes and implementing interfaces to feel a bit "ehhh".  So I want to make the way a developer uses and interacts with RabbitMQ to be more functional.  This is a bit more vague than I'd like, because this will require a bit more learning on my part; which is why I put it here!
+
