@@ -76,3 +76,5 @@ let publishToMyQueue  = publishToQueue "MyQueue"
 publishToMyQueue "Hello, World"
 {% endcodeblock %}
 Being able to easily create unique functions for each queue will make our code easier to read, debug, refactor, and write.
+
+That's it.  These two functions will define the basic interaction with queues.  A developer can use partial application to create a unique function for each queue in his or her system.  I'll do the actual implementation of the code at the end of the post.  This section was just about the design.
