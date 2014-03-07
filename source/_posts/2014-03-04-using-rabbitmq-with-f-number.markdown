@@ -8,7 +8,8 @@ categories: [F#, RabbitMQ]
 
 Over the last few years, one of the topics on which I have done much of my work has been distributed computing using message queues.  Recently, I've been playing around with RabbitMQ, not for any reason other than that I wanted a simple, easy to setup, and easy to use messaging framework, which I could use for little experiments at home.
 
-I'm not going to talk about RabbitMQ.  What I am going to talk about is one of the many ways in which F# makes programming just an absolute blast.
+I'm not going to talk much about using RabbitMQ.  What I am going to talk about is one of the many ways in which F# makes programming just an absolute blast.
+<!-- more -->
 
 Outside of work, most of my programming has been with F# (with a tiny bit of Clojure).  Naturally, I've done some experiments with using F# and RabbitMQ.  I'll cover that, but that's not really what this post is about.
 

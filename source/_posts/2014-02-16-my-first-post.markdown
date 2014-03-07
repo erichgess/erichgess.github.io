@@ -7,6 +7,7 @@ categories: F#
 ---
 
 One of the more interesting featuers of F# is the Code Quotation.  Though I do find this interesting now, it has taken over a year before I saw any reason I might have even slight interest.  Even now, as I have taken a much greater interest in the topic, it's been difficult finding anything detailed on the topic.
+<!-- more -->
 
 Anyone familiar with Lisp or one of its dialects, such as Clojure, will find Quotations familiar.  To put it simply, Quotations allow you to represent F# code as data.  Take the following example, where I bind a Quotation to ```q```:
 
