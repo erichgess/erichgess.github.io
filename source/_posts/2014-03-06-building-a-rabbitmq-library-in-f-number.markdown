@@ -154,3 +154,17 @@ myQueue.Publish "Hello, World"
 {% endcodeblock %}
 
 One nice benefit about this record data type is that it is independent of RabbitMQ.  This same type could be used with any queueing framework.
+
+### Conclusion
+I now have a simple F# focused client for interacting with RabbitMQ.  Unfortunately, it's a little anemic in that it only lets me send and receive string messages.
+
+I am also disappointed that my design went a little astray between what I wanted my functions to be:
+{% codeblock lang:fsharp %}
+let publishToQueue queueName message = ...
+let readFromQueue queueName = ...
+{% endcodeblock %}
+
+and where I wound up:
+{% codeblock lang:fsharp %}
+myQueue.Publish "Hello, World"
+{% endcodeblock %}
