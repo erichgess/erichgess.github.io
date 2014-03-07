@@ -122,3 +122,23 @@ let (readFromMyQueue,publishToMyQueue) = openRabbitMqQueue "MyQueue"
 
 publishToMyQueue "Hello, World"
 {% endcodeblock %}
+This is nice an functional.  The code is certainly short and clean.  However, I don't like the 'let (readFromMyQueue,publishToMyQueue) = openRabbitMqQueue "MyQueue"', it would be far too easy to forget which function is which and, more importantly, there's nothing to tell you what these functions you get back do.
+
+Let's create a data type to hold these two functions and make the code easier to read:
+{% codeblock lang:fsharp %}
+type Queue = { Name: string; ReadFrom: unit -> string; PublishTo: string -> unit }
+{% endcodeblock %}
+We then change our implementation to:
+{% codeblock lang:fsharp %}
+    let connectToRabbitMq address =
+        let factory = new ConnectionFactory(HostName = "localhost")
+        use connection = factory.CreateConnection()
+        use channel = connection.CreateModel()
+
+        fun queueName ->
+            channel.QueueDeclare( queueName, false, false, false, null ) |> ignore
+            let consumer = new QueueingBasicConsumer(channel) 
+            channel.BasicConsume(queueName, true, consumer) |> ignore
+
+            {Name = queueName; ReadFrom = (fun () -> readFromQueue consumer queueName); PublishTo = (publishToQueue channel queueName)}
+{% endcodeblock %}
