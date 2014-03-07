@@ -172,5 +172,7 @@ Primarily because I think `publishToMyQueue "Hello, World"` is a litle more read
 
 This is one of my first major design efforts in F#.  By which I mean that I started by designing and thinking about the problem rather than just hacking or trying to learn.  As such, it went exceptionally well.
 
+My next effort will be to make the read/write functions except more than just string types.  Perhaps a little refactoring if I can come up with a better design.
+
 The source code for this blog post is located on the "RabbitMqFramework" branch of my FirstRabbitMq repository:
 https://github.com/erichgess/FirstRabbitMQ/tree/RabbitMQFramework
