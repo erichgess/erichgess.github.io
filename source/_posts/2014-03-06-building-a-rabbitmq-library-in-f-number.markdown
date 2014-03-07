@@ -27,11 +27,12 @@ I threw number 3 on there, not because it is a problem I am trying to solve righ
 For scope, I'll look at the first two problems and ignore the third.  Problem 2 shouldn't impact the scope very much, as it's really a restriction on my design:  make the design fit the functional paradigm.  Problem 1 definitely can impact the scope of work:  there is a lot to RabbitMQ and doing a full client implementation in F# would be a LOT of work.  To define the scope of work I am going to do, I'll focus on explicitly writing out my needs and then only do the amount of work necessary to meet those needs.
 
 ##### Problem 1 Needs
-I am doing very little with RabbitMQ in my experiments.  I am not using subjects, or fan-out exchanges, or anything; except making queues, publishing messages to the queue, and reading from the queue.  So this is all I need (in version 1 :) ):
+I am doing very little with RabbitMQ in my experiments.  I am not using subjects, or fan-out exchanges, or anything; except making queues, publishing messages to the queue, and reading from the queue.  The messages, for this post, will also just be simple text messages, so no serialization/deserialization.  So this is all I need (in version 1 :) ):
 
 1. Create a queue on a RabbitMQ server
 1. Publish a message to a specific queue
 1. Read messages from a specific queue
+1. Messages are just text messages
 
 Easy Enough!  My first version of the RabbitMQ F# client will only do those 3 things.
 
@@ -46,3 +47,32 @@ At the end of all of this, my library will do just provide these three features:
 1. Provide a way to read messages from the queue
 
 Behind the scenes it will do whatever setup/teardown is needed to get those 3 features to work.
+
+#### The Design
+The design needs to be more functional than OO, so that it fits better with the general aesthetic flow of writing F#.  Being new to functional design, I'll start with the [NOOO Manifesto](http://simontcousins.azurewebsites.net/manifesto/) as my guide:
+
+- Functions and Types over classes
+- Purity over mutability
+- Composition over inheritance
+- Higher-order functions over method dispatch
+- Options over nulls
+
+#### Queue Interaction
+I'll start with designing how a developer will interact with the queue itself, because this will be 90% of what he or she would use this library for.  After that, will be the design for the part of the library which handles connecting to/creating the queue.
+
+In OO design, I might represent the queue as a class which has methods for publishing and reading.  The first line of the NOOO Manifesto is "Functions and Types over classes": I want functions to represent the two actions of publishing and reading.  The queue itself can be represented by just the name for now, so that would be a string.
+
+Both publish and read functions will require the target queue.  The read function won't require any other parameters, but the publish function will require the message.  The read function will return a message from the queue; that means a return type of string.  For the publish function:  RabbitMQ's `BasicPublish` is a void so that means that my function will be of type unit.
+
+Here are the signatures of my first design:
+{% codeblock lang:fsharp %}
+let publishToQueue queueName message = ...
+let readFromQueue queueName = ...
+{% endcodeblock %}
+Please note that I put the queue name as the first parameter for both functions.  This will let us take advantage of currying and partial application.  If there's a queue named "MyQueue" the developer can do partial application:
+{% codeblock lang:fsharp %}
+let publishToMyQueue  = publishToQueue "MyQueue"
+
+publishToMyQueue "Hello, World"
+{% endcodeblock %}
+Being able to easily create unique functions for each queue will make our code easier to read, debug, refactor, and write.
