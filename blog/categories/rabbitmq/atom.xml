@@ -4,7 +4,7 @@
   <title><![CDATA[Category: RabbitMQ | Elegant Architecture]]></title>
   <link href="http://erichgess.github.io/blog/categories/rabbitmq/atom.xml" rel="self"/>
   <link href="http://erichgess.github.io/"/>
-  <updated>2014-03-07T08:37:58-08:00</updated>
+  <updated>2014-03-07T08:54:41-08:00</updated>
   <id>http://erichgess.github.io/</id>
   <author>
     <name><![CDATA[Erich G. Ess]]></name>
@@ -289,7 +289,10 @@ Primarily because I think <code>publishToMyQueue "Hello, World"</code> is a litl
     <id>http://erichgess.github.io/blog/2014/03/04/using-rabbitmq-with-f-number</id>
     <content type="html"><![CDATA[<p>Over the last few years, one of the topics on which I have done much of my work has been distributed computing using message queues.  Recently, I&rsquo;ve been playing around with RabbitMQ, not for any reason other than that I wanted a simple, easy to setup, and easy to use messaging framework, which I could use for little experiments at home.</p>
 
-<p>I&rsquo;m not going to talk about RabbitMQ.  What I am going to talk about is one of the many ways in which F# makes programming just an absolute blast.</p>
+<p>I&rsquo;m not going to talk much about using RabbitMQ.  What I am going to talk about is one of the many ways in which F# makes programming just an absolute blast.</p>
+
+<!-- more -->
+
 
 <p>Outside of work, most of my programming has been with F# (with a tiny bit of Clojure).  Naturally, I&rsquo;ve done some experiments with using F# and RabbitMQ.  I&rsquo;ll cover that, but that&rsquo;s not really what this post is about.</p>
 

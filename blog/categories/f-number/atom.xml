@@ -4,7 +4,7 @@
   <title><![CDATA[Category: F# | Elegant Architecture]]></title>
   <link href="http://erichgess.github.io/blog/categories/f-number/atom.xml" rel="self"/>
   <link href="http://erichgess.github.io/"/>
-  <updated>2014-03-07T08:37:58-08:00</updated>
+  <updated>2014-03-07T08:54:41-08:00</updated>
   <id>http://erichgess.github.io/</id>
   <author>
     <name><![CDATA[Erich G. Ess]]></name>
@@ -289,7 +289,10 @@ Primarily because I think <code>publishToMyQueue "Hello, World"</code> is a litl
     <id>http://erichgess.github.io/blog/2014/03/04/using-rabbitmq-with-f-number</id>
     <content type="html"><![CDATA[<p>Over the last few years, one of the topics on which I have done much of my work has been distributed computing using message queues.  Recently, I&rsquo;ve been playing around with RabbitMQ, not for any reason other than that I wanted a simple, easy to setup, and easy to use messaging framework, which I could use for little experiments at home.</p>
 
-<p>I&rsquo;m not going to talk about RabbitMQ.  What I am going to talk about is one of the many ways in which F# makes programming just an absolute blast.</p>
+<p>I&rsquo;m not going to talk much about using RabbitMQ.  What I am going to talk about is one of the many ways in which F# makes programming just an absolute blast.</p>
+
+<!-- more -->
+
 
 <p>Outside of work, most of my programming has been with F# (with a tiny bit of Clojure).  Naturally, I&rsquo;ve done some experiments with using F# and RabbitMQ.  I&rsquo;ll cover that, but that&rsquo;s not really what this post is about.</p>
 
@@ -450,6 +453,9 @@ Or maybe even a join between the message queue and a database query.</p>
     <updated>2014-02-16T20:37:19-08:00</updated>
     <id>http://erichgess.github.io/blog/2014/02/16/my-first-post</id>
     <content type="html"><![CDATA[<p>One of the more interesting featuers of F# is the Code Quotation.  Though I do find this interesting now, it has taken over a year before I saw any reason I might have even slight interest.  Even now, as I have taken a much greater interest in the topic, it&rsquo;s been difficult finding anything detailed on the topic.</p>
+
+<!-- more -->
+
 
 <p>Anyone familiar with Lisp or one of its dialects, such as Clojure, will find Quotations familiar.  To put it simply, Quotations allow you to represent F# code as data.  Take the following example, where I bind a Quotation to <code>q</code>:</p>
 

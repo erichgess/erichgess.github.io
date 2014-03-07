@@ -100,7 +100,7 @@
   
   
     <footer>
-      <a rel="full-article" href="/blog/2014/03/06/building-a-rabbitmq-library-in-f-number/">Read on &rarr;</a>
+      <a rel="full-article" href="/blog/2014/03/06/building-a-rabbitmq-library-in-f-number/">Lay on, MacDuff &rarr;</a>
     </footer>
   
 
@@ -137,139 +137,14 @@
 
   <div class="entry-content"><p>Over the last few years, one of the topics on which I have done much of my work has been distributed computing using message queues.  Recently, I&rsquo;ve been playing around with RabbitMQ, not for any reason other than that I wanted a simple, easy to setup, and easy to use messaging framework, which I could use for little experiments at home.</p>
 
-<p>I&rsquo;m not going to talk about RabbitMQ.  What I am going to talk about is one of the many ways in which F# makes programming just an absolute blast.</p>
+<p>I&rsquo;m not going to talk much about using RabbitMQ.  What I am going to talk about is one of the many ways in which F# makes programming just an absolute blast.</p>
 
-<p>Outside of work, most of my programming has been with F# (with a tiny bit of Clojure).  Naturally, I&rsquo;ve done some experiments with using F# and RabbitMQ.  I&rsquo;ll cover that, but that&rsquo;s not really what this post is about.</p>
-
-<p>My first attempt at this was to just follow the basic C# tutorial from www.rabbitmq.com, twisting it here and there for F#.  The tutorial you build a simple sender/receiver system:  one app sends messages to another app, which prints them to the console.  Which got me with some good workable boring code:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">factory</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ConnectionFactory</span><span class="o">(</span><span class="nc">HostName</span> <span class="o">=</span> <span class="s2">&quot;localhost&quot;</span><span class="o">)</span>
-</span><span class='line'><span class="k">use</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="nc">CreateConnection</span><span class="bp">()</span>
-</span><span class='line'><span class="k">use</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="nc">CreateModel</span><span class="bp">()</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">channel</span><span class="o">.</span><span class="nc">QueueDeclare</span><span class="o">(</span> <span class="s2">&quot;hello&quot;</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="k">null</span> <span class="o">)</span>
-</span><span class='line'><span class="k">let</span> <span class="n">consumer</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">QueueingBasicConsumer</span><span class="o">(</span><span class="n">channel</span><span class="o">)</span>
-</span><span class='line'><span class="n">channel</span><span class="o">.</span><span class="nc">BasicConsume</span><span class="o">(</span><span class="s2">&quot;hello&quot;</span><span class="o">,</span> <span class="bp">true</span><span class="o">,</span> <span class="n">consumer</span><span class="o">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">while</span> <span class="bp">true</span> <span class="k">do</span>
-</span><span class='line'>    <span class="k">let</span> <span class="n">ea</span> <span class="o">=</span> <span class="n">consumer</span><span class="o">.</span><span class="nn">Queue</span><span class="p">.</span><span class="nc">Dequeue</span><span class="bp">()</span> <span class="o">:&gt;</span> <span class="nc">BasicDeliverEventArgs</span>
-</span><span class='line'>    <span class="k">let</span> <span class="n">body</span> <span class="o">=</span> <span class="n">ea</span><span class="o">.</span><span class="nc">Body</span>
-</span><span class='line'>    <span class="k">let</span> <span class="n">message</span> <span class="o">=</span> <span class="nn">Encoding</span><span class="p">.</span><span class="nn">UTF8</span><span class="p">.</span><span class="nc">GetString</span><span class="o">(</span><span class="n">body</span><span class="o">)</span>
-</span><span class='line'>    <span class="n">printfn</span> <span class="s2">&quot;%s&quot;</span> <span class="n">message</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>This will do its job.  Listening on the queue and writing the messages as they come in.  It&rsquo;s not spectaculor and it doesn&rsquo;t use any of the Consumer class framework which comes with RabbitMQ.  But again, this post isn&rsquo;t about using RabbitMQ, it&rsquo;s about using <em>sequence expressions</em>.</p>
-
-<p>The Sequence Expression is a fun little construct in F# that lets you write programmatic enumerables.  For example, I want an enumerable with the numbers from 1 to 100, I would just write</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">example</span> <span class="o">=</span> <span class="n">seq</span><span class="o">{</span> <span class="mi">1</span> <span class="o">..</span> <span class="mi">100</span> <span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Or, what if I want a sequence of data, where everytime I ask for an element it gives me the current time:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">example2</span> <span class="o">=</span> <span class="n">seq</span> <span class="o">{</span>
-</span><span class='line'>                      <span class="k">while</span> <span class="bp">true</span> <span class="k">do</span>
-</span><span class='line'>                          <span class="k">yield</span> <span class="nn">DateTime</span><span class="p">.</span><span class="nc">Now</span>
-</span><span class='line'>                 <span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>The sequence expression got me to thinking about trying that out with the message queues.  So, I changed my receiver code to look like this:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">factory</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ConnectionFactory</span><span class="o">(</span><span class="nc">HostName</span> <span class="o">=</span> <span class="s2">&quot;localhost&quot;</span><span class="o">)</span>
-</span><span class='line'><span class="k">use</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="nc">CreateConnection</span><span class="bp">()</span>
-</span><span class='line'><span class="k">use</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="nc">CreateModel</span><span class="bp">()</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">channel</span><span class="o">.</span><span class="nc">QueueDeclare</span><span class="o">(</span> <span class="s2">&quot;hello&quot;</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="k">null</span> <span class="o">)</span>
-</span><span class='line'><span class="k">let</span> <span class="n">consumer</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">QueueingBasicConsumer</span><span class="o">(</span><span class="n">channel</span><span class="o">)</span>
-</span><span class='line'><span class="n">channel</span><span class="o">.</span><span class="nc">BasicConsume</span><span class="o">(</span><span class="s2">&quot;hello&quot;</span><span class="o">,</span> <span class="bp">true</span><span class="o">,</span> <span class="n">consumer</span><span class="o">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// I wrap the queue in a sequence expression</span>
-</span><span class='line'><span class="k">let</span> <span class="n">queue</span> <span class="o">=</span> <span class="n">seq</span><span class="o">{</span>
-</span><span class='line'>                <span class="k">while</span> <span class="bp">true</span> <span class="k">do</span>
-</span><span class='line'>                    <span class="k">let</span> <span class="n">ea</span> <span class="o">=</span> <span class="n">consumer</span><span class="o">.</span><span class="nn">Queue</span><span class="p">.</span><span class="nc">Dequeue</span><span class="bp">()</span> <span class="o">:&gt;</span> <span class="nc">BasicDeliverEventArgs</span>
-</span><span class='line'>                    <span class="k">let</span> <span class="n">body</span> <span class="o">=</span> <span class="n">ea</span><span class="o">.</span><span class="nc">Body</span>
-</span><span class='line'>                    <span class="k">let</span> <span class="n">message</span> <span class="o">=</span> <span class="nn">Encoding</span><span class="p">.</span><span class="nn">UTF8</span><span class="p">.</span><span class="nc">GetString</span><span class="o">(</span><span class="n">body</span><span class="o">)</span>
-</span><span class='line'>                    <span class="k">yield</span> <span class="n">message</span>
-</span><span class='line'>            <span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>This creates an enumerable data structure called <code>queue</code>.  And this is where things get awesome, because I can now write <em>queries</em> to my queue of messages, exactly as I would to a database or list:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">qQuery</span> <span class="o">=</span> <span class="n">query</span><span class="o">{</span>
-</span><span class='line'>                <span class="k">for</span> <span class="n">message</span> <span class="k">in</span> <span class="n">queue</span> <span class="k">do</span>
-</span><span class='line'>                <span class="n">select</span> <span class="n">i</span><span class="o">.</span><span class="nc">ToUpper</span><span class="bp">()</span>
-</span><span class='line'>             <span class="o">}</span>
-</span><span class='line'><span class="n">qQuery</span> <span class="o">|&gt;</span> <span class="nn">Seq</span><span class="p">.</span><span class="n">iter</span> <span class="o">(</span><span class="n">printfn</span> <span class="s2">&quot;%d&quot;</span><span class="o">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>This query will select each message from the queue and convert it to all capital letters.  The Seq.iter will then pull each message from the query result and print it to the screen.  Do note that the <code>seq{...}</code> I bound to <code>queue</code> is an infinite loop, so <code>qQuery |&gt; Seq.iter (printfn "%d")</code> will run forever, printing out each message as it arrives in the queue.</p>
-
-<p>If you take a look at the <a href="http://msdn.microsoft.com/en-us/library/hh225374.aspx">MSDN</a> article on F#&rsquo;s Query Expressions, you&rsquo;ll see that there is a lot that can be done.  For example, if we had two different queues:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">doubleQuery</span> <span class="o">=</span> <span class="n">query</span><span class="o">{</span>
-</span><span class='line'>                    <span class="k">for</span> <span class="n">m1</span> <span class="k">in</span> <span class="n">queue</span> <span class="k">do</span>
-</span><span class='line'>                    <span class="n">join</span> <span class="n">m2</span> <span class="k">in</span> <span class="n">queue2</span> <span class="n">on</span>
-</span><span class='line'>                        <span class="o">(</span><span class="n">m1</span> <span class="o">=</span> <span class="n">m2</span><span class="o">)</span>
-</span><span class='line'>                    <span class="n">select</span> <span class="o">(</span><span class="n">m1</span><span class="o">,</span> <span class="n">m2</span><span class="o">)</span>
-</span><span class='line'>                  <span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Or maybe even a join between the message queue and a database query.</p>
-
-<p>The long and short of all this is that I keep falling more in love with F#.  I get to spend so much time not writing boilerplate code and squiggly braces and so much time just doing.</p>
 </div>
   
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/03/04/using-rabbitmq-with-f-number/">Lay on, MacDuff &rarr;</a>
+    </footer>
   
 
 
@@ -305,46 +180,12 @@
 
   <div class="entry-content"><p>One of the more interesting featuers of F# is the Code Quotation.  Though I do find this interesting now, it has taken over a year before I saw any reason I might have even slight interest.  Even now, as I have taken a much greater interest in the topic, it&rsquo;s been difficult finding anything detailed on the topic.</p>
 
-<p>Anyone familiar with Lisp or one of its dialects, such as Clojure, will find Quotations familiar.  To put it simply, Quotations allow you to represent F# code as data.  Take the following example, where I bind a Quotation to <code>q</code>:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">q</span> <span class="o">=</span> <span class="o">&lt;@</span> <span class="mi">2</span> <span class="o">@&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Running this in the FSI gives the following output:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">val</span> <span class="n">q</span> <span class="o">:</span> <span class="nn">Quotations</span><span class="p">.</span><span class="nc">Expr</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="o">=</span> <span class="nc">Value</span> <span class="o">(</span><span class="mi">2</span><span class="o">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>The operator <code>&lt;@ @&gt;</code> takes the F# code which it wraps and converts it into a Quotation data structure.  In this case, it takes the value 2 and creates a Value type, which is part of the <code>Quotations.Expr</code> discriminated union.</p>
-
-<p>I&rsquo;ll do a more interesting example, which will better show what a Quotation actually gives you, using the FSI:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="o">&gt;</span> <span class="k">let</span> <span class="n">q</span> <span class="o">=</span> <span class="o">&lt;@</span> <span class="o">(</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span><span class="o">)</span> <span class="o">*</span> <span class="o">(</span> <span class="mi">3</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">)</span> <span class="o">@&gt;;;</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">val</span> <span class="n">q</span> <span class="o">:</span> <span class="nn">Quotations</span><span class="p">.</span><span class="nc">Expr</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="o">=</span>
-</span><span class='line'>  <span class="nc">Call</span> <span class="o">(</span><span class="nc">None</span><span class="o">,</span> <span class="n">op_Multiply</span><span class="o">,</span>
-</span><span class='line'>      <span class="o">[</span><span class="nc">Call</span> <span class="o">(</span><span class="nc">None</span><span class="o">,</span> <span class="n">op_Addition</span><span class="o">,</span> <span class="o">[</span><span class="nc">Value</span> <span class="o">(</span><span class="mi">2</span><span class="o">),</span> <span class="nc">Value</span> <span class="o">(</span><span class="mi">3</span><span class="o">)]),</span>
-</span><span class='line'>       <span class="nc">Call</span> <span class="o">(</span><span class="nc">None</span><span class="o">,</span> <span class="n">op_Subtraction</span><span class="o">,</span> <span class="o">[</span><span class="nc">Value</span> <span class="o">(</span><span class="mi">3</span><span class="o">),</span> <span class="nc">Value</span> <span class="o">(</span><span class="mi">1</span><span class="o">)])])</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>The Quotation gives you the Abstract Syntax Tree (AST) for a given F# expression.  Which, when I first started learning F# a year ago, was nothing but a curiousity.  In fact, it wasn&rsquo;t until just the other day that I actually started to get excited about Quotations.</p>
-
-<p>Whenever I read about Code Quotations, it seems it&rsquo;s always about using Quotations to handle translating F# code into another language.  The best example of this use case, in my opinion, is WebSharper; which takes F# code and translates it into JavaScript.</p>
-
-<p>However, it&rsquo;s the possibilities of using Quotations with distributed computing which caused my sudden spike in interest.  What&rsquo;s been bouncing around in my brain is:  can I write code in F#, break it apart into discrete chunks, send those chunks to be executing on different servers and then collect the results (MapReduce for sure).</p>
 </div>
   
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/02/16/my-first-post/">Lay on, MacDuff &rarr;</a>
+    </footer>
   
 
 
