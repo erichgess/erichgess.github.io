@@ -89,3 +89,6 @@ seq{
         yield message
 }
 {% endcodeblock %}
+
+#### Connecting to the Queue
+With RabbitMQ, the setup logic is pretty clear cut.  You start by building a connection factory (this is where you configure the location of the RabbitMQ server).  The factory is used to open a connection.  The connection is used to create a channel.  The channel is what you use to create or connect to or read from or write to the queue.
