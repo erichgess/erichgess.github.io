@@ -83,10 +83,7 @@ That's neat, but it's not as awesome as it could be.  In an earlier post, I show
 {% codeblock lang:fsharp %}
 seq{
     while true do
-        let ea = consumer.Queue.Dequeue()
-        let body = ea.Body
-        let message = Encoding.UTF8.GetString(body)
-        yield message
+        yield readFromQueue queueName
 }
 {% endcodeblock %}
 
