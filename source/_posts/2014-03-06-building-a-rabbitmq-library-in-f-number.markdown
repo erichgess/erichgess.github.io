@@ -91,3 +91,26 @@ seq{
 With RabbitMQ, the setup logic is pretty clear cut.  You start by building a connection factory (this is where you configure the location of the RabbitMQ server).  The factory is used to open a connection.  The connection is used to create a channel.  The channel is what you use to create or connect to or read from or write to the queue.
 
 I'm going to again use a function oriented approach to this design:  for example, a function to connect to the RabbitMQ host, which returns a function for setting up a queue.  That function, in turn, will return two functions: one for reading from a queue and one for writing to a queue.
+{% codeblock lang:fsharp %}
+module Client =
+    let readFromQueue (consumer:QueueingBasicConsumer) queueName =
+        let ea = consumer.Queue.Dequeue()
+        let body = ea.Body
+        Encoding.UTF8.GetString(body)
+
+    let publishToQueue (channel:IModel) queueName (message:string) =
+        let body = Encoding.UTF8.GetBytes(message)
+        channel.BasicPublish("", queueName, null, body)
+
+    let connectToRabbitMq address =
+        let factory = new ConnectionFactory(HostName = "localhost")
+        use connection = factory.CreateConnection()
+        use channel = connection.CreateModel()
+
+        fun queueName ->
+            channel.QueueDeclare( queueName, false, false, false, null ) |> ignore
+            let consumer = new QueueingBasicConsumer(channel) 
+            channel.BasicConsume(queueName, true, consumer) |> ignore
+
+            (fun () -> readFromQueue consumer queueName, publishToQueue channel queueName)
+{% endcodeblock %}
