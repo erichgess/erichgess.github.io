@@ -171,3 +171,6 @@ myQueue.Publish "Hello, World"
 Primarily because I think `publishToMyQueue "Hello, World"` is a litle more readable than `myQueue.Publish "Hello, World"`.
 
 This is one of my first major design efforts in F#.  By which I mean that I started by designing and thinking about the problem rather than just hacking or trying to learn.  As such, it went exceptionally well.
+
+The source code for this blog post is located on the "RabbitMqFramework" branch of my FirstRabbitMq repository:
+https://github.com/erichgess/FirstRabbitMQ/tree/RabbitMQFramework
