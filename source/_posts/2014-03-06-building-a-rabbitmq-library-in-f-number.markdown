@@ -169,3 +169,5 @@ and where I wound up:
 myQueue.Publish "Hello, World"
 {% endcodeblock %}
 Primarily because I think `publishToMyQueue "Hello, World"` is a litle more readable than `myQueue.Publish "Hello, World"`.
+
+This is one of my first major design efforts in F#.  By which I mean that I started by designing and thinking about the problem rather than just hacking or trying to learn.  As such, it went exceptionally well.
