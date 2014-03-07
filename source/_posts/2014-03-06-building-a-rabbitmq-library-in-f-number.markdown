@@ -152,3 +152,5 @@ let myQueue = openRabbitMqQueue "MyQueue"
 
 myQueue.Publish "Hello, World"
 {% endcodeblock %}
+
+One nice benefit about this record data type is that it is independent of RabbitMQ.  This same type could be used with any queueing framework.
