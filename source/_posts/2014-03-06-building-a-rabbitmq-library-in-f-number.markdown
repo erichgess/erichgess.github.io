@@ -78,3 +78,14 @@ publishToMyQueue "Hello, World"
 Being able to easily create unique functions for each queue will make our code easier to read, debug, refactor, and write.
 
 That's it.  These two functions will define the basic interaction with queues.  A developer can use partial application to create a unique function for each queue in his or her system.  I'll do the actual implementation of the code at the end of the post.  This section was just about the design.
+
+That's neat, but it's not as awesome as it could be.  In an earlier post, I showed how to build a sequence expression to encapsulate reading from the queue.  This is easily done, using the readFromQueue function:
+{% codeblock lang:fsharp %}
+seq{
+    while true do
+        let ea = consumer.Queue.Dequeue()
+        let body = ea.Body
+        let message = Encoding.UTF8.GetString(body)
+        yield message
+}
+{% endcodeblock %}
