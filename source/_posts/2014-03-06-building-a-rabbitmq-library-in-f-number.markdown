@@ -114,3 +114,11 @@ module Client =
 
             (fun () -> readFromQueue consumer queueName, publishToQueue channel queueName)
 {% endcodeblock %}
+
+Using this client library would then look like this:
+{% codeblock lang:fsharp %}
+let openRabbitMqQueue = connectToRabbitMq "localhost"
+let (readFromMyQueue,publishToMyQueue) = openRabbitMqQueue "MyQueue"
+
+publishToMyQueue "Hello, World"
+{% endcodeblock %}
