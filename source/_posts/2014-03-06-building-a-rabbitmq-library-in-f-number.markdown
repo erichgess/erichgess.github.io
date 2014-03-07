@@ -140,5 +140,7 @@ We then change our implementation to:
             let consumer = new QueueingBasicConsumer(channel) 
             channel.BasicConsume(queueName, true, consumer) |> ignore
 
-            {Name = queueName; ReadFrom = (fun () -> readFromQueue consumer queueName); PublishTo = (publishToQueue channel queueName)}
+            {Name = queueName; 
+            	ReadFrom = (fun () -> readFromQueue consumer queueName); 
+            	PublishTo = (publishToQueue channel queueName)}
 {% endcodeblock %}
