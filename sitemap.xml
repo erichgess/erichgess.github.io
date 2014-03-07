@@ -2,22 +2,28 @@
 <urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
     <url>
         <loc>http://erichgess.github.io/blog/2014/02/16/my-first-post/</loc>
-        <lastmod>2014-03-04T22:45:26-08:00</lastmod>
+        <lastmod>2014-03-07T08:37:29-08:00</lastmod>
     </url>
     <url>
         <loc>http://erichgess.github.io/blog/2014/03/04/using-rabbitmq-with-f-number/</loc>
-        <lastmod>2014-03-04T22:46:42-08:00</lastmod>
+        <lastmod>2014-03-07T08:37:29-08:00</lastmod>
+    </url>
+    <url>
+        <loc>
+            http://erichgess.github.io/blog/2014/03/06/building-a-rabbitmq-library-in-f-number/
+        </loc>
+        <lastmod>2014-03-07T08:37:29-08:00</lastmod>
     </url>
     <url>
         <loc>http://erichgess.github.io/blog/archives/</loc>
-        <lastmod>2014-03-04T22:46:42-08:00</lastmod>
+        <lastmod>2014-03-07T08:37:29-08:00</lastmod>
     </url>
     <url>
         <loc>http://erichgess.github.io/</loc>
-        <lastmod>2014-03-04T22:46:42-08:00</lastmod>
+        <lastmod>2014-03-07T08:37:29-08:00</lastmod>
     </url>
     <url>
         <loc>http://erichgess.github.io/robots.txt</loc>
-        <lastmod>2014-03-04T21:31:58-08:00</lastmod>
+        <lastmod>2014-03-07T08:37:29-08:00</lastmod>
     </url>
 </urlset>

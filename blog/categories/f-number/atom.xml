@@ -1,17 +1,286 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: F# | My Octopress Blog]]></title>
+  <title><![CDATA[Category: F# | Elegant Architecture]]></title>
   <link href="http://erichgess.github.io/blog/categories/f-number/atom.xml" rel="self"/>
   <link href="http://erichgess.github.io/"/>
-  <updated>2014-03-04T22:48:13-08:00</updated>
+  <updated>2014-03-07T08:37:58-08:00</updated>
   <id>http://erichgess.github.io/</id>
   <author>
-    <name><![CDATA[Your Name]]></name>
+    <name><![CDATA[Erich G. Ess]]></name>
     
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Building a RabbitMQ Library in F#]]></title>
+    <link href="http://erichgess.github.io/blog/2014/03/06/building-a-rabbitmq-library-in-f-number/"/>
+    <updated>2014-03-06T07:44:30-08:00</updated>
+    <id>http://erichgess.github.io/blog/2014/03/06/building-a-rabbitmq-library-in-f-number</id>
+    <content type="html"><![CDATA[<p>I&rsquo;ve been doing a lot of experimenting with F# and distributed computing via messaging.  As evidenced by my previous, I&rsquo;m using RabbitMQ as my messaging platform, for a couple of reasons: it&rsquo;s easy to use, it&rsquo;s free and open source, and I might decide to switch to RabbitMQ at work.  I&rsquo;ve been having a lot of fun experimenting with RabbitMQ and F#.  However, I spend a lot of my time just writing and copy/pasting the boilerplate code needed to configure the RabbitMQ client libraries, add the fact that the .Net client library is written for C#, and you get a constant block of boring work.  So, purely for fun and profit, I&rsquo;m going to write a quick F# wrapper.  The purpose of it being to let me very quickly setup RabbitMQ and, just as importantly, work with RabbitMQ in a manner that better fits F#.</p>
+
+<!-- more -->
+
+
+<h2>Design</h2>
+
+<p>I want to use this as an opportuntity to practice all of my engineering skills.  So, I&rsquo;m going to start by defining the problem I want to solve, the scope of work, and then the design itself.  For the problem: I will try to understand what my needs are, right now, and predict what they will be in the future.  For the scope of work:  RabbitMQ has a lot of stuff, so I will use the definition of the problem to decide how much of the RabbitMQ framework I will expose with my wrapper.  The design:  this is when I will figure out how I want to use this library and how to make it fit the F#/functional paradigm.  I will do all of this, before I start writing any code!</p>
+
+<h4>The Problem(s)</h4>
+
+<p>Right now, I have two problems when I&rsquo;m trying to do a messaging experiment in F#:</p>
+
+<ol>
+<li>I have to rewrite the RabbitMQ setup code every time I make a new endpoint.</li>
+<li>It&rsquo;s OO/C# focused design doesn&rsquo;t fit very well with F#.  It works, but, I think, it will be better if it&rsquo;s functional.</li>
+<li>Long term, I&rsquo;d like to make up a simple RabbitMQ F# Client library which anyone could use.</li>
+</ol>
+
+
+<p>I threw number 3 on there, not because it is a problem I am trying to solve right now, but because this something which could contribute to the F# community.  By keeping this in mind as a long term goal, it will help me write my solution so that it is easy to expand.</p>
+
+<h4>The Scope</h4>
+
+<p>For scope, I&rsquo;ll look at the first two problems and ignore the third.  Problem 2 shouldn&rsquo;t impact the scope very much, as it&rsquo;s really a restriction on my design:  make the design fit the functional paradigm.  Problem 1 definitely can impact the scope of work:  there is a lot to RabbitMQ and doing a full client implementation in F# would be a LOT of work.  To define the scope of work I am going to do, I&rsquo;ll focus on explicitly writing out my needs and then only do the amount of work necessary to meet those needs.</p>
+
+<h5>Problem 1 Needs</h5>
+
+<p>I am doing very little with RabbitMQ in my experiments.  I am not using subjects, or fan-out exchanges, or anything; except making queues, publishing messages to the queue, and reading from the queue.  The messages, for this post, will also just be simple text messages, so no serialization/deserialization.  So this is all I need (in version 1 :) ):</p>
+
+<ol>
+<li>Create a queue on a RabbitMQ server</li>
+<li>Publish a message to a specific queue</li>
+<li>Read messages from a specific queue</li>
+<li>Messages are just text messages</li>
+</ol>
+
+
+<p>Easy Enough!  My first version of the RabbitMQ F# client will only do those 3 things.</p>
+
+<h5>Problem 2 Needs</h5>
+
+<p>This is purely aesthetic.  The more I worke in F#, the more I find writing up classes and implementing interfaces to feel a bit &ldquo;ehhh&rdquo;.  So I want to make the way a developer uses and interacts with RabbitMQ to be more functional.  This is a bit more vague than I&rsquo;d like, because this will require a bit more learning on my part; which is why I put it here!</p>
+
+<h5>Scope</h5>
+
+<p>At the end of all of this, my library will do just provide these three features:</p>
+
+<ol>
+<li>Connect to or create a specified queue on a RabbitMQ server</li>
+<li>Provide a way to publish messages to the queue</li>
+<li>Provide a way to read messages from the queue</li>
+</ol>
+
+
+<p>Behind the scenes it will do whatever setup/teardown is needed to get those 3 features to work.</p>
+
+<h4>The Design</h4>
+
+<p>The design needs to be more functional than OO, so that it fits better with the general aesthetic flow of writing F#.  Being new to functional design, I&rsquo;ll start with the <a href="http://simontcousins.azurewebsites.net/manifesto/">NOOO Manifesto</a> as my guide:</p>
+
+<ul>
+<li>Functions and Types over classes</li>
+<li>Purity over mutability</li>
+<li>Composition over inheritance</li>
+<li>Higher-order functions over method dispatch</li>
+<li>Options over nulls</li>
+</ul>
+
+
+<h4>Queue Interaction</h4>
+
+<p>I&rsquo;ll start with designing how a developer will interact with the queue itself, because this will be 90% of what he or she would use this library for.  After that, will be the design for the part of the library which handles connecting to/creating the queue.</p>
+
+<p>In OO design, I might represent the queue as a class which has methods for publishing and reading.  The first line of the NOOO Manifesto is &ldquo;Functions and Types over classes&rdquo;: I want functions to represent the two actions of publishing and reading.  The queue itself can be represented by just the name for now, so that would be a string.</p>
+
+<p>Both publish and read functions will require the target queue.  The read function won&rsquo;t require any other parameters, but the publish function will require the message.  The read function will return a message from the queue; that means a return type of string.  For the publish function:  RabbitMQ&rsquo;s <code>BasicPublish</code> is a void so that means that my function will be of type unit.</p>
+
+<p>Here are the signatures of my first design:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">publishToQueue</span> <span class="n">queueName</span> <span class="n">message</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">hellip</span><span class="o">;</span>
+</span><span class='line'><span class="k">let</span> <span class="n">readFromQueue</span> <span class="n">queueName</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">hellip</span><span class="o">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+Please note that I put the queue name as the first parameter for both functions.  This will let us take advantage of currying and partial application.  If there&rsquo;s a queue named &ldquo;MyQueue&rdquo; the developer can do partial application:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">publishToMyQueue</span>  <span class="o">=</span> <span class="n">publishToQueue</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="nc">MyQueue</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="n">publishToMyQueue</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="nc">Hello</span><span class="o">,</span> <span class="nc">World</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+Being able to easily create unique functions for each queue will make our code easier to read, debug, refactor, and write.</p>
+
+<p>That&rsquo;s it.  These two functions will define the basic interaction with queues.  A developer can use partial application to create a unique function for each queue in his or her system.  I&rsquo;ll do the actual implementation of the code at the end of the post.  This section was just about the design.</p>
+
+<p>That&rsquo;s neat, but it&rsquo;s not as awesome as it could be.  In an earlier post, I showed how to build a sequence expression to encapsulate reading from the queue.  This is easily done, using the readFromQueue function:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="n">seq</span><span class="o">{&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="k">while</span> <span class="bp">true</span> <span class="k">do</span>
+</span><span class='line'>    <span class="k">yield</span> <span class="n">readFromQueue</span> <span class="n">queueName</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h4>Connecting to the Queue</h4>
+
+<p>With RabbitMQ, the setup logic is pretty clear cut.  You start by building a connection factory (this is where you configure the location of the RabbitMQ server).  The factory is used to open a connection.  The connection is used to create a channel.  The channel is what you use to create or connect to or read from or write to the queue.</p>
+
+<p>I&rsquo;m going to again use a function oriented approach to this design:  for example, a function to connect to the RabbitMQ host, which returns a function for setting up a queue.  That function, in turn, will return two functions: one for reading from a queue and one for writing to a queue.
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">module</span> <span class="nc">Client</span> <span class="o">=&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="k">let</span> <span class="n">readFromQueue</span> <span class="o">(</span><span class="n">consumer</span><span class="o">:</span><span class="nc">QueueingBasicConsumer</span><span class="o">)</span> <span class="n">queueName</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">let</span> <span class="n">ea</span> <span class="o">=</span> <span class="n">consumer</span><span class="o">.</span><span class="nn">Queue</span><span class="p">.</span><span class="nc">Dequeue</span><span class="bp">()</span>
+</span><span class='line'>    <span class="k">let</span> <span class="n">body</span> <span class="o">=</span> <span class="n">ea</span><span class="o">.</span><span class="nc">Body</span>
+</span><span class='line'>    <span class="nn">Encoding</span><span class="p">.</span><span class="nn">UTF8</span><span class="p">.</span><span class="nc">GetString</span><span class="o">(</span><span class="n">body</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">let</span> <span class="n">publishToQueue</span> <span class="o">(</span><span class="n">channel</span><span class="o">:</span><span class="nc">IModel</span><span class="o">)</span> <span class="n">queueName</span> <span class="o">(</span><span class="n">message</span><span class="o">:</span><span class="kt">string</span><span class="o">)</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">let</span> <span class="n">body</span> <span class="o">=</span> <span class="nn">Encoding</span><span class="p">.</span><span class="nn">UTF8</span><span class="p">.</span><span class="nc">GetBytes</span><span class="o">(</span><span class="n">message</span><span class="o">)</span>
+</span><span class='line'>    <span class="n">channel</span><span class="o">.</span><span class="nc">BasicPublish</span><span class="o">(</span><span class="s2">&quot;&quot;</span><span class="o">,</span> <span class="n">queueName</span><span class="o">,</span> <span class="k">null</span><span class="o">,</span> <span class="n">body</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">let</span> <span class="n">connectToRabbitMq</span> <span class="n">address</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">let</span> <span class="n">factory</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ConnectionFactory</span><span class="o">(</span><span class="nc">HostName</span> <span class="o">=</span> <span class="s2">&quot;localhost&quot;</span><span class="o">)</span>
+</span><span class='line'>    <span class="k">use</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="nc">CreateConnection</span><span class="bp">()</span>
+</span><span class='line'>    <span class="k">use</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="nc">CreateModel</span><span class="bp">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">fun</span> <span class="n">queueName</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'>        <span class="n">channel</span><span class="o">.</span><span class="nc">QueueDeclare</span><span class="o">(</span> <span class="n">queueName</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="k">null</span> <span class="o">)</span> <span class="o">|&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">ignore</span>
+</span><span class='line'>        <span class="k">let</span> <span class="n">consumer</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">QueueingBasicConsumer</span><span class="o">(</span><span class="n">channel</span><span class="o">)</span>
+</span><span class='line'>        <span class="n">channel</span><span class="o">.</span><span class="nc">BasicConsume</span><span class="o">(</span><span class="n">queueName</span><span class="o">,</span> <span class="bp">true</span><span class="o">,</span> <span class="n">consumer</span><span class="o">)</span> <span class="o">|&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">ignore</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">readFromQueue</span> <span class="n">consumer</span> <span class="n">queueName</span><span class="o">,</span> <span class="n">publishToQueue</span> <span class="n">channel</span> <span class="n">queueName</span><span class="o">)</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Using this client library would then look like this:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">openRabbitMqQueue</span> <span class="o">=</span> <span class="n">connectToRabbitMq</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">localhost</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;</span>
+</span><span class='line'><span class="k">let</span> <span class="o">(</span><span class="n">readFromMyQueue</span><span class="o">,</span><span class="n">publishToMyQueue</span><span class="o">)</span> <span class="o">=</span> <span class="n">openRabbitMqQueue</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="nc">MyQueue</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="n">publishToMyQueue</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="nc">Hello</span><span class="o">,</span> <span class="nc">World</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+This is nice an functional.  The code is certainly short and clean.  However, I don&rsquo;t like the &lsquo;let (readFromMyQueue,publishToMyQueue) = openRabbitMqQueue &ldquo;MyQueue&rdquo;&rsquo;, it would be far too easy to forget which function is which and, more importantly, there&rsquo;s nothing to tell you what these functions you get back do.</p>
+
+<p>Let&rsquo;s create a data type to hold these two functions and make the code easier to read:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">type</span> <span class="nc">Queue</span> <span class="o">=</span> <span class="o">{</span> <span class="nc">Name</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span> <span class="nc">Read</span><span class="o">:</span> <span class="kt">unit</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="o">;&gt;</span> <span class="kt">string</span><span class="o">;</span> <span class="nc">Publish</span><span class="o">:</span> <span class="kt">string</span> <span class="o">&amp;</span><span class="n">ndash</span><span class="o">;&gt;</span> <span class="kt">unit</span> <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+We then change our implementation to:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="k">let</span> <span class="n">connectToRabbitMq</span> <span class="n">address</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">let</span> <span class="n">factory</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ConnectionFactory</span><span class="o">(</span><span class="nc">HostName</span> <span class="o">=</span> <span class="s2">&quot;localhost&quot;</span><span class="o">)</span>
+</span><span class='line'>    <span class="k">use</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="nc">CreateConnection</span><span class="bp">()</span>
+</span><span class='line'>    <span class="k">use</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="nc">CreateModel</span><span class="bp">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">fun</span> <span class="n">queueName</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'>        <span class="n">channel</span><span class="o">.</span><span class="nc">QueueDeclare</span><span class="o">(</span> <span class="n">queueName</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="k">null</span> <span class="o">)</span> <span class="o">|&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">ignore</span>
+</span><span class='line'>        <span class="k">let</span> <span class="n">consumer</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">QueueingBasicConsumer</span><span class="o">(</span><span class="n">channel</span><span class="o">)</span>
+</span><span class='line'>        <span class="n">channel</span><span class="o">.</span><span class="nc">BasicConsume</span><span class="o">(</span><span class="n">queueName</span><span class="o">,</span> <span class="bp">true</span><span class="o">,</span> <span class="n">consumer</span><span class="o">)</span> <span class="o">|&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">ignore</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="o">{</span><span class="nc">Name</span> <span class="o">=</span> <span class="n">queueName</span><span class="o">;</span>
+</span><span class='line'>            <span class="nc">Read</span> <span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">readFromQueue</span> <span class="n">consumer</span> <span class="n">queueName</span><span class="o">);</span>
+</span><span class='line'>            <span class="nc">Publish</span> <span class="o">=</span> <span class="o">(</span><span class="n">publishToQueue</span> <span class="n">channel</span> <span class="n">queueName</span><span class="o">)}</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Which would change the usage to:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">openRabbitMqQueue</span> <span class="o">=</span> <span class="n">connectToRabbitMq</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">localhost</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;</span>
+</span><span class='line'><span class="k">let</span> <span class="n">myQueue</span> <span class="o">=</span> <span class="n">openRabbitMqQueue</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="nc">MyQueue</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="n">myQueue</span><span class="o">.</span><span class="nc">Publish</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="nc">Hello</span><span class="o">,</span> <span class="nc">World</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>One nice benefit about this record data type is that it is independent of RabbitMQ.  This same type could be used with any queueing framework.</p>
+
+<h3>Conclusion</h3>
+
+<p>I now have a simple F# focused client for interacting with RabbitMQ.  Unfortunately, it&rsquo;s a little anemic in that it only lets me send and receive string messages.</p>
+
+<p>I am also disappointed that my design went a little astray between what I wanted my functions to be:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">publishToQueue</span> <span class="n">queueName</span> <span class="n">message</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">hellip</span><span class="o">;</span>
+</span><span class='line'><span class="k">let</span> <span class="n">readFromQueue</span> <span class="n">queueName</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">hellip</span><span class="o">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>and where I wound up:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="n">myQueue</span><span class="o">.</span><span class="nc">Publish</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="nc">Hello</span><span class="o">,</span> <span class="nc">World</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+Primarily because I think <code>publishToMyQueue "Hello, World"</code> is a litle more readable than <code>myQueue.Publish "Hello, World"</code>.</p>
+
+<p>This is one of my first major design efforts in F#.  By which I mean that I started by designing and thinking about the problem rather than just hacking or trying to learn.  As such, it went exceptionally well.</p>
+
+<p>My next effort will be to make the read/write functions except more than just string types.  Perhaps a little refactoring if I can come up with a better design.</p>
+
+<p>The source code for this blog post is located on the &ldquo;RabbitMqFramework&rdquo; branch of my FirstRabbitMq repository:
+<a href="https://github.com/erichgess/FirstRabbitMQ/tree/RabbitMQFramework">https://github.com/erichgess/FirstRabbitMQ/tree/RabbitMQFramework</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Using RabbitMQ With F#]]></title>

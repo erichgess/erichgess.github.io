@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>My Octopress Blog</title>
-  <meta name="author" content="Your Name">
+  <title>Elegant Architecture</title>
+  <meta name="author" content="Erich G. Ess">
 
   
-  <meta name="description" content="Over the last few years, one of the topics on which I have done much of my work has been distributed computing using message queues. Recently, I& &hellip;">
+  <meta name="description" content="I&rsquo;ve been doing a lot of experimenting with F# and distributed computing via messaging. As evidenced by my previous, I&rsquo;m using RabbitMQ &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -21,7 +21,7 @@
   <link rel="canonical" href="http://erichgess.github.io">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <link href="/atom.xml" rel="alternate" title="My Octopress Blog" type="application/atom+xml">
+  <link href="/atom.xml" rel="alternate" title="Elegant Architecture" type="application/atom+xml">
   <script src="/javascripts/modernizr-2.0.js"></script>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
   <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
@@ -36,9 +36,9 @@
 
 <body   >
   <header role="banner"><hgroup>
-  <h1><a href="/">My Octopress Blog</a></h1>
+  <h1><a href="/">Elegant Architecture</a></h1>
   
-    <h2>A blogging framework for hackers.</h2>
+    <h2>Architecture, Functional Languages, Style</h2>
   
 </hgroup>
 
@@ -65,6 +65,47 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/03/06/building-a-rabbitmq-library-in-f-number/">Building a RabbitMQ Library in F#</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-06T07:44:30-08:00" pubdate data-updated="true">Mar 6<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>I&rsquo;ve been doing a lot of experimenting with F# and distributed computing via messaging.  As evidenced by my previous, I&rsquo;m using RabbitMQ as my messaging platform, for a couple of reasons: it&rsquo;s easy to use, it&rsquo;s free and open source, and I might decide to switch to RabbitMQ at work.  I&rsquo;ve been having a lot of fun experimenting with RabbitMQ and F#.  However, I spend a lot of my time just writing and copy/pasting the boilerplate code needed to configure the RabbitMQ client libraries, add the fact that the .Net client library is written for C#, and you get a constant block of boring work.  So, purely for fun and profit, I&rsquo;m going to write a quick F# wrapper.  The purpose of it being to let me very quickly setup RabbitMQ and, just as importantly, work with RabbitMQ in a manner that better fits F#.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/03/06/building-a-rabbitmq-library-in-f-number/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -322,6 +363,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/03/06/building-a-rabbitmq-library-in-f-number/">Building a RabbitMQ Library in F#</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/03/04/using-rabbitmq-with-f-number/">Using RabbitMQ With F#</a>
       </li>
     
@@ -342,7 +387,7 @@
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2014 - Your Name -
+  Copyright &copy; 2014 - Erich G. Ess -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 
