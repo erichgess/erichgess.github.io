@@ -126,7 +126,7 @@ This is nice an functional.  The code is certainly short and clean.  However, I 
 
 Let's create a data type to hold these two functions and make the code easier to read:
 {% codeblock lang:fsharp %}
-type Queue = { Name: string; ReadFrom: unit -> string; PublishTo: string -> unit }
+type Queue = { Name: string; Read: unit -> string; Publish: string -> unit }
 {% endcodeblock %}
 We then change our implementation to:
 {% codeblock lang:fsharp %}
@@ -141,6 +141,14 @@ We then change our implementation to:
             channel.BasicConsume(queueName, true, consumer) |> ignore
 
             {Name = queueName; 
-            	ReadFrom = (fun () -> readFromQueue consumer queueName); 
-            	PublishTo = (publishToQueue channel queueName)}
+            	Read = (fun () -> readFromQueue consumer queueName); 
+            	Publish = (publishToQueue channel queueName)}
+{% endcodeblock %}
+
+Which would change the usage to:
+{% codeblock lang:fsharp %}
+let openRabbitMqQueue = connectToRabbitMq "localhost"
+let myQueue = openRabbitMqQueue "MyQueue"
+
+myQueue.Publish "Hello, World"
 {% endcodeblock %}
