@@ -168,3 +168,4 @@ and where I wound up:
 {% codeblock lang:fsharp %}
 myQueue.Publish "Hello, World"
 {% endcodeblock %}
+Primarily because I think `publishToMyQueue "Hello, World"` is a litle more readable than `myQueue.Publish "Hello, World"`.
