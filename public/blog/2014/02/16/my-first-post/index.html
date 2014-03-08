@@ -1,0 +1,255 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Experimenting With Quotations - Elegant Architecture</title>
+  <meta name="author" content="Erich G. Ess">
+
+  
+  <meta name="description" content="One of the more interesting featuers of F# is the Code Quotation. Though I do find this interesting now, it has taken over a year before I saw any &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://erichgess.github.io/blog/2014/02/16/my-first-post">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Elegant Architecture" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Elegant Architecture</a></h1>
+  
+    <h2>Architecture, Functional Languages, Style</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:erichgess.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Experimenting With Quotations</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-02-16T20:37:19-08:00" pubdate data-updated="true">Feb 16<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>One of the more interesting featuers of F# is the Code Quotation.  Though I do find this interesting now, it has taken over a year before I saw any reason I might have even slight interest.  Even now, as I have taken a much greater interest in the topic, it&rsquo;s been difficult finding anything detailed on the topic.</p>
+
+<!-- more -->
+
+
+<p>Anyone familiar with Lisp or one of its dialects, such as Clojure, will find Quotations familiar.  To put it simply, Quotations allow you to represent F# code as data.  Take the following example, where I bind a Quotation to <code>q</code>:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">q</span> <span class="o">=</span> <span class="o">&lt;@</span> <span class="mi">2</span> <span class="o">@&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Running this in the FSI gives the following output:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">val</span> <span class="n">q</span> <span class="o">:</span> <span class="nn">Quotations</span><span class="p">.</span><span class="nc">Expr</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="o">=</span> <span class="nc">Value</span> <span class="o">(</span><span class="mi">2</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The operator <code>&lt;@ @&gt;</code> takes the F# code which it wraps and converts it into a Quotation data structure.  In this case, it takes the value 2 and creates a Value type, which is part of the <code>Quotations.Expr</code> discriminated union.</p>
+
+<p>I&rsquo;ll do a more interesting example, which will better show what a Quotation actually gives you, using the FSI:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="o">&gt;</span> <span class="k">let</span> <span class="n">q</span> <span class="o">=</span> <span class="o">&lt;@</span> <span class="o">(</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span><span class="o">)</span> <span class="o">*</span> <span class="o">(</span> <span class="mi">3</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">)</span> <span class="o">@&gt;;;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">val</span> <span class="n">q</span> <span class="o">:</span> <span class="nn">Quotations</span><span class="p">.</span><span class="nc">Expr</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="o">=</span>
+</span><span class='line'>  <span class="nc">Call</span> <span class="o">(</span><span class="nc">None</span><span class="o">,</span> <span class="n">op_Multiply</span><span class="o">,</span>
+</span><span class='line'>      <span class="o">[</span><span class="nc">Call</span> <span class="o">(</span><span class="nc">None</span><span class="o">,</span> <span class="n">op_Addition</span><span class="o">,</span> <span class="o">[</span><span class="nc">Value</span> <span class="o">(</span><span class="mi">2</span><span class="o">),</span> <span class="nc">Value</span> <span class="o">(</span><span class="mi">3</span><span class="o">)]),</span>
+</span><span class='line'>       <span class="nc">Call</span> <span class="o">(</span><span class="nc">None</span><span class="o">,</span> <span class="n">op_Subtraction</span><span class="o">,</span> <span class="o">[</span><span class="nc">Value</span> <span class="o">(</span><span class="mi">3</span><span class="o">),</span> <span class="nc">Value</span> <span class="o">(</span><span class="mi">1</span><span class="o">)])])</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The Quotation gives you the Abstract Syntax Tree (AST) for a given F# expression.  Which, when I first started learning F# a year ago, was nothing but a curiousity.  In fact, it wasn&rsquo;t until just the other day that I actually started to get excited about Quotations.</p>
+
+<p>Whenever I read about Code Quotations, it seems it&rsquo;s always about using Quotations to handle translating F# code into another language.  The best example of this use case, in my opinion, is WebSharper; which takes F# code and translates it into JavaScript.</p>
+
+<p>However, it&rsquo;s the possibilities of using Quotations with distributed computing which caused my sudden spike in interest.  What&rsquo;s been bouncing around in my brain is:  can I write code in F#, break it apart into discrete chunks, send those chunks to be executing on different servers and then collect the results (MapReduce for sure).</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Erich G. Ess</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-02-16T20:37:19-08:00" pubdate data-updated="true">Feb 16<span>th</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/f-number/'>F#</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://erichgess.github.io/blog/2014/02/16/my-first-post/" data-via="" data-counturl="http://erichgess.github.io/blog/2014/02/16/my-first-post/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/03/04/using-rabbitmq-with-f-number/" title="Next Post: Using RabbitMQ with F#">Using RabbitMQ with F# &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/03/07/odin-learning-distributed-computing/">Odin - Learning Distributed Computing</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/03/06/building-a-rabbitmq-library-in-f-number/">Building a RabbitMQ Library in F#</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/03/04/using-rabbitmq-with-f-number/">Using RabbitMQ With F#</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/02/16/my-first-post/">Experimenting With Quotations</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Erich G. Ess -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

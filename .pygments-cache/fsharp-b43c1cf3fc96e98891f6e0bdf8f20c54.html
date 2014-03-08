@@ -1,0 +1,14 @@
+<div class="highlight"><pre><span class="k">let</span> <span class="n">factory</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ConnectionFactory</span><span class="o">(</span><span class="nc">HostName</span> <span class="o">=</span> <span class="s2">&quot;localhost&quot;</span><span class="o">)</span>
+<span class="k">use</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="nc">CreateConnection</span><span class="bp">()</span>
+<span class="k">use</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="nc">CreateModel</span><span class="bp">()</span>
+
+<span class="n">channel</span><span class="o">.</span><span class="nc">QueueDeclare</span><span class="o">(</span> <span class="s2">&quot;hello&quot;</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="k">null</span> <span class="o">)</span>
+<span class="k">let</span> <span class="n">consumer</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">QueueingBasicConsumer</span><span class="o">(</span><span class="n">channel</span><span class="o">)</span>
+<span class="n">channel</span><span class="o">.</span><span class="nc">BasicConsume</span><span class="o">(</span><span class="s2">&quot;hello&quot;</span><span class="o">,</span> <span class="bp">true</span><span class="o">,</span> <span class="n">consumer</span><span class="o">)</span>
+
+<span class="k">while</span> <span class="bp">true</span> <span class="k">do</span>
+    <span class="k">let</span> <span class="n">ea</span> <span class="o">=</span> <span class="n">consumer</span><span class="o">.</span><span class="nn">Queue</span><span class="p">.</span><span class="nc">Dequeue</span><span class="bp">()</span> <span class="o">:&gt;</span> <span class="nc">BasicDeliverEventArgs</span>
+    <span class="k">let</span> <span class="n">body</span> <span class="o">=</span> <span class="n">ea</span><span class="o">.</span><span class="nc">Body</span>
+    <span class="k">let</span> <span class="n">message</span> <span class="o">=</span> <span class="nn">Encoding</span><span class="p">.</span><span class="nn">UTF8</span><span class="p">.</span><span class="nc">GetString</span><span class="o">(</span><span class="n">body</span><span class="o">)</span>
+    <span class="n">printfn</span> <span class="s2">&quot;%s&quot;</span> <span class="n">message</span>
+</pre></div>
