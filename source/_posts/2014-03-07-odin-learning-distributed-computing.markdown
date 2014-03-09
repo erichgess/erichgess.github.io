@@ -3,7 +3,7 @@ layout: post
 title: "Odin - Learning Distributed Computing"
 date: 2014-03-07 22:39:00 -0800
 comments: true
-categories: 
+categories: [F#, Rx, Odin, Distributed Computing]
 ---
 
 Over the last two years, I've really become interested in distributed computing and things like big data.  My interest in these topics grew in coincidence with my falling in love with F#.  I do a lot of different projects at work and not all of them involve any of those three topics.  So, to provide a motive for learning more about distributed computing and sharpening my F# skills I have decided to start working on a small side project (currently, by myself but several friends are interested).  This is called Odin, inspired by the Riemann project, it's a distributed monitoring system.  It will consist of lightweight agents and heavyweight monitoring engines.  The agents will run on servers collecting data and sending it to the monitors.  The monitors will read the stream of events coming from all the servers then process, analyze, and act.

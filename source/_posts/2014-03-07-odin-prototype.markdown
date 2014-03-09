@@ -3,7 +3,7 @@ layout: post
 title: "Odin Prototype"
 date: 2014-03-07 23:32:30 -0800
 comments: true
-categories: 
+categories: [Odin, Distributed Computing]
 ---
 In my previous post, I described a distributed monitoring system called Odin.  Which I am building because it will help me learn and explore topics in distributed computing independent of work.
 
