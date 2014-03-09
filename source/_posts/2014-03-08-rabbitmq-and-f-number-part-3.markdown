@@ -12,6 +12,7 @@ There are two problems:
 
 1. Missing the Queue Consumer functionality.  This makes it a lot easier to deal with RabbitMQ so I definitely want to get this in.
 1. I'm not happy with using the record type to capture the Read and Publish functions for a queue.   After all, how often are you going to be writing to and reading from a specific queue in the same process?
+<!-- more -->
 
 I will start by fixing #2, as that is bothering me the most.  The design, at present, has this flow:
 
