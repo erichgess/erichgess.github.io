@@ -1,0 +1,16 @@
+<div class="highlight"><pre><span class="o">[&lt;</span><span class="nc">EntryPoint</span><span class="o">&gt;]</span>
+<span class="k">let</span> <span class="n">main</span> <span class="n">argv</span> <span class="o">=</span> 
+    <span class="k">let</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">openConnection</span> <span class="s2">&quot;localhost&quot;</span>
+    <span class="k">let</span> <span class="n">myChannel</span> <span class="o">=</span> <span class="n">openChannel</span> <span class="n">connection</span>
+    <span class="k">let</span> <span class="o">(</span><span class="n">readFrom</span><span class="o">,_)</span> <span class="o">=</span> <span class="n">createQueueFuntions</span> <span class="n">myChannel</span>
+
+    <span class="k">let</span> <span class="n">readFromHelloQueue</span> <span class="o">=</span> <span class="n">readFrom</span> <span class="s2">&quot;hello&quot;</span>
+
+    <span class="k">while</span> <span class="bp">true</span> <span class="k">do</span>
+        <span class="k">let</span> <span class="n">message</span> <span class="o">=</span> <span class="n">readFromHelloQueue</span><span class="bp">()</span>
+        <span class="k">match</span> <span class="n">message</span> <span class="k">with</span>
+        <span class="o">|</span> <span class="nc">Some</span><span class="o">(</span><span class="n">s</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">printfn</span> <span class="s2">&quot;%s&quot;</span> <span class="n">s</span>
+        <span class="o">|</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="bp">()</span>
+
+    <span class="mi">0</span> <span class="c1">// return an integer exit code</span>
+</pre></div>

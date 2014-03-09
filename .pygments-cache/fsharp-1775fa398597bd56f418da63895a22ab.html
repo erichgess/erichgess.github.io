@@ -1,0 +1,6 @@
+<div class="highlight"><pre><span class="k">let</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">connectToRabbitMqServerAt</span> <span class="s2">&quot;localhost&quot;</span>
+<span class="k">let</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">openChannelOn</span> <span class="n">connection</span>
+
+<span class="k">let</span> <span class="n">writeToHelloQueue</span> <span class="o">=</span> <span class="n">createQueueWriter</span> <span class="n">channel</span> <span class="s2">&quot;MyQueue&quot;</span>
+<span class="s2">&quot;Hello&quot;</span> <span class="o">|&gt;</span> <span class="n">writeToHelloQueue</span>
+</pre></div>

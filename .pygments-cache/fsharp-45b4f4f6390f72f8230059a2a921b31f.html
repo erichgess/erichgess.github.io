@@ -1,0 +1,16 @@
+<div class="highlight"><pre><span class="k">let</span> <span class="n">readFromQueue</span> <span class="o">(</span><span class="n">channel</span><span class="o">:</span><span class="nc">IModel</span><span class="o">)</span> <span class="n">queueName</span> <span class="o">=&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+
+<span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">declareQueue</span> <span class="n">channel</span> <span class="n">queueName</span> <span class="o">|&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">ignore</span>
+
+<span class="k">fun</span> <span class="bp">()</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> 
+    <span class="k">let</span> <span class="n">ea</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="nc">BasicGet</span><span class="o">(</span><span class="n">queueName</span><span class="o">,</span> <span class="bp">true</span><span class="o">)</span>
+    <span class="k">if</span> <span class="n">ea</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="k">null</span> <span class="k">then</span>
+        <span class="k">let</span> <span class="n">body</span> <span class="o">=</span> <span class="n">ea</span><span class="o">.</span><span class="nc">Body</span>
+        <span class="k">let</span> <span class="n">message</span> <span class="o">=</span> <span class="nn">Encoding</span><span class="p">.</span><span class="nn">UTF8</span><span class="p">.</span><span class="nc">GetString</span><span class="o">(</span><span class="n">body</span><span class="o">)</span>
+        <span class="nc">Some</span> <span class="n">message</span>
+    <span class="k">else</span>
+        <span class="nc">None</span>
+<span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>
+</pre></div>

@@ -1,0 +1,18 @@
+<div class="highlight"><pre><span class="o">[&lt;</span><span class="nc">EntryPoint</span><span class="o">&gt;]</span>
+<span class="k">let</span> <span class="n">main</span> <span class="n">argv</span> <span class="o">=</span> 
+    <span class="k">let</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">openConnection</span> <span class="s2">&quot;localhost&quot;</span>
+    <span class="k">let</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">openChannel</span> <span class="n">connection</span>
+    <span class="k">let</span> <span class="o">(_,</span><span class="n">writeTo</span><span class="o">)</span> <span class="o">=</span> <span class="n">createQueueFuntions</span> <span class="n">channel</span>
+    
+    <span class="k">let</span> <span class="n">writeToHelloQueue</span> <span class="o">=</span> <span class="n">writeTo</span> <span class="s2">&quot;hello&quot;</span>
+
+    <span class="k">let</span> <span class="k">mutable</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="bp">true</span> <span class="k">do</span>
+        <span class="n">i</span> <span class="o">&lt;-</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">let</span> <span class="n">message</span> <span class="o">=</span> <span class="n">sprintf</span> <span class="s2">&quot;%d,test&quot;</span> <span class="o">((</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span> <span class="o">%</span> <span class="mi">10</span><span class="o">)</span>  <span class="c1">// send a message with a number from 0 to 9 along with some text</span>
+        <span class="n">printfn</span> <span class="s2">&quot;Sending: %s&quot;</span> <span class="n">message</span>
+        <span class="n">message</span> <span class="o">|&gt;</span> <span class="n">writeToHelloQueue</span>
+        <span class="nn">System</span><span class="p">.</span><span class="nn">Threading</span><span class="p">.</span><span class="nn">Thread</span><span class="p">.</span><span class="nc">Sleep</span><span class="o">(</span><span class="mi">1000</span><span class="o">)</span>
+
+    <span class="mi">0</span> <span class="c1">// return an integer exit code</span>
+</pre></div>

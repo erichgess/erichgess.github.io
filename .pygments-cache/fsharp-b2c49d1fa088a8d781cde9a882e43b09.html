@@ -1,0 +1,47 @@
+<div class="highlight"><pre><span class="k">namespace</span> <span class="nn">RabbitMQ</span><span class="p">.</span><span class="nc">FSharp</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">open</span> <span class="nn">RabbitMQ</span><span class="p">.</span><span class="nc">Client</span>
+<span class="k">open</span> <span class="nn">RabbitMQ</span><span class="p">.</span><span class="nn">Client</span><span class="p">.</span><span class="nc">Events</span>
+<span class="k">open</span> <span class="nn">System</span><span class="p">.</span><span class="nc">Text</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">module</span> <span class="nc">Client</span> <span class="o">=&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+
+<span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="k">type</span> <span class="nc">Queue</span> <span class="o">=</span> <span class="o">{</span> <span class="nc">Name</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span> <span class="nc">Read</span><span class="o">:</span> <span class="kt">unit</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="kt">string</span><span class="o">;</span> <span class="nc">Publish</span><span class="o">:</span> <span class="kt">string</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="kt">unit</span> <span class="o">}</span>
+
+<span class="k">let</span> <span class="n">openConnection</span> <span class="n">address</span> <span class="o">=</span> 
+    <span class="k">let</span> <span class="n">factory</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ConnectionFactory</span><span class="o">(</span><span class="nc">HostName</span> <span class="o">=</span> <span class="n">address</span><span class="o">)</span>
+    <span class="n">factory</span><span class="o">.</span><span class="nc">CreateConnection</span><span class="bp">()</span>
+
+<span class="c1">// I need to declare the type for connection because F# can&#39;t infer types on classes</span>
+<span class="k">let</span> <span class="n">openChannel</span> <span class="o">(</span><span class="n">connection</span><span class="o">:</span><span class="nc">IConnection</span><span class="o">)</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="nc">CreateModel</span><span class="bp">()</span>
+
+<span class="k">let</span> <span class="n">declareQueue</span> <span class="o">(</span><span class="n">channel</span><span class="o">:</span><span class="nc">IModel</span><span class="o">)</span> <span class="n">queueName</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="nc">QueueDeclare</span><span class="o">(</span> <span class="n">queueName</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="k">null</span> <span class="o">)</span>
+
+<span class="k">let</span> <span class="n">readFromQueue</span> <span class="o">(</span><span class="n">consumer</span><span class="o">:</span><span class="nc">QueueingBasicConsumer</span><span class="o">)</span> <span class="n">queueName</span> <span class="o">=</span>
+    <span class="k">let</span> <span class="n">ea</span> <span class="o">=</span> <span class="n">consumer</span><span class="o">.</span><span class="nn">Queue</span><span class="p">.</span><span class="nc">Dequeue</span><span class="bp">()</span>
+    <span class="k">let</span> <span class="n">body</span> <span class="o">=</span> <span class="n">ea</span><span class="o">.</span><span class="nc">Body</span>
+    <span class="k">let</span> <span class="n">message</span> <span class="o">=</span> <span class="nn">Encoding</span><span class="p">.</span><span class="nn">UTF8</span><span class="p">.</span><span class="nc">GetString</span><span class="o">(</span><span class="n">body</span><span class="o">)</span>
+    <span class="n">message</span>
+
+<span class="k">let</span> <span class="n">publishToQueue</span> <span class="o">(</span><span class="n">channel</span><span class="o">:</span><span class="nc">IModel</span><span class="o">)</span> <span class="n">queueName</span> <span class="o">(</span><span class="n">message</span><span class="o">:</span><span class="kt">string</span><span class="o">)</span> <span class="o">=</span>
+    <span class="k">let</span> <span class="n">body</span> <span class="o">=</span> <span class="nn">Encoding</span><span class="p">.</span><span class="nn">UTF8</span><span class="p">.</span><span class="nc">GetBytes</span><span class="o">(</span><span class="n">message</span><span class="o">)</span>
+    <span class="n">channel</span><span class="o">.</span><span class="nc">BasicPublish</span><span class="o">(</span><span class="s2">&quot;&quot;</span><span class="o">,</span> <span class="n">queueName</span><span class="o">,</span> <span class="k">null</span><span class="o">,</span> <span class="n">body</span><span class="o">)</span>
+
+<span class="c1">// I don&#39;t have to declare the type of connection, because F# can infer the type from my call to openChannel</span>
+<span class="k">let</span> <span class="n">connectToQueue</span> <span class="n">connection</span> <span class="o">(</span><span class="n">channel</span><span class="o">:</span><span class="nc">IModel</span><span class="o">)</span> <span class="n">queueName</span> <span class="o">=</span>            
+    <span class="n">declareQueue</span> <span class="n">channel</span> <span class="n">queueName</span> <span class="o">|&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">ignore</span>
+
+    <span class="o">{</span><span class="nc">Name</span> <span class="o">=</span> <span class="n">queueName</span><span class="o">;</span> 
+    <span class="nc">Read</span> <span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> 
+                    <span class="k">let</span> <span class="n">ea</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="nc">BasicGet</span><span class="o">(</span><span class="n">queueName</span><span class="o">,</span> <span class="bp">true</span><span class="o">)</span>
+                    <span class="k">if</span> <span class="n">ea</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="k">null</span> <span class="k">then</span>
+                        <span class="k">let</span> <span class="n">body</span> <span class="o">=</span> <span class="n">ea</span><span class="o">.</span><span class="nc">Body</span>
+                        <span class="k">let</span> <span class="n">message</span> <span class="o">=</span> <span class="nn">Encoding</span><span class="p">.</span><span class="nn">UTF8</span><span class="p">.</span><span class="nc">GetString</span><span class="o">(</span><span class="n">body</span><span class="o">)</span>
+                        <span class="n">message</span>
+                    <span class="k">else</span>
+                        <span class="s2">&quot;&quot;</span><span class="o">);</span> 
+    <span class="nc">Publish</span> <span class="o">=</span> <span class="o">(</span><span class="n">publishToQueue</span> <span class="n">channel</span> <span class="n">queueName</span><span class="o">)}</span>
+<span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>
+</pre></div>

@@ -4,7 +4,7 @@
   <title><![CDATA[Elegant Architecture]]></title>
   <link href="http://erichgess.github.io/atom.xml" rel="self"/>
   <link href="http://erichgess.github.io/"/>
-  <updated>2014-03-07T23:37:02-08:00</updated>
+  <updated>2014-03-08T22:12:04-08:00</updated>
   <id>http://erichgess.github.io/</id>
   <author>
     <name><![CDATA[Erich G. Ess]]></name>
@@ -12,6 +12,894 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[RabbitMQ and F# - Part 6]]></title>
+    <link href="http://erichgess.github.io/blog/2014/03/08/rabbitmq-and-f-number-part-6/"/>
+    <updated>2014-03-08T22:08:19-08:00</updated>
+    <id>http://erichgess.github.io/blog/2014/03/08/rabbitmq-and-f-number-part-6</id>
+    <content type="html"><![CDATA[<p>A final round of polish.  Now that I have the layout and flow for using my RabbitMQ library defined, it&rsquo;s time to go through and do a bit of clean up on my names.  There&rsquo;s a lot I can do to make it so that code you write with this library becomes as readable and literate as possible.</p>
+
+<p>Here&rsquo;s the code you write to do the initial setup:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">openConnection</span> <span class="s2">&quot;localhost&quot;</span>
+</span><span class='line'><span class="k">let</span> <span class="n">myChannel</span> <span class="o">=</span> <span class="n">openChannel</span> <span class="n">connection</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If I just look at this, I have to ask:  open connection to what?  Context would probably help, but this function will get called only once in an entire application, so there&rsquo;s not much reason to hold back on the name.  I like the fluent style of naming, so I&rsquo;ll go with:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">connectToRabbitMqServerAt</span> <span class="s2">&quot;localhost&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I&rsquo;ll also make the second line a little more fluent:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">myChannel</span> <span class="o">=</span> <span class="n">openChannelOn</span> <span class="n">connection</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Which turns my setup code to:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">connectToRabbitMqServerAt</span> <span class="s2">&quot;localhost&quot;</span>
+</span><span class='line'><span class="k">let</span> <span class="n">myChannel</span> <span class="o">=</span> <span class="n">openChannelOn</span> <span class="n">connection</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And that&rsquo;s it for now!  I have a library which will let me write code to connect to and send a message on RabbitMQ in about 4 lines of code.  Pretty damn good, IMO.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">connectToRabbitMqServerAt</span> <span class="s2">&quot;localhost&quot;</span>
+</span><span class='line'><span class="k">let</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">openChannelOn</span> <span class="n">connection</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">let</span> <span class="n">writeToHelloQueue</span> <span class="o">=</span> <span class="n">createQueueWriter</span> <span class="n">channel</span> <span class="s2">&quot;MyQueue&quot;</span>
+</span><span class='line'><span class="s2">&quot;Hello&quot;</span> <span class="o">|&gt;</span> <span class="n">writeToHelloQueue</span>
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[RabbitMQ and F# - Part 5]]></title>
+    <link href="http://erichgess.github.io/blog/2014/03/08/rabbitmq-and-f-number-part-5/"/>
+    <updated>2014-03-08T22:00:00-08:00</updated>
+    <id>http://erichgess.github.io/blog/2014/03/08/rabbitmq-and-f-number-part-5</id>
+    <content type="html"><![CDATA[<p>Alright, I now have a simple usable RabbitMQ client library which fits comfortably with F#.  However, there&rsquo;s still some inconsistency in the design which I want to polish out:</p>
+
+<ol>
+<li>To create a consumer on a  queue, you call:</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="n">createQueueConsumer</span> <span class="n">myChannel</span> <span class="s2">&quot;myQueue&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>To create a read function for a queue, you call:</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="o">(</span><span class="n">readFrom</span><span class="o">,_)</span> <span class="o">=</span> <span class="n">createQueueFuntions</span> <span class="n">myChannel</span>
+</span><span class='line'><span class="k">let</span> <span class="n">readFromMyQueue</span> <span class="o">=</span> <span class="n">readFrom</span> <span class="s2">&quot;myQueue&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>To create a write function for a queue, you call:</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="o">(_,</span><span class="n">writeTo</span><span class="o">)</span> <span class="o">=</span> <span class="n">createQueueFuntions</span> <span class="n">myChannel</span>
+</span><span class='line'><span class="k">let</span> <span class="n">writeToMyQueue</span> <span class="o">=</span> <span class="n">writeTo</span> <span class="s2">&quot;myQueue&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Why have a function which manages both the read AND the writes for a channel?  Why not split the read and write out to their own functions?  This is better in my opinion for one very obvious reason:  the code will explicitly explain what is happening.  With my current createQueueFuntions  function, there is nothing which tells you that you get a tuple and that the first element in the tuple is a write function and the second element is a read function.</p>
+
+<!-- more -->
+
+
+<p>Let&rsquo;s make things more explicit and thus more readable:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">createQueueReader</span> <span class="n">channel</span> <span class="n">queue</span> <span class="o">=</span>
+</span><span class='line'>    <span class="n">readFromQueue</span> <span class="n">channel</span> <span class="n">queue</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">let</span> <span class="n">createQueueWriter</span> <span class="n">channel</span> <span class="n">queue</span> <span class="o">=</span>
+</span><span class='line'>    <span class="n">publishToQueue</span> <span class="n">channel</span> <span class="n">queue</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This will change the Sender application to this:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="o">[&lt;</span><span class="nc">EntryPoint</span><span class="o">&gt;]</span>
+</span><span class='line'><span class="k">let</span> <span class="n">main</span> <span class="n">argv</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">let</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">openConnection</span> <span class="s2">&quot;localhost&quot;</span>
+</span><span class='line'>    <span class="k">let</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">openChannel</span> <span class="n">connection</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="n">writeToHelloQueue</span> <span class="o">=</span> <span class="n">createQueueWriter</span> <span class="n">channel</span> <span class="s2">&quot;hello&quot;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="k">mutable</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span class='line'>    <span class="k">while</span> <span class="bp">true</span> <span class="k">do</span>
+</span><span class='line'>        <span class="n">i</span> <span class="o">&lt;-</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+</span><span class='line'>        <span class="k">let</span> <span class="n">message</span> <span class="o">=</span> <span class="n">sprintf</span> <span class="s2">&quot;%d,test&quot;</span> <span class="o">((</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span> <span class="o">%</span> <span class="mi">10</span><span class="o">)</span>  <span class="c1">// send a message with a number from 0 to 9 along with some text</span>
+</span><span class='line'>        <span class="n">printfn</span> <span class="s2">&quot;Sending: %s&quot;</span> <span class="n">message</span>
+</span><span class='line'>        <span class="n">message</span> <span class="o">|&gt;</span> <span class="n">writeToHelloQueue</span>
+</span><span class='line'>        <span class="nn">System</span><span class="p">.</span><span class="nn">Threading</span><span class="p">.</span><span class="nn">Thread</span><span class="p">.</span><span class="nc">Sleep</span><span class="o">(</span><span class="mi">1000</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="mi">0</span> <span class="c1">// return an integer exit code</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>BAM!  Now only what you need to survive is in the actual written code!</p>
+
+<p>=====================================</p>
+
+<p>There is a final bit of polish I want to hit for this version of my library.  This is my publish function:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">publishToQueue</span> <span class="o">(</span><span class="n">channel</span><span class="o">:</span><span class="nc">IModel</span><span class="o">)</span> <span class="n">queueName</span> <span class="o">(</span><span class="n">message</span><span class="o">:</span><span class="kt">string</span><span class="o">)</span> <span class="o">=</span>
+</span><span class='line'>    <span class="n">declareQueue</span> <span class="n">channel</span> <span class="n">queueName</span> <span class="o">|&gt;</span> <span class="n">ignore</span>
+</span><span class='line'>    <span class="k">let</span> <span class="n">body</span> <span class="o">=</span> <span class="nn">Encoding</span><span class="p">.</span><span class="nn">UTF8</span><span class="p">.</span><span class="nc">GetBytes</span><span class="o">(</span><span class="n">message</span><span class="o">)</span>
+</span><span class='line'>    <span class="n">channel</span><span class="o">.</span><span class="nc">BasicPublish</span><span class="o">(</span><span class="s2">&quot;&quot;</span><span class="o">,</span> <span class="n">queueName</span><span class="o">,</span> <span class="k">null</span><span class="o">,</span> <span class="n">body</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The problem is the call to declareQueue.  This won&rsquo;t harm anything, what it does is create the queue if it does not already exist.  However, it will perform this action every single time you write a message to a queue.  That&rsquo;s definitely not needed.  I&rsquo;ll move this code over to where I create the writer function:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">createQueueWriter</span> <span class="n">channel</span> <span class="n">queue</span> <span class="o">=</span>
+</span><span class='line'>    <span class="n">declareQueue</span> <span class="n">channel</span> <span class="n">queue</span> <span class="o">|&gt;</span> <span class="n">ignore</span>
+</span><span class='line'>    <span class="n">publishToQueue</span> <span class="n">channel</span> <span class="n">queue</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now, declareQueue will only be called when you create a reader or a writer for a queue.</p>
+
+<p>The complete source code to date:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">namespace</span> <span class="nn">RabbitMQ</span><span class="p">.</span><span class="nc">FSharp</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">open</span> <span class="nn">RabbitMQ</span><span class="p">.</span><span class="nc">Client</span>
+</span><span class='line'><span class="k">open</span> <span class="nn">RabbitMQ</span><span class="p">.</span><span class="nn">Client</span><span class="p">.</span><span class="nc">Events</span>
+</span><span class='line'><span class="k">open</span> <span class="nn">System</span><span class="p">.</span><span class="nc">Text</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">module</span> <span class="nc">Client</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">type</span> <span class="nc">Queue</span> <span class="o">=</span> <span class="o">{</span> <span class="nc">Name</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span> <span class="nc">Read</span><span class="o">:</span> <span class="kt">unit</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="n">option</span><span class="o">;</span> <span class="nc">Publish</span><span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">unit</span> <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="n">openConnection</span> <span class="n">address</span> <span class="o">=</span>
+</span><span class='line'>        <span class="k">let</span> <span class="n">factory</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ConnectionFactory</span><span class="o">(</span><span class="nc">HostName</span> <span class="o">=</span> <span class="n">address</span><span class="o">)</span>
+</span><span class='line'>        <span class="n">factory</span><span class="o">.</span><span class="nc">CreateConnection</span><span class="bp">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// I need to declare the type for connection because F# can&#39;t infer types on classes</span>
+</span><span class='line'>    <span class="k">let</span> <span class="n">openChannel</span> <span class="o">(</span><span class="n">connection</span><span class="o">:</span><span class="nc">IConnection</span><span class="o">)</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="nc">CreateModel</span><span class="bp">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="n">declareQueue</span> <span class="o">(</span><span class="n">channel</span><span class="o">:</span><span class="nc">IModel</span><span class="o">)</span> <span class="n">queueName</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="nc">QueueDeclare</span><span class="o">(</span> <span class="n">queueName</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="k">null</span> <span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="n">publishToQueue</span> <span class="o">(</span><span class="n">channel</span><span class="o">:</span><span class="nc">IModel</span><span class="o">)</span> <span class="n">queueName</span> <span class="o">(</span><span class="n">message</span><span class="o">:</span><span class="kt">string</span><span class="o">)</span> <span class="o">=</span>
+</span><span class='line'>        <span class="k">let</span> <span class="n">body</span> <span class="o">=</span> <span class="nn">Encoding</span><span class="p">.</span><span class="nn">UTF8</span><span class="p">.</span><span class="nc">GetBytes</span><span class="o">(</span><span class="n">message</span><span class="o">)</span>
+</span><span class='line'>        <span class="n">channel</span><span class="o">.</span><span class="nc">BasicPublish</span><span class="o">(</span><span class="s2">&quot;&quot;</span><span class="o">,</span> <span class="n">queueName</span><span class="o">,</span> <span class="k">null</span><span class="o">,</span> <span class="n">body</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="n">createQueueReader</span> <span class="n">channel</span> <span class="n">queue</span> <span class="o">=</span>
+</span><span class='line'>        <span class="n">declareQueue</span> <span class="n">channel</span> <span class="n">queue</span> <span class="o">|&gt;</span> <span class="n">ignore</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">fun</span> <span class="bp">()</span> <span class="o">-&gt;</span>
+</span><span class='line'>            <span class="k">let</span> <span class="n">ea</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="nc">BasicGet</span><span class="o">(</span><span class="n">queue</span><span class="o">,</span> <span class="bp">true</span><span class="o">)</span>
+</span><span class='line'>            <span class="k">if</span> <span class="n">ea</span> <span class="o">&lt;&gt;</span> <span class="k">null</span> <span class="k">then</span>
+</span><span class='line'>                <span class="k">let</span> <span class="n">body</span> <span class="o">=</span> <span class="n">ea</span><span class="o">.</span><span class="nc">Body</span>
+</span><span class='line'>                <span class="k">let</span> <span class="n">message</span> <span class="o">=</span> <span class="nn">Encoding</span><span class="p">.</span><span class="nn">UTF8</span><span class="p">.</span><span class="nc">GetString</span><span class="o">(</span><span class="n">body</span><span class="o">)</span>
+</span><span class='line'>                <span class="nc">Some</span> <span class="n">message</span>
+</span><span class='line'>            <span class="k">else</span>
+</span><span class='line'>                <span class="nc">None</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="n">createQueueWriter</span> <span class="n">channel</span> <span class="n">queue</span> <span class="o">=</span>
+</span><span class='line'>        <span class="n">declareQueue</span> <span class="n">channel</span> <span class="n">queue</span> <span class="o">|&gt;</span> <span class="n">ignore</span>
+</span><span class='line'>        <span class="n">publishToQueue</span> <span class="n">channel</span> <span class="n">queue</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="n">createQueueConsumer</span> <span class="n">channel</span> <span class="n">queueName</span> <span class="o">=</span>
+</span><span class='line'>        <span class="k">let</span> <span class="n">consumer</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">QueueingBasicConsumer</span><span class="o">(</span><span class="n">channel</span><span class="o">)</span>
+</span><span class='line'>        <span class="n">channel</span><span class="o">.</span><span class="nc">BasicConsume</span><span class="o">(</span><span class="n">queueName</span><span class="o">,</span> <span class="bp">true</span><span class="o">,</span> <span class="n">consumer</span><span class="o">)</span> <span class="o">|&gt;</span> <span class="n">ignore</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">fun</span> <span class="bp">()</span> <span class="o">-&gt;</span>
+</span><span class='line'>            <span class="k">let</span> <span class="n">ea</span> <span class="o">=</span> <span class="n">consumer</span><span class="o">.</span><span class="nn">Queue</span><span class="p">.</span><span class="nc">Dequeue</span><span class="bp">()</span>
+</span><span class='line'>            <span class="k">let</span> <span class="n">body</span> <span class="o">=</span> <span class="n">ea</span><span class="o">.</span><span class="nc">Body</span>
+</span><span class='line'>            <span class="nn">Encoding</span><span class="p">.</span><span class="nn">UTF8</span><span class="p">.</span><span class="nc">GetString</span><span class="o">(</span><span class="n">body</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[RabbitMQ and F# - Part 4]]></title>
+    <link href="http://erichgess.github.io/blog/2014/03/08/rabbitmq-and-f-number-part-4/"/>
+    <updated>2014-03-08T21:55:44-08:00</updated>
+    <id>http://erichgess.github.io/blog/2014/03/08/rabbitmq-and-f-number-part-4</id>
+    <content type="html"><![CDATA[<p>In my previous post, I made my RabbitMQ client library a bit more functional by removing the Queue record type and replacing it with higher order functions.  These higher order functions are used for creating functions for reading/writing queues.  If you want to use &ldquo;MyQueue&rdquo; for writing, you use the &ldquo;writeTo&rdquo; higher order function to create a function for writing to &ldquo;MyQueue&rdquo;.  It&rsquo;s sounds more complex than it really is.</p>
+
+<p>I did that because I mentioned two things about my initial effort which bothered me:  it wasn&rsquo;t functional enough and it didn&rsquo;t support RabbitMQ consumers.  I got the first taken care of.  Now I am going to get the second.</p>
+
+<p>I will follow the same higher order function approach:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">createQueueConsumer</span> <span class="n">channel</span> <span class="n">queueName</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">let</span> <span class="n">consumer</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">QueueingBasicConsumer</span><span class="o">(</span><span class="n">channel</span><span class="o">)</span>
+</span><span class='line'>    <span class="n">channel</span><span class="o">.</span><span class="nc">BasicConsume</span><span class="o">(</span><span class="n">queueName</span><span class="o">,</span> <span class="bp">true</span><span class="o">,</span> <span class="n">consumer</span><span class="o">)</span> <span class="o">|&gt;</span> <span class="n">ignore</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">fun</span> <span class="bp">()</span> <span class="o">-&gt;</span>
+</span><span class='line'>        <span class="k">let</span> <span class="n">ea</span> <span class="o">=</span> <span class="n">consumer</span><span class="o">.</span><span class="nn">Queue</span><span class="p">.</span><span class="nc">Dequeue</span><span class="bp">()</span>
+</span><span class='line'>        <span class="k">let</span> <span class="n">body</span> <span class="o">=</span> <span class="n">ea</span><span class="o">.</span><span class="nc">Body</span>
+</span><span class='line'>        <span class="nn">Encoding</span><span class="p">.</span><span class="nn">UTF8</span><span class="p">.</span><span class="nc">GetString</span><span class="o">(</span><span class="n">body</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This will take a channel and a queue name, then return a function which will return one message from the consumer queue.</p>
+
+<p>The complete source code up until now:</p>
+
+<!-- more -->
+
+
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">namespace</span> <span class="nn">RabbitMQ</span><span class="p">.</span><span class="nc">FSharp</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">open</span> <span class="nn">RabbitMQ</span><span class="p">.</span><span class="nc">Client</span>
+</span><span class='line'><span class="k">open</span> <span class="nn">RabbitMQ</span><span class="p">.</span><span class="nn">Client</span><span class="p">.</span><span class="nc">Events</span>
+</span><span class='line'><span class="k">open</span> <span class="nn">System</span><span class="p">.</span><span class="nc">Text</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">module</span> <span class="nc">Client</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">type</span> <span class="nc">Queue</span> <span class="o">=</span> <span class="o">{</span> <span class="nc">Name</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span> <span class="nc">Read</span><span class="o">:</span> <span class="kt">unit</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="n">option</span><span class="o">;</span> <span class="nc">Publish</span><span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">unit</span> <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="n">openConnection</span> <span class="n">address</span> <span class="o">=</span>
+</span><span class='line'>        <span class="k">let</span> <span class="n">factory</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ConnectionFactory</span><span class="o">(</span><span class="nc">HostName</span> <span class="o">=</span> <span class="n">address</span><span class="o">)</span>
+</span><span class='line'>        <span class="n">factory</span><span class="o">.</span><span class="nc">CreateConnection</span><span class="bp">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// I need to declare the type for connection because F# can&#39;t infer types on classes</span>
+</span><span class='line'>    <span class="k">let</span> <span class="n">openChannel</span> <span class="o">(</span><span class="n">connection</span><span class="o">:</span><span class="nc">IConnection</span><span class="o">)</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="nc">CreateModel</span><span class="bp">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="n">declareQueue</span> <span class="o">(</span><span class="n">channel</span><span class="o">:</span><span class="nc">IModel</span><span class="o">)</span> <span class="n">queueName</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="nc">QueueDeclare</span><span class="o">(</span> <span class="n">queueName</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="k">null</span> <span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="n">readFromQueue</span> <span class="o">(</span><span class="n">channel</span><span class="o">:</span><span class="nc">IModel</span><span class="o">)</span> <span class="n">queueName</span> <span class="o">=</span>
+</span><span class='line'>        <span class="n">declareQueue</span> <span class="n">channel</span> <span class="n">queueName</span> <span class="o">|&gt;</span> <span class="n">ignore</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">fun</span> <span class="bp">()</span> <span class="o">-&gt;</span>
+</span><span class='line'>            <span class="k">let</span> <span class="n">ea</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="nc">BasicGet</span><span class="o">(</span><span class="n">queueName</span><span class="o">,</span> <span class="bp">true</span><span class="o">)</span>
+</span><span class='line'>            <span class="k">if</span> <span class="n">ea</span> <span class="o">&lt;&gt;</span> <span class="k">null</span> <span class="k">then</span>
+</span><span class='line'>                <span class="k">let</span> <span class="n">body</span> <span class="o">=</span> <span class="n">ea</span><span class="o">.</span><span class="nc">Body</span>
+</span><span class='line'>                <span class="k">let</span> <span class="n">message</span> <span class="o">=</span> <span class="nn">Encoding</span><span class="p">.</span><span class="nn">UTF8</span><span class="p">.</span><span class="nc">GetString</span><span class="o">(</span><span class="n">body</span><span class="o">)</span>
+</span><span class='line'>                <span class="nc">Some</span> <span class="n">message</span>
+</span><span class='line'>            <span class="k">else</span>
+</span><span class='line'>                <span class="nc">None</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="n">publishToQueue</span> <span class="o">(</span><span class="n">channel</span><span class="o">:</span><span class="nc">IModel</span><span class="o">)</span> <span class="n">queueName</span> <span class="o">(</span><span class="n">message</span><span class="o">:</span><span class="kt">string</span><span class="o">)</span> <span class="o">=</span>
+</span><span class='line'>        <span class="n">declareQueue</span> <span class="n">channel</span> <span class="n">queueName</span> <span class="o">|&gt;</span> <span class="n">ignore</span>
+</span><span class='line'>        <span class="k">let</span> <span class="n">body</span> <span class="o">=</span> <span class="nn">Encoding</span><span class="p">.</span><span class="nn">UTF8</span><span class="p">.</span><span class="nc">GetBytes</span><span class="o">(</span><span class="n">message</span><span class="o">)</span>
+</span><span class='line'>        <span class="n">channel</span><span class="o">.</span><span class="nc">BasicPublish</span><span class="o">(</span><span class="s2">&quot;&quot;</span><span class="o">,</span> <span class="n">queueName</span><span class="o">,</span> <span class="k">null</span><span class="o">,</span> <span class="n">body</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="n">createQueueFuntions</span> <span class="n">channel</span> <span class="o">=</span>
+</span><span class='line'>        <span class="o">(</span><span class="n">readFromQueue</span> <span class="n">channel</span><span class="o">,</span> <span class="n">publishToQueue</span> <span class="n">channel</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="n">createQueueConsumer</span> <span class="n">channel</span> <span class="n">queueName</span> <span class="o">=</span>
+</span><span class='line'>        <span class="k">let</span> <span class="n">consumer</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">QueueingBasicConsumer</span><span class="o">(</span><span class="n">channel</span><span class="o">)</span>
+</span><span class='line'>        <span class="n">channel</span><span class="o">.</span><span class="nc">BasicConsume</span><span class="o">(</span><span class="n">queueName</span><span class="o">,</span> <span class="bp">true</span><span class="o">,</span> <span class="n">consumer</span><span class="o">)</span> <span class="o">|&gt;</span> <span class="n">ignore</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">fun</span> <span class="bp">()</span> <span class="o">-&gt;</span>
+</span><span class='line'>            <span class="k">let</span> <span class="n">ea</span> <span class="o">=</span> <span class="n">consumer</span><span class="o">.</span><span class="nn">Queue</span><span class="p">.</span><span class="nc">Dequeue</span><span class="bp">()</span>
+</span><span class='line'>            <span class="k">let</span> <span class="n">body</span> <span class="o">=</span> <span class="n">ea</span><span class="o">.</span><span class="nc">Body</span>
+</span><span class='line'>            <span class="nn">Encoding</span><span class="p">.</span><span class="nn">UTF8</span><span class="p">.</span><span class="nc">GetString</span><span class="o">(</span><span class="n">body</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[RabbitMQ and F# - Part 3]]></title>
+    <link href="http://erichgess.github.io/blog/2014/03/08/rabbitmq-and-f-number-part-3/"/>
+    <updated>2014-03-08T21:38:01-08:00</updated>
+    <id>http://erichgess.github.io/blog/2014/03/08/rabbitmq-and-f-number-part-3</id>
+    <content type="html"><![CDATA[<p>I now have a functioning RabbitMQ Library!  Though, there is a lot more to be done to make it satisfactory.</p>
+
+<p>There are two problems:</p>
+
+<ol>
+<li>Missing the Queue Consumer functionality.  This makes it a lot easier to deal with RabbitMQ so I definitely want to get this in.</li>
+<li>I&rsquo;m not happy with using the record type to capture the Read and Publish functions for a queue.   After all, how often are you going to be writing to and reading from a specific queue in the same process?</li>
+</ol>
+
+
+<!-- more -->
+
+
+<p>I will start by fixing #2, as that is bothering me the most.  The design, at present, has this flow:</p>
+
+<ol>
+<li>Connect to a RabbitMQ server</li>
+<li>Open a channel</li>
+<li>Request a connection to a queue</li>
+<li>Receive a function for writing to the queue and a function for reading from the queue</li>
+</ol>
+
+
+<p>The first question I have is:  how often are you going to be reading from and writing to the same queue in the same code?  Probably not very often.  Which means that, most of the time, only half of what I am returning is useful.   We can simplify this.  Rather than build the Read and Write functions for you, they should be built only when you need them.</p>
+
+<p>I will change the design so that rather than opening a queue and getting back two functions.  There will be two functions which can write or read to any queue.</p>
+
+<p>My next design approach will be to update the function which creates a channel to now also return two functions:  one function will be for using the channel to write to a queue, the function is for using the channel to read from a queue.  Now if you want to setup a publishing function to &ldquo;MyQueue&rdquo; you use the returned write function and partial application to build the writeToMyQueue function.</p>
+
+<p>I&rsquo;ve modified my readFromQueue function so that it now takes a channel and a queue name and returns a function which will read one message from the queue:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">readFromQueue</span> <span class="o">(</span><span class="n">channel</span><span class="o">:</span><span class="nc">IModel</span><span class="o">)</span> <span class="n">queueName</span> <span class="o">=</span>
+</span><span class='line'>    <span class="n">declareQueue</span> <span class="n">channel</span> <span class="n">queueName</span> <span class="o">|&gt;</span> <span class="n">ignore</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">fun</span> <span class="bp">()</span> <span class="o">-&gt;</span>
+</span><span class='line'>        <span class="k">let</span> <span class="n">ea</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="nc">BasicGet</span><span class="o">(</span><span class="n">queueName</span><span class="o">,</span> <span class="bp">true</span><span class="o">)</span>
+</span><span class='line'>        <span class="k">if</span> <span class="n">ea</span> <span class="o">&lt;&gt;</span> <span class="k">null</span> <span class="k">then</span>
+</span><span class='line'>            <span class="k">let</span> <span class="n">body</span> <span class="o">=</span> <span class="n">ea</span><span class="o">.</span><span class="nc">Body</span>
+</span><span class='line'>            <span class="k">let</span> <span class="n">message</span> <span class="o">=</span> <span class="nn">Encoding</span><span class="p">.</span><span class="nn">UTF8</span><span class="p">.</span><span class="nc">GetString</span><span class="o">(</span><span class="n">body</span><span class="o">)</span>
+</span><span class='line'>            <span class="nc">Some</span> <span class="n">message</span>
+</span><span class='line'>        <span class="k">else</span>
+</span><span class='line'>            <span class="nc">None</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Then I made this new function:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">createQueueFuntions</span> <span class="n">channel</span> <span class="o">=</span>
+</span><span class='line'>    <span class="o">(</span><span class="n">readFromQueue</span> <span class="n">channel</span><span class="o">,</span> <span class="n">publishToQueue</span> <span class="n">channel</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Which will take a channel and return two functions.  One for writing to a specific queue and one for reading from a specific queue.  You can then use these two functions to connect to queues as you need.  Once a developer reaches this point, all he or she needs to think about are: queue names, do I want to read from this queue, and do I want to write to this queue.</p>
+
+<p>For example, in my receiver the code is now:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="o">[&lt;</span><span class="nc">EntryPoint</span><span class="o">&gt;]</span>
+</span><span class='line'><span class="k">let</span> <span class="n">main</span> <span class="n">argv</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">let</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">openConnection</span> <span class="s2">&quot;localhost&quot;</span>
+</span><span class='line'>    <span class="k">let</span> <span class="n">myChannel</span> <span class="o">=</span> <span class="n">openChannel</span> <span class="n">connection</span>
+</span><span class='line'>    <span class="k">let</span> <span class="o">(</span><span class="n">readFrom</span><span class="o">,_)</span> <span class="o">=</span> <span class="n">createQueueFuntions</span> <span class="n">myChannel</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="n">readFromHelloQueue</span> <span class="o">=</span> <span class="n">readFrom</span> <span class="s2">&quot;hello&quot;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">while</span> <span class="bp">true</span> <span class="k">do</span>
+</span><span class='line'>        <span class="k">let</span> <span class="n">message</span> <span class="o">=</span> <span class="n">readFromHelloQueue</span><span class="bp">()</span>
+</span><span class='line'>        <span class="k">match</span> <span class="n">message</span> <span class="k">with</span>
+</span><span class='line'>        <span class="o">|</span> <span class="nc">Some</span><span class="o">(</span><span class="n">s</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">printfn</span> <span class="s2">&quot;%s&quot;</span> <span class="n">s</span>
+</span><span class='line'>        <span class="o">|</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="bp">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="mi">0</span> <span class="c1">// return an integer exit code</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I don&rsquo;t care about writing to queues at all, so I completely ignore the write function which createQueueFunctions returns.</p>
+
+<p>The Sender code now looks like this:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="o">[&lt;</span><span class="nc">EntryPoint</span><span class="o">&gt;]</span>
+</span><span class='line'><span class="k">let</span> <span class="n">main</span> <span class="n">argv</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">let</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">openConnection</span> <span class="s2">&quot;localhost&quot;</span>
+</span><span class='line'>    <span class="k">let</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">openChannel</span> <span class="n">connection</span>
+</span><span class='line'>    <span class="k">let</span> <span class="o">(_,</span><span class="n">writeTo</span><span class="o">)</span> <span class="o">=</span> <span class="n">createQueueFuntions</span> <span class="n">channel</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="n">writeToHelloQueue</span> <span class="o">=</span> <span class="n">writeTo</span> <span class="s2">&quot;hello&quot;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="k">mutable</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span class='line'>    <span class="k">while</span> <span class="bp">true</span> <span class="k">do</span>
+</span><span class='line'>        <span class="n">i</span> <span class="o">&lt;-</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+</span><span class='line'>        <span class="k">let</span> <span class="n">message</span> <span class="o">=</span> <span class="n">sprintf</span> <span class="s2">&quot;%d,test&quot;</span> <span class="o">((</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span> <span class="o">%</span> <span class="mi">10</span><span class="o">)</span>  <span class="c1">// send a message with a number from 0 to 9 along with some text</span>
+</span><span class='line'>        <span class="n">printfn</span> <span class="s2">&quot;Sending: %s&quot;</span> <span class="n">message</span>
+</span><span class='line'>        <span class="n">message</span> <span class="o">|&gt;</span> <span class="n">writeToHelloQueue</span>
+</span><span class='line'>        <span class="nn">System</span><span class="p">.</span><span class="nn">Threading</span><span class="p">.</span><span class="nn">Thread</span><span class="p">.</span><span class="nc">Sleep</span><span class="o">(</span><span class="mi">1000</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="mi">0</span> <span class="c1">// return an integer exit code</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I find that this design is a lot better.  Functions for reading and writing are only created when you need to read or write to a queue.  The channel object can now safely be ignored after the initial setup, instead everything boils down to: what do I want to do with this queue.  When you write with this framework, you now are no longer concerned with what objects you have at hand and what you can do with those objects; you are just concerned with what you want to do.</p>
+
+<p>The complete source as of this point:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">namespace</span> <span class="nn">RabbitMQ</span><span class="p">.</span><span class="nc">FSharp</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">open</span> <span class="nn">RabbitMQ</span><span class="p">.</span><span class="nc">Client</span>
+</span><span class='line'><span class="k">open</span> <span class="nn">RabbitMQ</span><span class="p">.</span><span class="nn">Client</span><span class="p">.</span><span class="nc">Events</span>
+</span><span class='line'><span class="k">open</span> <span class="nn">System</span><span class="p">.</span><span class="nc">Text</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">module</span> <span class="nc">Client</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">type</span> <span class="nc">Queue</span> <span class="o">=</span> <span class="o">{</span> <span class="nc">Name</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span> <span class="nc">Read</span><span class="o">:</span> <span class="kt">unit</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="n">option</span><span class="o">;</span> <span class="nc">Publish</span><span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">unit</span> <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="n">openConnection</span> <span class="n">address</span> <span class="o">=</span>
+</span><span class='line'>        <span class="k">let</span> <span class="n">factory</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ConnectionFactory</span><span class="o">(</span><span class="nc">HostName</span> <span class="o">=</span> <span class="n">address</span><span class="o">)</span>
+</span><span class='line'>        <span class="n">factory</span><span class="o">.</span><span class="nc">CreateConnection</span><span class="bp">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// I need to declare the type for connection because F# can&#39;t infer types on classes</span>
+</span><span class='line'>    <span class="k">let</span> <span class="n">openChannel</span> <span class="o">(</span><span class="n">connection</span><span class="o">:</span><span class="nc">IConnection</span><span class="o">)</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="nc">CreateModel</span><span class="bp">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="n">declareQueue</span> <span class="o">(</span><span class="n">channel</span><span class="o">:</span><span class="nc">IModel</span><span class="o">)</span> <span class="n">queueName</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="nc">QueueDeclare</span><span class="o">(</span> <span class="n">queueName</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="k">null</span> <span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="n">readFromQueue</span> <span class="o">(</span><span class="n">channel</span><span class="o">:</span><span class="nc">IModel</span><span class="o">)</span> <span class="n">queueName</span> <span class="o">=</span>
+</span><span class='line'>        <span class="n">declareQueue</span> <span class="n">channel</span> <span class="n">queueName</span> <span class="o">|&gt;</span> <span class="n">ignore</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">fun</span> <span class="bp">()</span> <span class="o">-&gt;</span>
+</span><span class='line'>            <span class="k">let</span> <span class="n">ea</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="nc">BasicGet</span><span class="o">(</span><span class="n">queueName</span><span class="o">,</span> <span class="bp">true</span><span class="o">)</span>
+</span><span class='line'>            <span class="k">if</span> <span class="n">ea</span> <span class="o">&lt;&gt;</span> <span class="k">null</span> <span class="k">then</span>
+</span><span class='line'>                <span class="k">let</span> <span class="n">body</span> <span class="o">=</span> <span class="n">ea</span><span class="o">.</span><span class="nc">Body</span>
+</span><span class='line'>                <span class="k">let</span> <span class="n">message</span> <span class="o">=</span> <span class="nn">Encoding</span><span class="p">.</span><span class="nn">UTF8</span><span class="p">.</span><span class="nc">GetString</span><span class="o">(</span><span class="n">body</span><span class="o">)</span>
+</span><span class='line'>                <span class="nc">Some</span> <span class="n">message</span>
+</span><span class='line'>            <span class="k">else</span>
+</span><span class='line'>                <span class="nc">None</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="n">publishToQueue</span> <span class="o">(</span><span class="n">channel</span><span class="o">:</span><span class="nc">IModel</span><span class="o">)</span> <span class="n">queueName</span> <span class="o">(</span><span class="n">message</span><span class="o">:</span><span class="kt">string</span><span class="o">)</span> <span class="o">=</span>
+</span><span class='line'>        <span class="n">declareQueue</span> <span class="n">channel</span> <span class="n">queueName</span> <span class="o">|&gt;</span> <span class="n">ignore</span>
+</span><span class='line'>        <span class="k">let</span> <span class="n">body</span> <span class="o">=</span> <span class="nn">Encoding</span><span class="p">.</span><span class="nn">UTF8</span><span class="p">.</span><span class="nc">GetBytes</span><span class="o">(</span><span class="n">message</span><span class="o">)</span>
+</span><span class='line'>        <span class="n">channel</span><span class="o">.</span><span class="nc">BasicPublish</span><span class="o">(</span><span class="s2">&quot;&quot;</span><span class="o">,</span> <span class="n">queueName</span><span class="o">,</span> <span class="k">null</span><span class="o">,</span> <span class="n">body</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="n">createQueueFuntions</span> <span class="n">channel</span> <span class="o">=</span>
+</span><span class='line'>        <span class="o">(</span><span class="n">readFromQueue</span> <span class="n">channel</span><span class="o">,</span> <span class="n">publishToQueue</span> <span class="n">channel</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="n">connectToQueue</span> <span class="n">connection</span> <span class="o">(</span><span class="n">channel</span><span class="o">:</span><span class="nc">IModel</span><span class="o">)</span> <span class="n">queueName</span> <span class="o">=</span>
+</span><span class='line'>        <span class="n">declareQueue</span> <span class="n">channel</span> <span class="n">queueName</span> <span class="o">|&gt;</span> <span class="n">ignore</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="o">{</span><span class="nc">Name</span> <span class="o">=</span> <span class="n">queueName</span><span class="o">;</span>
+</span><span class='line'>        <span class="nc">Read</span> <span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&gt;</span>
+</span><span class='line'>                        <span class="k">let</span> <span class="n">ea</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="nc">BasicGet</span><span class="o">(</span><span class="n">queueName</span><span class="o">,</span> <span class="bp">true</span><span class="o">)</span>
+</span><span class='line'>                        <span class="k">if</span> <span class="n">ea</span> <span class="o">&lt;&gt;</span> <span class="k">null</span> <span class="k">then</span>
+</span><span class='line'>                            <span class="k">let</span> <span class="n">body</span> <span class="o">=</span> <span class="n">ea</span><span class="o">.</span><span class="nc">Body</span>
+</span><span class='line'>                            <span class="k">let</span> <span class="n">message</span> <span class="o">=</span> <span class="nn">Encoding</span><span class="p">.</span><span class="nn">UTF8</span><span class="p">.</span><span class="nc">GetString</span><span class="o">(</span><span class="n">body</span><span class="o">)</span>
+</span><span class='line'>                            <span class="nc">Some</span> <span class="n">message</span>
+</span><span class='line'>                        <span class="k">else</span>
+</span><span class='line'>                            <span class="nc">None</span><span class="o">);</span>
+</span><span class='line'>        <span class="nc">Publish</span> <span class="o">=</span> <span class="o">(</span><span class="n">publishToQueue</span> <span class="n">channel</span> <span class="n">queueName</span><span class="o">)}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[RabbitMQ and F# - Part 2]]></title>
+    <link href="http://erichgess.github.io/blog/2014/03/08/rabbitmq-and-f-number-part-2/"/>
+    <updated>2014-03-08T21:15:36-08:00</updated>
+    <id>http://erichgess.github.io/blog/2014/03/08/rabbitmq-and-f-number-part-2</id>
+    <content type="html"><![CDATA[<p>Notes about RabbitMQ:</p>
+
+<pre><code>- You should have one connection per application and one channel per thread (http://stackoverflow.com/a/10501593)
+</code></pre>
+
+<p>I was able to build and run my sender and receiver, both using my client.</p>
+
+<p>However, something odd happened.  The receiver was only printing out every other message which the Sender sent.</p>
+
+<!-- more -->
+
+
+<p><img src="http://erichgess.github.io/images/posts/rabbitmq_and_fsharp/missing_messages.png"></p>
+
+<p>Here&rsquo;s the secret of what&rsquo;s happening:</p>
+
+<p><img src="http://erichgess.github.io/images/posts/rabbitmq_and_fsharp/too_many_consumers.png"></p>
+
+<p>OH SNAP!  There are two consumers on the queue and RabbitMQ is splitting the messages evenly between the two consumers.</p>
+
+<p>My suspicion is that the Sender is also opening up a consumer.  I can verify this easily by starting only the Sender and looking at the RaabbitMQ console:</p>
+
+<p><img src="http://erichgess.github.io/images/posts/rabbitmq_and_fsharp/too_many_consumers_2.png"></p>
+
+<p>Sure enough, there&rsquo;s one consumer!  So the Sender is also opening up a consumer and reading messages from the queue.</p>
+
+<p>The culprit is almost certainly this bit of code:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">consumer</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">QueueingBasicConsumer</span><span class="o">(</span><span class="n">channel</span><span class="o">)</span>
+</span><span class='line'><span class="n">channel</span><span class="o">.</span><span class="nc">BasicConsume</span><span class="o">(</span><span class="n">queueName</span><span class="o">,</span> <span class="bp">true</span><span class="o">,</span> <span class="n">consumer</span><span class="o">)</span> <span class="o">|&gt;</span> <span class="n">ignore</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">{</span><span class="nc">Name</span> <span class="o">=</span> <span class="n">queueName</span><span class="o">;</span>
+</span><span class='line'><span class="nc">Read</span> <span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&gt;</span> <span class="n">readFromQueue</span> <span class="n">consumer</span> <span class="n">queueName</span><span class="o">);</span>
+</span><span class='line'><span class="nc">Publish</span> <span class="o">=</span> <span class="o">(</span><span class="n">publishToQueue</span> <span class="n">channel</span> <span class="n">queueName</span><span class="o">)}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I create a consumer and attach it to the queue every time a request is made to open a queue.  My assumption had been that a message would only be read from the queue when <code>consumer.Queue.Dequeue()</code> was called.  This is a fairly obvious error, in hindsight.  Reading the documentation further, I see that the consumer sets up a subscription to a queue and messages are automatically read; making this a push pattern.  To do a pull pattern, I would just use BasicGet on the queue.</p>
+
+<p>A basic get example, in C#:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="n">BasicGetResult</span> <span class="n">result</span> <span class="p">=</span> <span class="n">channel</span><span class="p">.</span><span class="n">BasicGet</span><span class="p">(</span><span class="n">queueName</span><span class="p">,</span> <span class="n">noAck</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I do want to have subscriptions and for this to be useful in my future projects.  However, for now my goal is to get a simple functioning library.  So I will switch my code over to use the basic get.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">connectToQueue</span> <span class="n">connection</span> <span class="o">(</span><span class="n">channel</span><span class="o">:</span><span class="nc">IModel</span><span class="o">)</span> <span class="n">queueName</span> <span class="o">=</span>
+</span><span class='line'>    <span class="n">declareQueue</span> <span class="n">channel</span> <span class="n">queueName</span> <span class="o">|&gt;</span> <span class="n">ignore</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="o">{</span><span class="nc">Name</span> <span class="o">=</span> <span class="n">queueName</span><span class="o">;</span>
+</span><span class='line'>    <span class="nc">Read</span> <span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&gt;</span>
+</span><span class='line'>                    <span class="k">let</span> <span class="n">ea</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="nc">BasicGet</span><span class="o">(</span><span class="n">queueName</span><span class="o">,</span> <span class="bp">true</span><span class="o">)</span>
+</span><span class='line'>                    <span class="k">if</span> <span class="n">ea</span> <span class="o">&lt;&gt;</span> <span class="k">null</span> <span class="k">then</span>
+</span><span class='line'>                        <span class="k">let</span> <span class="n">body</span> <span class="o">=</span> <span class="n">ea</span><span class="o">.</span><span class="nc">Body</span>
+</span><span class='line'>                        <span class="k">let</span> <span class="n">message</span> <span class="o">=</span> <span class="nn">Encoding</span><span class="p">.</span><span class="nn">UTF8</span><span class="p">.</span><span class="nc">GetString</span><span class="o">(</span><span class="n">body</span><span class="o">)</span>
+</span><span class='line'>                        <span class="n">message</span>
+</span><span class='line'>                    <span class="k">else</span>
+</span><span class='line'>                        <span class="s2">&quot;&quot;</span><span class="o">);</span>
+</span><span class='line'>    <span class="nc">Publish</span> <span class="o">=</span> <span class="o">(</span><span class="n">publishToQueue</span> <span class="n">channel</span> <span class="n">queueName</span><span class="o">)}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The Read function now does a BasicGet and decodes the message.</p>
+
+<p>The result:</p>
+
+<p><img src="http://erichgess.github.io/images/posts/rabbitmq_and_fsharp/right_number_consumers.png"></p>
+
+<p>No more extra consumer!</p>
+
+<p>I really don’t like the part where I return &ldquo;&rdquo; if there is nothing in the queue.  There&rsquo;s already a great way of handling that in F#.  So I&rsquo;ll change the Read function to return a string option, which will change my code to:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="nc">Read</span> <span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&gt;</span>
+</span><span class='line'>                <span class="k">let</span> <span class="n">ea</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="nc">BasicGet</span><span class="o">(</span><span class="n">queueName</span><span class="o">,</span> <span class="bp">true</span><span class="o">)</span>
+</span><span class='line'>                <span class="k">if</span> <span class="n">ea</span> <span class="o">&lt;&gt;</span> <span class="k">null</span> <span class="k">then</span>
+</span><span class='line'>                    <span class="k">let</span> <span class="n">body</span> <span class="o">=</span> <span class="n">ea</span><span class="o">.</span><span class="nc">Body</span>
+</span><span class='line'>                    <span class="k">let</span> <span class="n">message</span> <span class="o">=</span> <span class="nn">Encoding</span><span class="p">.</span><span class="nn">UTF8</span><span class="p">.</span><span class="nc">GetString</span><span class="o">(</span><span class="n">body</span><span class="o">)</span>
+</span><span class='line'>                    <span class="nc">Some</span> <span class="n">message</span>
+</span><span class='line'>                <span class="k">else</span>
+</span><span class='line'>                    <span class="nc">None</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This is good, because it will force developers using this function to deal with both the case where a message is on the queue and the case where there is no message on the queue.</p>
+
+<p>Here&rsquo;s the current complete code for my simple F# library:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">namespace</span> <span class="nn">RabbitMQ</span><span class="p">.</span><span class="nc">FSharp</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">open</span> <span class="nn">RabbitMQ</span><span class="p">.</span><span class="nc">Client</span>
+</span><span class='line'><span class="k">open</span> <span class="nn">RabbitMQ</span><span class="p">.</span><span class="nn">Client</span><span class="p">.</span><span class="nc">Events</span>
+</span><span class='line'><span class="k">open</span> <span class="nn">System</span><span class="p">.</span><span class="nc">Text</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">module</span> <span class="nc">Client</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">type</span> <span class="nc">Queue</span> <span class="o">=</span> <span class="o">{</span> <span class="nc">Name</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span> <span class="nc">Read</span><span class="o">:</span> <span class="kt">unit</span> <span class="o">-&gt;</span> <span class="kt">string</span><span class="o">;</span> <span class="nc">Publish</span><span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">unit</span> <span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="n">openConnection</span> <span class="n">address</span> <span class="o">=</span>
+</span><span class='line'>        <span class="k">let</span> <span class="n">factory</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ConnectionFactory</span><span class="o">(</span><span class="nc">HostName</span> <span class="o">=</span> <span class="n">address</span><span class="o">)</span>
+</span><span class='line'>        <span class="n">factory</span><span class="o">.</span><span class="nc">CreateConnection</span><span class="bp">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// I need to declare the type for connection because F# can&#39;t infer types on classes</span>
+</span><span class='line'>    <span class="k">let</span> <span class="n">openChannel</span> <span class="o">(</span><span class="n">connection</span><span class="o">:</span><span class="nc">IConnection</span><span class="o">)</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="nc">CreateModel</span><span class="bp">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="n">declareQueue</span> <span class="o">(</span><span class="n">channel</span><span class="o">:</span><span class="nc">IModel</span><span class="o">)</span> <span class="n">queueName</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="nc">QueueDeclare</span><span class="o">(</span> <span class="n">queueName</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="k">null</span> <span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="n">readFromQueue</span> <span class="o">(</span><span class="n">consumer</span><span class="o">:</span><span class="nc">QueueingBasicConsumer</span><span class="o">)</span> <span class="n">queueName</span> <span class="o">=</span>
+</span><span class='line'>        <span class="k">let</span> <span class="n">ea</span> <span class="o">=</span> <span class="n">consumer</span><span class="o">.</span><span class="nn">Queue</span><span class="p">.</span><span class="nc">Dequeue</span><span class="bp">()</span>
+</span><span class='line'>        <span class="k">let</span> <span class="n">body</span> <span class="o">=</span> <span class="n">ea</span><span class="o">.</span><span class="nc">Body</span>
+</span><span class='line'>        <span class="k">let</span> <span class="n">message</span> <span class="o">=</span> <span class="nn">Encoding</span><span class="p">.</span><span class="nn">UTF8</span><span class="p">.</span><span class="nc">GetString</span><span class="o">(</span><span class="n">body</span><span class="o">)</span>
+</span><span class='line'>        <span class="n">message</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="n">publishToQueue</span> <span class="o">(</span><span class="n">channel</span><span class="o">:</span><span class="nc">IModel</span><span class="o">)</span> <span class="n">queueName</span> <span class="o">(</span><span class="n">message</span><span class="o">:</span><span class="kt">string</span><span class="o">)</span> <span class="o">=</span>
+</span><span class='line'>        <span class="k">let</span> <span class="n">body</span> <span class="o">=</span> <span class="nn">Encoding</span><span class="p">.</span><span class="nn">UTF8</span><span class="p">.</span><span class="nc">GetBytes</span><span class="o">(</span><span class="n">message</span><span class="o">)</span>
+</span><span class='line'>        <span class="n">channel</span><span class="o">.</span><span class="nc">BasicPublish</span><span class="o">(</span><span class="s2">&quot;&quot;</span><span class="o">,</span> <span class="n">queueName</span><span class="o">,</span> <span class="k">null</span><span class="o">,</span> <span class="n">body</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// I don&#39;t have to declare the type of connection, because F# can infer the type from my call to openChannel</span>
+</span><span class='line'>    <span class="k">let</span> <span class="n">connectToQueue</span> <span class="n">connection</span> <span class="o">(</span><span class="n">channel</span><span class="o">:</span><span class="nc">IModel</span><span class="o">)</span> <span class="n">queueName</span> <span class="o">=</span>
+</span><span class='line'>        <span class="n">declareQueue</span> <span class="n">channel</span> <span class="n">queueName</span> <span class="o">|&gt;</span> <span class="n">ignore</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="o">{</span><span class="nc">Name</span> <span class="o">=</span> <span class="n">queueName</span><span class="o">;</span>
+</span><span class='line'>        <span class="nc">Read</span> <span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&gt;</span>
+</span><span class='line'>                        <span class="k">let</span> <span class="n">ea</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="nc">BasicGet</span><span class="o">(</span><span class="n">queueName</span><span class="o">,</span> <span class="bp">true</span><span class="o">)</span>
+</span><span class='line'>                        <span class="k">if</span> <span class="n">ea</span> <span class="o">&lt;&gt;</span> <span class="k">null</span> <span class="k">then</span>
+</span><span class='line'>                            <span class="k">let</span> <span class="n">body</span> <span class="o">=</span> <span class="n">ea</span><span class="o">.</span><span class="nc">Body</span>
+</span><span class='line'>                            <span class="k">let</span> <span class="n">message</span> <span class="o">=</span> <span class="nn">Encoding</span><span class="p">.</span><span class="nn">UTF8</span><span class="p">.</span><span class="nc">GetString</span><span class="o">(</span><span class="n">body</span><span class="o">)</span>
+</span><span class='line'>                            <span class="n">message</span>
+</span><span class='line'>                        <span class="k">else</span>
+</span><span class='line'>                            <span class="s2">&quot;&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="nc">Publish</span> <span class="o">=</span> <span class="o">(</span><span class="n">publishToQueue</span> <span class="n">channel</span> <span class="n">queueName</span><span class="o">)}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Odin Prototype]]></title>
