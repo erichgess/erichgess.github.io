@@ -90,4 +90,57 @@ let main argv =
 {% endcodeblock %}
 I find that this design is a lot better.  Functions for reading and writing are only created when you need to read or write to a queue.  The channel object can now safely be ignored after the initial setup, instead everything boils down to: what do I want to do with this queue.  When you write with this framework, you now are no longer concerned with what objects you have at hand and what you can do with those objects; you are just concerned with what you want to do.
 
-SHA - 8bb9f925a818fd8ce43278ff2dc0a7edddad5fd6
+The complete source as of this point:
+{% codeblock lang:fsharp %}
+namespace RabbitMQ.FSharp
+
+open RabbitMQ.Client
+open RabbitMQ.Client.Events
+open System.Text
+
+module Client =
+    type Queue = { Name: string; Read: unit -> string option; Publish: string -> unit }
+
+    let openConnection address = 
+        let factory = new ConnectionFactory(HostName = address)
+        factory.CreateConnection()
+
+    // I need to declare the type for connection because F# can't infer types on classes
+    let openChannel (connection:IConnection) = connection.CreateModel()
+
+    let declareQueue (channel:IModel) queueName = channel.QueueDeclare( queueName, false, false, false, null )
+
+    let readFromQueue (channel:IModel) queueName =
+        declareQueue channel queueName |> ignore
+
+        fun () -> 
+            let ea = channel.BasicGet(queueName, true)
+            if ea <> null then
+                let body = ea.Body
+                let message = Encoding.UTF8.GetString(body)
+                Some message
+            else
+                None
+
+    let publishToQueue (channel:IModel) queueName (message:string) =
+        declareQueue channel queueName |> ignore
+        let body = Encoding.UTF8.GetBytes(message)
+        channel.BasicPublish("", queueName, null, body)
+
+    let createQueueFuntions channel =
+        (readFromQueue channel, publishToQueue channel)
+
+    let connectToQueue connection (channel:IModel) queueName =            
+        declareQueue channel queueName |> ignore
+
+        {Name = queueName; 
+        Read = (fun () -> 
+                        let ea = channel.BasicGet(queueName, true)
+                        if ea <> null then
+                            let body = ea.Body
+                            let message = Encoding.UTF8.GetString(body)
+                            Some message
+                        else
+                            None); 
+        Publish = (publishToQueue channel queueName)}
+{% endcodeblock %}
