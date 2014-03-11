@@ -21,5 +21,14 @@ For the duration of this post, I'll call these Facts about the order.
 
 I want to know what the current status of any given order is at any time.  I also want to be able to display various things:  for the customer: the statuses of all their orders.  For Operations:  all orders which have thrown an error.  There will be a lot of data written when these little status updates.
 
-There are a lot of ways to solve this problem, but I'm using this to learn more about big data, so I'm going to go down that path.
+There are a lot of ways to solve this problem, but I'm using this to learn more about big data, so I'm going to go down that path.  I'm also using this to learn more about RavenDB.
 
+Here's how I'm going to implement my little big data solution:
+
+1. Each fact will be written to the database
+1. All facts are immutable
+1. MapReduce task will aggregate the facts and reduce them down to views which my customers need (actual customers and operations, in this case).
+
+The first item is pretty obvious, without saving the facts how will I know what's happening.
+
+The second is less obvious:  why not just keep a single record for each order and update the status with the latest fact?  There are a couple reasons for this.  Updates are slow:  the code has to look the record up, then update it, and then save it.  Updates are risky:  what happens if someone is reading that record while I'm updating it, two or more updates are happening to the same record, or what if an update contains a bad message (in the latest release, someone changed the text of a status message by accident)?  This is why big data sits on top of immutable data.
