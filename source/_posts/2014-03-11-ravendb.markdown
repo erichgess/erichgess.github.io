@@ -46,3 +46,5 @@ public class OrderFact {
 }
 {% endcodeblock %}
 The Id is a unique identifier which RavenDB will use as the primary key for the OrderFacts table.  The OrderId is a GUID which will identify an order a customer has generated, this will be used to correlate facts to an order.  The timestamp says when the fact was generated.  The name is for who made the order.  The Fact is the string which contains the fact.  The fact is a string so that it is as flexible as possible both at the stage where I create the fact and further down the line when the facts are being analyzed.
+
+I'll add a second post where I explain how I setup the MapReduced on RavenDB.
