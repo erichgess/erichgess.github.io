@@ -1,0 +1,25 @@
+---
+layout: post
+title: "RavenDB, MapReduce, and Logging"
+date: 2014-03-11 08:38:11 -0700
+comments: true
+categories: 
+---
+Working with a system which is distributed and uses messaging for communication presents some interesting challenges.  One simple but fun challenge I've gotten to deal with a few times is:  how to tell what's happening to a request as the system is processing it.  A request comes into the my system, which wakes one service up and it does some work, then it sends off commands to two other services which both do some work, and then, when both are done, a final service does some work and completes the task.  A little vague, but it should illustrate that when trying to figure out what happened to the initial request, I've got to dig through at least 4 services worth of logs.  That's assuming everything has only one instance; multiple instances on multiple servers and it becomes a huge chore.  The solution to this is fairly simple:  use a log aggregator like splunk or roll your own with ElasticSearch.  However, that's what makes this problem so fun, because it's a very small version of a problem a lot of people want to work with: big data.  So this makes a great opportunity to try out technology or algorithms and practice, practice, practice.  Further, because building a working solution is easy and probably already done, there is little consequence to failing or making a mistake.
+<!-- more -->
+
+That's just what I've been doing with RavenDB and its MapReduce functionality.  I want to display the status of requests on a webpage so that people can see what's happening.  Let me build up an example to explain.  My system, for the fictional company Bloxam, handles processing orders and tracking their shipment.  There's a service which will receive the order from the customer, process it, and either accept or error on the order (maybe the Credit Cart didn't work) then a service which will handle tracking the shipping side.  The different statuses an order can go through are:
+
+1. "Order Received"
+1. "Processing Order"
+1. "Order Accepted"
+1. "Order Shipped"
+1. "Order Delivered"
+1  "Error <text description>"
+
+For the duration of this post, I'll call these Facts about the order.
+
+I want to know what the current status of any given order is at any time.  I also want to be able to display various things:  for the customer: the statuses of all their orders.  For Operations:  all orders which have thrown an error.  There will be a lot of data written when these little status updates.
+
+There are a lot of ways to solve this problem, but I'm using this to learn more about big data, so I'm going to go down that path.
+
