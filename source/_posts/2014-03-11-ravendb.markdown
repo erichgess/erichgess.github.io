@@ -34,3 +34,15 @@ The first item is pretty obvious, without saving the facts how will I know what'
 The second is less obvious:  why not just keep a single record for each order and update the status with the latest fact?  There are a couple reasons for this.  Updates are slow:  the code has to look the record up, then update it, and then save it.  Updates are risky:  what happens if someone is reading that record while I'm updating it, two or more updates are happening to the same record, or what if an update contains a bad message (in the latest release, someone changed the text of a status message by accident)?  This is why big data sits on top of immutable data.
 
 The MapReduce step.  RavenDB has a nice MapReduce index feature which will work very well here.  I can tell RavenDB to basically perform a calculation on the entire set of Facts I have stored.  In this casee, what I am going to do is tell RavenDB to divide all the Facts into buckets based on Order Id.  The for each bucket, pick the most recent Fact.  This will generate a table, where each order appears once and has its most recent Fact.  RavenDB will run this task in the back ground and everytime I add a new fact it will update the information.
+
+Here's my order fact type:
+{% codeblock lang:csharp %}
+public class OrderFact {
+    public string Id { get; set; }
+    public Guid OrderId { get; set;}
+    public DateTime TimeStamp { get; set; }
+    public string Name { get; set; }
+    public string Fact { get; set; }
+}
+{% endcodeblock %}
+The Id is a unique identifier which RavenDB will use as the primary key for the OrderFacts table.  The OrderId is a GUID which will identify an order a customer has generated, this will be used to correlate facts to an order.  The timestamp says when the fact was generated.  The name is for who made the order.  The Fact is the string which contains the fact.  The fact is a string so that it is as flexible as possible both at the stage where I create the fact and further down the line when the facts are being analyzed.
