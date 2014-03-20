@@ -9,8 +9,9 @@ Working with a system which is distributed and uses messaging for communication 
 
 The solution to this is fairly simple:  use a log aggregator like splunk or roll your own with ElasticSearch.  However, I want to have some fun and learn something new and this is a perfect situation for learning and experimentation:  the problem isn't that complex and if I get the solution wrong, no one really cares, so the risk is low.  What I decided to do was build something up using RavenDB and its built in MapReduce index system.
 <!-- more -->
+Here's a cleaned up reiteration of the problem:  I have a system consisting of a bunch of services, communicating via message queues.  Completing a request will involve several different services.  To know the status of a request, or to investigate an issue with a request, will require finding out log data for all the services in the system.  A Huge Pain.
 
-That's just what I've been doing with RavenDB and its MapReduce functionality.  I want to display the status of requests on a webpage so that people can see what's happening.  Let me build up an example to explain.  My system, for the fictional company Bloxam, handles processing orders and tracking their shipment.  There's a service which will receive the order from the customer, process it, and either accept or error on the order (maybe the Credit Cart didn't work) then a service which will handle tracking the shipping side.  The different statuses an order can go through are:
+Let me build up an example to explain.  My system, for the fictional company Bloxam, handles processing orders and tracking their shipment.  There's a service which will receive the order from the customer, process it, and either accept or error on the order (maybe the Credit Cart didn't work) then a service which will handle tracking the shipping side.  The different statuses an order can go through are:
 
 1. "Order Received"
 1. "Processing Order"
