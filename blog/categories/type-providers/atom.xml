@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Type Providers | Elegant Architecture]]></title>
+  <link href="http://erichgess.github.io/blog/categories/type-providers/atom.xml" rel="self"/>
+  <link href="http://erichgess.github.io/"/>
+  <updated>2014-04-03T22:03:11-07:00</updated>
+  <id>http://erichgess.github.io/</id>
+  <author>
+    <name><![CDATA[Erich G. Ess]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Type Providers - Tutorial Part 1 - Concepts]]></title>
+    <link href="http://erichgess.github.io/blog/2014/04/03/type-providers-tutorial-part-1/"/>
+    <updated>2014-04-03T20:36:12-07:00</updated>
+    <id>http://erichgess.github.io/blog/2014/04/03/type-providers-tutorial-part-1</id>
+    <content type="html"><![CDATA[<p>I&rsquo;ve only been working with the F# language for the last year.  Which means that all of my learning has been with version 3.x of the F# language.  One of the biggest features of 3.x, and something which I have yet to work with, is the Type Provider.  Type Providers dynamically generate new types, usually from some data source (e.g. databases, XML documents, web services), which a developer can use in their code.  For C# developers this is analogous to the Entity Framework or the &ldquo;Add Service Reference&rdquo; in VS, both of which take a database or WSDL, respectively, and generate classes and functions that can be used in code.  For Java this would be similar to Hibernate or wsdl2java.  Just to be clear, when you create a Type Provider, what you&rsquo;ve built is an Entity Framework or a wsdl2java.  What F# provides is a framework for building your own Type Providers as easily as possible.</p>
+
+<!-- more -->
+
+
+<p>In order to learn how to build Type Providers, I decided to try my hand at writing a tutorial.  This will, I think, be the first tutorial I&rsquo;ve ever written.  I&rsquo;m going to break this tutorial into several phases.  The first phase will be building a very simple &ldquo;Hello World&rdquo; type provider, which just creates a type which can be referenced in code (it won&rsquo;t do anything).  The next phase will be to add static and instance methods, fields, and properties, but, again, the type will be predefined.  Finally, I want to do a true type provider for a data source (I&rsquo;m thinking Cassandra) which will take the schema for a database and generate a set of types from that schema.</p>
+
+<h3>Important Things</h3>
+
+<h4>ProvidedTypes.fs</h4>
+
+<p>This is an F# source code file provided by the F# team.  It includes a bunch of things for simplifying the construction of Type Providers.  I&rsquo;ll be making heavy use of this in my tutorial.  If you plan on writing your own Type Provider, you definitely want to get this:  it can be found in the F# 3.0 sample pack (<a href="http://fsharp3sample.codeplex.com/">http://fsharp3sample.codeplex.com/</a>).</p>
+
+<h4>Erased Types</h4>
+
+<p>Most of the time, when building Type Providers, you&rsquo;ll be creating erased types:  although this type may have members and functions when compiled it will be convered into an Object type by the compiler.  With the type provider, you are creating a set of methods, fields, properties, and constructors which enable a developer to work with your type, but, when compiled, all of that is &ldquo;erased&rdquo; and it just becomes and Object.  There&rsquo;s a section in the Type Provider MSDN article which explains erased types (<a href="http://msdn.microsoft.com/en-us/library/hh361034.aspx#BK_Erased">http://msdn.microsoft.com/en-us/library/hh361034.aspx#BK_Erased</a>).</p>
+
+<p>What&rsquo;s important is that this means there will be a lot of casting to and from the <code>obj</code> type in Type Provider code.  This also means that if the Type Provider is going to work with any kind of meaningful data sources, an underlying type (on which the generated types are built) must be defined.  If you look at the MSDN Type Provider Tutorial (<a href="http://msdn.microsoft.com/en-us/library/hh361034.aspx">http://msdn.microsoft.com/en-us/library/hh361034.aspx</a>), the underlying type is <code>string</code>.</p>
+
+<h4>Developing Type Providers</h4>
+
+<p>A Type Provider cannot be defined in anything except a Library project.  This seems like a pain but it does make sense:  if you are going to use a Type Provider in your code it must be fully compiled before you use it.</p>
+
+<h4>Debugging Type Providers</h4>
+
+<p>This is probably the biggest pain point of developing Type Providers, in my humble opinion.  Do not create a console project in your Type Provider solution and try to use that console project to test your Type Providers.  The problem is that when you build the console project, VS will lock the DLLs from the Type Provider library project.  Once the DLLs are locked you won&rsquo;t be able to build the Type Provider library until you restart VS.</p>
+
+<p>Use the F# Interactive Console.  Build the library project then right click on it in the Solution Explorer and choose &ldquo;Send to F# Interactive&rdquo;.  In the interactive console you can test out your type provider.  IMPORTANT:  Before you try building your project again make sure to reset the interactive console, otherwise it will lock the DLLs and your build will fail.</p>
+]]></content>
+  </entry>
+  
+</feed>
