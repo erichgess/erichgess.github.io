@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Type Providers - Tutorial Part 1"
+title: "Type Providers - Tutorial Part 1 - Concepts"
 date: 2014-04-03 20:36:12 -0700
 comments: true
 categories: [F#, Type Providers, Tutorials]
@@ -16,3 +16,6 @@ In order to learn how to build Type Providers, I decided to try my hand at writi
 This is an F# source code file provided by the F# team.  It includes a bunch of things for simplifying the construction of Type Providers.  I'll be making heavy use of this in my tutorial.  If you plan on writing your own Type Provider, you definitely want to get this:  it can be found in the F# 3.0 sample pack (http://fsharp3sample.codeplex.com/).
 
 #### Erased Types
+Most of the time, when building Type Providers, you'll be creating erased types:  although this type may have members and functions when compiled it will be convered into an Object type by the compiler.  With the type provider, you are creating a set of methods, fields, properties, and constructors which enable a developer to work with your type, but, when compiled, all of that is "erased" and it just becomes and Object.  There's a section in the Type Provider MSDN article which explains erased types (http://msdn.microsoft.com/en-us/library/hh361034.aspx#BK_Erased).
+
+What's important is that this means there will be a lot of casting to and from the `obj` type in Type Provider code.  This also means that if the Type Provider is going to work with any kind of meaningful data sources, an underlying type (on which the generated types are built) must be defined.  If you look at the MSDN Type Provider Tutorial (http://msdn.microsoft.com/en-us/library/hh361034.aspx), the underlying type is `string`.
