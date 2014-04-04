@@ -19,3 +19,11 @@ This is an F# source code file provided by the F# team.  It includes a bunch of 
 Most of the time, when building Type Providers, you'll be creating erased types:  although this type may have members and functions when compiled it will be convered into an Object type by the compiler.  With the type provider, you are creating a set of methods, fields, properties, and constructors which enable a developer to work with your type, but, when compiled, all of that is "erased" and it just becomes and Object.  There's a section in the Type Provider MSDN article which explains erased types (http://msdn.microsoft.com/en-us/library/hh361034.aspx#BK_Erased).
 
 What's important is that this means there will be a lot of casting to and from the `obj` type in Type Provider code.  This also means that if the Type Provider is going to work with any kind of meaningful data sources, an underlying type (on which the generated types are built) must be defined.  If you look at the MSDN Type Provider Tutorial (http://msdn.microsoft.com/en-us/library/hh361034.aspx), the underlying type is `string`.
+
+#### Developing Type Providers
+A Type Provider cannot be defined in anything except a Library project.  This seems like a pain but it does make sense:  if you are going to use a Type Provider in your code it must be fully compiled before you use it.
+
+#### Debugging Type Providers
+This is probably the biggest pain point of developing Type Providers, in my humble opinion.  Do not create a console project in your Type Provider solution and try to use that console project to test your Type Providers.  The problem is that when you build the console project, VS will lock the DLLs from the Type Provider library project.  Once the DLLs are locked you won't be able to build the Type Provider library until you restart VS.
+
+Use the F# Interactive Console.  Build the library project then right click on it in the Solution Explorer and choose "Send to F# Interactive".  In the interactive console you can test out your type provider.  IMPORTANT:  Before you try building your project again make sure to reset the interactive console, otherwise it will lock the DLLs and your build will fail.
