@@ -1,14 +1,15 @@
+
 <!DOCTYPE html>
 <!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
 <!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>My Octopress Blog</title>
-  <meta name="author" content="Erich Ess">
+  <title>Elegant Architecture</title>
+  <meta name="author" content="Erich G. Ess">
 
   
-  <meta name="description" content=" Blog Archives Recent Posts ">
+  <meta name="description" content="I&rsquo;ve only been working with the F# language for the last year. Which means that all of my learning has been with version 3.x of the F# language &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -20,7 +21,7 @@
   <link rel="canonical" href="http://erichgess.github.io">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <link href="/atom.xml" rel="alternate" title="My Octopress Blog" type="application/atom+xml">
+  <link href="/atom.xml" rel="alternate" title="Elegant Architecture" type="application/atom+xml">
   <script src="/javascripts/modernizr-2.0.js"></script>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
   <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
@@ -35,9 +36,9 @@
 
 <body   >
   <header role="banner"><hgroup>
-  <h1><a href="/">My Octopress Blog</a></h1>
+  <h1><a href="/">Elegant Architecture</a></h1>
   
-    <h2>A blogging framework for hackers.</h2>
+    <h2>Architecture, Functional Languages, Style</h2>
   
 </hgroup>
 
@@ -65,7 +66,546 @@
       <div class="blog-index">
   
   
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/04/03/type-providers-tutorial-part-1/">Type Providers - Tutorial Part 1 - Concepts</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-03T20:36:12-07:00" pubdate data-updated="true">Apr 3<span>rd</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>I&rsquo;ve only been working with the F# language for the last year.  Which means that all of my learning has been with version 3.x of the F# language.  One of the biggest features of 3.x, and something which I have yet to work with, is the Type Provider.  Type Providers dynamically generate new types, usually from some data source (e.g. databases, XML documents, web services), which a developer can use in their code.  For C# developers this is analogous to the Entity Framework or the &ldquo;Add Service Reference&rdquo; in VS, both of which take a database or WSDL, respectively, and generate classes and functions that can be used in code.  For Java this would be similar to Hibernate or wsdl2java.  Just to be clear, when you create a Type Provider, what you&rsquo;ve built is an Entity Framework or a wsdl2java.  What F# provides is a framework for building your own Type Providers as easily as possible.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/04/03/type-providers-tutorial-part-1/">Lay on, MacDuff &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/03/20/first-haskell-meetup/">First Haskell Meetup</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-20T08:47:44-07:00" pubdate data-updated="true">Mar 20<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Last night was the first meet up for the San Diego Haskell Users Group.  I have to say that it was a lot of fun and probably the most interesting dev meet up I&rsquo;ve been to so far in San Diego.  I have barely done any Haskell, beyond get the compiler setup on my computer and make &ldquo;Hello, World&rdquo;.  As such, I learned a lot.</p>
+
+<ol>
+<li>I reallly love how Haskell allows you to build &ldquo;pipelines of data&rdquo;:  when you chain together several functions, put data into the top function and get the output of the bottom.  This is one of my favorite things to get in F# code and Haskell just seems to make it even easier.</li>
+<li>Generic Algebraic Data Types:  something which was mentioned to me when I made a comment about doing a presentation on &ldquo;Algebraic Data Types&rdquo;.  I have no clue what the difference between ADT and GADT is but now I have to find out.</li>
+<li>Cabal might be the simplest project management/build management tool I&rsquo;ve yet seen.  Though I&rsquo;ve only looked a little at Leiningen, I think, Cabal fills the same role.  However, I found it much easier to read.</li>
+<li>Having a meetup be a 15 minute walk from my apartment is the best.</li>
+</ol>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/03/11/ravendb/">RavenDB, MapReduce, and Logging</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-11T08:38:11-07:00" pubdate data-updated="true">Mar 11<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Working with a system which is distributed and uses messaging for communication presents some interesting challenges.  One frequent challenge I&rsquo;ve gotten to deal with a few times is:  how to tell what&rsquo;s happening to a request as the system is processing it.  A request comes into the my system, which wakes one service up and it does some work, then it sends off commands to two other services which both do some work, and then, when both are done, a final service does some work and completes the task.  A little vague, but the scenario should illustrate that when trying to figure out what happened to the initial request, I&rsquo;ve got to dig through at least 4 services worth of logs.  That&rsquo;s assuming everything has only one instance; multiple instances on multiple servers and it becomes a huge chore.</p>
+
+<p>The solution to this is fairly simple:  use a log aggregator like splunk or roll your own with ElasticSearch.  However, I want to have some fun and learn something new and this is a perfect situation for learning and experimentation:  the problem isn&rsquo;t that complex and if I get the solution wrong, no one really cares, so the risk is low.  What I decided to do was build something up using RavenDB and its built in MapReduce index system.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/03/11/ravendb/">Lay on, MacDuff &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/03/08/rabbitmq-and-f-number-part-6/">RabbitMQ and F# - Part 6</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-08T22:08:19-08:00" pubdate data-updated="true">Mar 8<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>A final round of polish.  Now that I have the layout and flow for using my RabbitMQ library defined, it&rsquo;s time to go through and do a bit of clean up on my names.  There&rsquo;s a lot I can do to make it so that code you write with this library becomes as readable and literate as possible.</p>
+
+<p>Here&rsquo;s the code you write to do the initial setup:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">openConnection</span> <span class="s2">&quot;localhost&quot;</span>
+</span><span class='line'><span class="k">let</span> <span class="n">myChannel</span> <span class="o">=</span> <span class="n">openChannel</span> <span class="n">connection</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If I just look at this, I have to ask:  open connection to what?  Context would probably help, but this function will get called only once in an entire application, so there&rsquo;s not much reason to hold back on the name.  I like the fluent style of naming, so I&rsquo;ll go with:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">connectToRabbitMqServerAt</span> <span class="s2">&quot;localhost&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I&rsquo;ll also make the second line a little more fluent:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">myChannel</span> <span class="o">=</span> <span class="n">openChannelOn</span> <span class="n">connection</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Which turns my setup code to:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">connectToRabbitMqServerAt</span> <span class="s2">&quot;localhost&quot;</span>
+</span><span class='line'><span class="k">let</span> <span class="n">myChannel</span> <span class="o">=</span> <span class="n">openChannelOn</span> <span class="n">connection</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And that&rsquo;s it for now!  I have a library which will let me write code to connect to and send a message on RabbitMQ in about 4 lines of code.  Pretty damn good, IMO.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">connectToRabbitMqServerAt</span> <span class="s2">&quot;localhost&quot;</span>
+</span><span class='line'><span class="k">let</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">openChannelOn</span> <span class="n">connection</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">let</span> <span class="n">writeToHelloQueue</span> <span class="o">=</span> <span class="n">createQueueWriter</span> <span class="n">channel</span> <span class="s2">&quot;MyQueue&quot;</span>
+</span><span class='line'><span class="s2">&quot;Hello&quot;</span> <span class="o">|&gt;</span> <span class="n">writeToHelloQueue</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/03/08/rabbitmq-and-f-number-part-5/">RabbitMQ and F# - Part 5</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-08T22:00:00-08:00" pubdate data-updated="true">Mar 8<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Alright, I now have a simple usable RabbitMQ client library which fits comfortably with F#.  However, there&rsquo;s still some inconsistency in the design which I want to polish out:</p>
+
+<ol>
+<li>To create a consumer on a  queue, you call:</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="n">createQueueConsumer</span> <span class="n">myChannel</span> <span class="s2">&quot;myQueue&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>To create a read function for a queue, you call:</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="o">(</span><span class="n">readFrom</span><span class="o">,_)</span> <span class="o">=</span> <span class="n">createQueueFuntions</span> <span class="n">myChannel</span>
+</span><span class='line'><span class="k">let</span> <span class="n">readFromMyQueue</span> <span class="o">=</span> <span class="n">readFrom</span> <span class="s2">&quot;myQueue&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>To create a write function for a queue, you call:</li>
+</ol>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="o">(_,</span><span class="n">writeTo</span><span class="o">)</span> <span class="o">=</span> <span class="n">createQueueFuntions</span> <span class="n">myChannel</span>
+</span><span class='line'><span class="k">let</span> <span class="n">writeToMyQueue</span> <span class="o">=</span> <span class="n">writeTo</span> <span class="s2">&quot;myQueue&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Why have a function which manages both the read AND the writes for a channel?  Why not split the read and write out to their own functions?  This is better in my opinion for one very obvious reason:  the code will explicitly explain what is happening.  With my current createQueueFuntions  function, there is nothing which tells you that you get a tuple and that the first element in the tuple is a write function and the second element is a read function.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/03/08/rabbitmq-and-f-number-part-5/">Lay on, MacDuff &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/03/08/rabbitmq-and-f-number-part-4/">RabbitMQ and F# - Part 4</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-08T21:55:44-08:00" pubdate data-updated="true">Mar 8<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>In my previous post, I made my RabbitMQ client library a bit more functional by removing the Queue record type and replacing it with higher order functions.  These higher order functions are used for creating functions for reading/writing queues.  If you want to use &ldquo;MyQueue&rdquo; for writing, you use the &ldquo;writeTo&rdquo; higher order function to create a function for writing to &ldquo;MyQueue&rdquo;.  It&rsquo;s sounds more complex than it really is.</p>
+
+<p>I did that because I mentioned two things about my initial effort which bothered me:  it wasn&rsquo;t functional enough and it didn&rsquo;t support RabbitMQ consumers.  I got the first taken care of.  Now I am going to get the second.</p>
+
+<p>I will follow the same higher order function approach:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">createQueueConsumer</span> <span class="n">channel</span> <span class="n">queueName</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">let</span> <span class="n">consumer</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">QueueingBasicConsumer</span><span class="o">(</span><span class="n">channel</span><span class="o">)</span>
+</span><span class='line'>    <span class="n">channel</span><span class="o">.</span><span class="nc">BasicConsume</span><span class="o">(</span><span class="n">queueName</span><span class="o">,</span> <span class="bp">true</span><span class="o">,</span> <span class="n">consumer</span><span class="o">)</span> <span class="o">|&gt;</span> <span class="n">ignore</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">fun</span> <span class="bp">()</span> <span class="o">-&gt;</span>
+</span><span class='line'>        <span class="k">let</span> <span class="n">ea</span> <span class="o">=</span> <span class="n">consumer</span><span class="o">.</span><span class="nn">Queue</span><span class="p">.</span><span class="nc">Dequeue</span><span class="bp">()</span>
+</span><span class='line'>        <span class="k">let</span> <span class="n">body</span> <span class="o">=</span> <span class="n">ea</span><span class="o">.</span><span class="nc">Body</span>
+</span><span class='line'>        <span class="nn">Encoding</span><span class="p">.</span><span class="nn">UTF8</span><span class="p">.</span><span class="nc">GetString</span><span class="o">(</span><span class="n">body</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This will take a channel and a queue name, then return a function which will return one message from the consumer queue.</p>
+
+<p>The complete source code up until now:</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/03/08/rabbitmq-and-f-number-part-4/">Lay on, MacDuff &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/03/08/rabbitmq-and-f-number-part-3/">RabbitMQ and F# - Part 3</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-08T21:38:01-08:00" pubdate data-updated="true">Mar 8<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>I now have a functioning RabbitMQ Library!  Though, there is a lot more to be done to make it satisfactory.</p>
+
+<p>There are two problems:</p>
+
+<ol>
+<li>Missing the Queue Consumer functionality.  This makes it a lot easier to deal with RabbitMQ so I definitely want to get this in.</li>
+<li>I&rsquo;m not happy with using the record type to capture the Read and Publish functions for a queue.   After all, how often are you going to be writing to and reading from a specific queue in the same process?</li>
+</ol>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/03/08/rabbitmq-and-f-number-part-3/">Lay on, MacDuff &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/03/08/rabbitmq-and-f-number-part-2/">RabbitMQ and F# - Part 2</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-08T21:15:36-08:00" pubdate data-updated="true">Mar 8<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Notes about RabbitMQ:</p>
+
+<pre><code>- You should have one connection per application and one channel per thread (http://stackoverflow.com/a/10501593)
+</code></pre>
+
+<p>I was able to build and run my sender and receiver, both using my client.</p>
+
+<p>However, something odd happened.  The receiver was only printing out every other message which the Sender sent.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/03/08/rabbitmq-and-f-number-part-2/">Lay on, MacDuff &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/03/07/odin-prototype/">Odin Prototype</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-07T23:32:30-08:00" pubdate data-updated="true">Mar 7<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>In my previous post, I described a distributed monitoring system called Odin.  Which I am building because it will help me learn and explore topics in distributed computing independent of work.</p>
+
+<p>I&rsquo;ve been slowly working on it when I get a chance and have put together a very basic prototype:
+<a href="https://github.com/erichgess/OdinPrototype">https://github.com/erichgess/OdinPrototype</a></p>
+
+<p>This prototype is some hacking I did over a few, very spread out days, to try out some concepts.  It has a very simple agent, which reads %CPU used and sends a message to a receiver.  That receiver this publishes that message as an IObservable.  Multiple mailbox processors subscribe to the Observable and use Reactive to do some queries on the incoming messages.</p>
+
+<p>This is very very little.  However, it served as a way for me to try out a few different concepts: RabbitMQ, Mailbox Processors, and Reactive.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/03/07/odin-learning-distributed-computing/">Odin - Learning Distributed Computing</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-07T22:39:00-08:00" pubdate data-updated="true">Mar 7<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Over the last two years, I&rsquo;ve really become interested in distributed computing and things like big data.  My interest in these topics grew in coincidence with my falling in love with F#.  I do a lot of different projects at work and not all of them involve any of those three topics.  So, to provide a motive for learning more about distributed computing and sharpening my F# skills I have decided to start working on a small side project (currently, by myself but several friends are interested).  This is called Odin, inspired by the Riemann project, it&rsquo;s a distributed monitoring system.  It will consist of lightweight agents and heavyweight monitoring engines.  The agents will run on servers collecting data and sending it to the monitors.  The monitors will read the stream of events coming from all the servers then process, analyze, and act.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/03/07/odin-learning-distributed-computing/">Lay on, MacDuff &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
   <div class="pagination">
+    
+      <a class="prev" href="/blog/page/2/">&larr; Older</a>
     
     <a href="/blog/archives">Blog Archives</a>
     
@@ -76,6 +616,26 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/04/03/type-providers-tutorial-part-1/">Type Providers - Tutorial Part 1 - Concepts</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/03/20/first-haskell-meetup/">First Haskell Meetup</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/03/11/ravendb/">RavenDB, MapReduce, and Logging</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/03/08/rabbitmq-and-f-number-part-6/">RabbitMQ and F# - Part 6</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/03/08/rabbitmq-and-f-number-part-5/">RabbitMQ and F# - Part 5</a>
+      </li>
     
   </ul>
 </section>
@@ -90,7 +650,7 @@
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2014 - Erich Ess -
+  Copyright &copy; 2014 - Erich G. Ess -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 
