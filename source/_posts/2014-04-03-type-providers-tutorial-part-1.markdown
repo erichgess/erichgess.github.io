@@ -10,3 +10,9 @@ I've only been working with the F# language for the last year.  Which means that
 
 In order to learn how to build Type Providers, I decided to try my hand at writing a tutorial.  This will, I think, be the first tutorial I've ever written.  I'm going to break this tutorial into several phases.  The first phase will be building a very simple "Hello World" type provider, which just creates a type which can be referenced in code (it won't do anything).  The next phase will be to add static and instance methods, fields, and properties, but, again, the type will be predefined.  Finally, I want to do a true type provider for a data source (I'm thinking Cassandra) which will take the schema for a database and generate a set of types from that schema.
 
+### Important Things
+
+#### ProvidedTypes.fs
+This is an F# source code file provided by the F# team.  It includes a bunch of things for simplifying the construction of Type Providers.  I'll be making heavy use of this in my tutorial.  If you plan on writing your own Type Provider, you definitely want to get this:  it can be found in the F# 3.0 sample pack (http://fsharp3sample.codeplex.com/).
+
+#### Erased Types
