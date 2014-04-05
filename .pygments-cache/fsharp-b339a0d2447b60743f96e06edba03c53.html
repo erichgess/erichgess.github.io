@@ -1,0 +1,8 @@
+<div class="highlight"><pre>        <span class="k">let</span> <span class="n">instanceMeth</span> <span class="o">=</span> 
+            <span class="nc">ProvidedMethod</span><span class="o">(</span><span class="n">methodName</span> <span class="o">=</span> <span class="s2">&quot;DoubleValue&quot;</span><span class="o">,</span> 
+                           <span class="n">parameters</span> <span class="o">=</span> <span class="bp">[]</span><span class="o">,</span> 
+                           <span class="n">returnType</span> <span class="o">=</span> <span class="n">typeof</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;,</span>
+                           <span class="nc">InvokeCode</span> <span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&gt;</span> 
+                              <span class="o">&lt;@@</span> <span class="o">((%%(</span><span class="n">args</span><span class="o">.[</span><span class="mi">0</span><span class="o">])</span> <span class="o">:</span> <span class="n">obj</span><span class="o">)</span> <span class="o">:?&gt;</span> <span class="kt">int</span><span class="o">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">@@&gt;))</span>
+        <span class="n">t</span><span class="o">.</span><span class="nc">AddMember</span> <span class="n">instanceMeth</span>
+</pre></div>
