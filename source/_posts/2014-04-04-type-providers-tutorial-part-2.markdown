@@ -11,18 +11,18 @@ I will make a Type Provider which generates a single type named "Hello".  At fir
 <!-- more -->
 I start by creating a new F# Library Project and name it "TypeProviderTutorial":
 
-// Insert picture of newproj.png
+{% img /images/posts/typeprov_tut_p2/1-newproj.png %}
 
-I then download the ProvidedTypes-0.4.fs file from the F# 3.0 Sample Pack and add that to my project:
+I then download the [ProvidedTypes-0.4.fs file from the F# 3.0 Sample Pack](http://fsharp3sample.codeplex.com/SourceControl/latest#SampleProviders/Shared/ProvidedTypes-0.4.fs) and add that to my project:
 
-// insert picture 2-providedtypes.png
+{% img /images/posts/typeprov_tut_p2/2-providedtypes.png 300 %}
 
 Now it's time to create our Type Provider.  Add a new F# source code file beneath the "ProvidedTypes-0.4.fs" and name it "HelloWorld.fs".
 
-// insert 3-addbelow.png
-// insert 4-newsource.png
+{% img /images/posts/typeprov_tut_p2/3-addbelow.png %}
+{% img /images/posts/typeprov_tut_p2/4-newsource.png %}
 
-#### Skeleton Code
+### Skeleton Code
 We'll build up from the very bare minimum needed for a Type Provider.  Starting with the boilerplate code which actually tells the compiler our type is a Type Provider:
 
 {% codeblock lang:fsharp %}
@@ -54,7 +54,7 @@ This code will compile, but won't do anything fun yet :).
 1.  Within `HelloWorldTypeProvider` we will put the code which actually generates new types.
 1.  `[<assembly:TypeProviderAssembly]>` this attribute indicates that this assembly contains a Type Provider.
 
-#### The `Hello` Type
+### The `Hello` Type
 With the skeleton in place, it's time to start adding a little muscle.  The following code will create a type named `Hello`.  This type won't do anything because there are no members (static or instance).  The code tells the type what assembly it belongs to, what namespace it is in, and the name of the type.
 {% codeblock lang:fsharp %}
     let namespaceName = "Tutorial"
@@ -80,7 +80,7 @@ With the skeleton in place, it's time to start adding a little muscle.  The foll
 ##### Testing
 Build the library.  When the build is complete, right click on the project in the Solution Explorer and choose "Send Project Output To F# Interactive":
 
-// insert 5-firstbuild.png
+{% img /images/posts/typeprov_tut_p2/5-firstbuild.png %}
 
 In F# Interactive run:
 {% codeblock %}
@@ -91,10 +91,10 @@ In F# Interactive run:
 When you run `Tutorial.Hello` you'll get an error about not having a constructor.  This is a good thing.  The compiler can find the type, but there's no constructor so it bombs out.
 
 ** Before Proceeding make sure to reset F# Interactive **
-// Insert 6-resetfsi.png
+{% img /images/posts/typeprov_tut_p2/6-resetfsi.png %}
 Do this by right clicking on the FSI window and choosing the reset option.
 
-#### Adding a Static Property
+### Adding a Static Property
 Time to make that `Hello` type actually do something.  We'll add a static property to this type called `StaticProperty` which will return the string "World!".  Once we've added that, we'll be able to write `Tutorial.Hello.World` in our code and it will compile!
 
 To add the static property, I'm going to update the `CreateType()` method.  It will create a static property by using the `ProvidedProperty` type, then that value will be added as a member to the generated type.
@@ -128,3 +128,26 @@ let CreateType () =
 
 ##### Testing
 Build and send our Library to F# Interactive then open the "Tutorial" namespace.  Try executing `Tutorial.Hello.StaticProperty` and see what you get.  It should be `val it : string = "World!"`.  Which is awesome!  We now have a generated type which actually does something!
+
+### Adding a Static Method
+Finally, we'll add a static method to our `Hello` type.  To keep things consistent, this method will also return "World!".
+
+Again, the work will be done by updating `CreateType()`.  In this case, we'll add a ProvidedMethod to our `Hello` type.  In the code sample below, I left out the StaticProperty to keep the code snippet small:
+{% codeblock lang:fsharp %}
+        let staticMeth = 
+            ProvidedMethod(methodName = "StaticMethod", 
+                           parameters = [], 
+                           returnType = typeof<string>, 
+                           IsStaticMethod = true,
+                           InvokeCode = (fun args -> 
+                              <@@ "World!" @@>))
+        t.AddMember staticMeth
+{% endcodeblock %}
+
+##### Breakdown
+
+There isn't much which is different between adding a static method and a static property.  We use a different type: `ProvidedMethod`.  Also note that to make this static we set the `IsStaticMethod` property to `true` rather than the `IsStatic` property.  `InvokeCode` is the function which will be executed when this method is called.  In our case, it will just return "World!".
+
+##### Testing
+
+Try executing `Tutorial.Hello.StaticMethod();;` and see what you get :).
