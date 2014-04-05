@@ -75,3 +75,28 @@ Now, being able to instantiate `Hello` is nice, but pretty pointless if we can't
 
 ##### Testing
 Try loading our new type provider into F# interactive and executing `let x = new Tutorial.Hello(1)`!
+
+### Instance Property - 9/10 of the Law
+Now we can instantiate our `Hello` type.  We have some data behind our type.  Let's add a way to get that data!
+
+{% codeblock lang:fsharp %}
+        let instProperty = ProvidedProperty("Value",
+                                            typeof<int>,
+                                            GetterCode = (fun args -> <@@ (%%(args.[0]) : obj) :?> int @@>))
+        t.AddMember instProperty
+{% endcodeblock %}
+
+##### Breakdown
+The instance `ProvidedProperty` is very similar to the one we used for making a static property:  we specify the name of the property and its type.  However, the `GetterCode` is important for us to review:
+{% codeblock lang:fsharp %}
+GetterCode = (fun args -> <@@ (%%(args.[0]) : obj) :?> int @@>))
+{% endcodeblock %}
+What's important here is the `(%%(args.[0]) : obj)`.  More specifically, I want to call out the `args.[0]`:  when dealing with instance methods or properties `arg.[0]` is where the value of our instance is stored.  In the case of `Hello`, our instance is just an integer, so we case `arg.[0]` to an integer and return that value.
+
+##### Testing
+Try running this in the F# Interactive console:
+{% codeblock lang:fsharp %}
+open Tutorial;;
+let c = new Tutorial.Hello(3);;
+c.Value;;
+{% endcodeblock %}
