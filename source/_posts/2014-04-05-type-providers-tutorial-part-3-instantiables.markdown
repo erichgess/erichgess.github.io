@@ -72,7 +72,7 @@ Now, being able to instantiate `Hello` is nice, but pretty pointless if we can't
 {% endcodeblock %}
 
 ##### Breakdown
-1.  `ProvidedParameter("v", typeof<int>)]` - This is how we define a paramter for a function or constructor.  The `"v"` is the name of the parameter.  Followed by the type of our parameter.
+1.  `ProvidedParameter("v", typeof<int>)]` - This is how we define a parameter for a function or constructor.  The `"v"` is the name of the parameter.  Followed by the type of our parameter.
 1.  `<@@ ( %%(args.[0]) : int) :> obj @@>` - This extracts the value of our first parameter (which is `v` for those keeping score), casts it to an integer, and then boxes it to `obj`.  The `%%` is a Code Quotation operator used for "splicing"; this is used to "splice" the `args` value into a Code Quotation.
 
 ##### Testing
