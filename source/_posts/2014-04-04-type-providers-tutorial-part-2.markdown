@@ -76,3 +76,52 @@ With the skeleton in place, it's time to start adding a little muscle.  The foll
 1.  I added the method `CreateType` which will return a new provided type when called.  Right now, all this method does is create the most boring type ever.
 1.  `types` is a list of types which the Type Provider generates
 1.  `do this.AddNamespace(namespaceName, types)` adds the generated types to the namespace `namespaceName` so that they can be used by a developer.
+
+##### Testing
+Build the library.  When the build is complete, right click on the project in the Solution Explorer and choose "Send Project Output To F# Interactive":
+
+// insert 5-firstbuild.png
+
+In F# Interactive run:
+{% codeblock %}
+> open Tutorial;;
+> Tutorial.Hello;;
+{% endcodeblock %}
+
+When you run `Tutorial.Hello` you'll get an error about not having a constructor.  This is a good thing.  The compiler can find the type, but there's no constructor so it bombs out.
+
+** Before Proceeding make sure to reset F# Interactive **
+// Insert 6-resetfsi.png
+Do this by right clicking on the FSI window and choosing the reset option.
+
+#### Adding a Static Property
+Time to make that `Hello` type actually do something.  We'll add a static property to this type called `StaticProperty` which will return the string "World!".  Once we've added that, we'll be able to write `Tutorial.Hello.World` in our code and it will compile!
+
+To add the static property, I'm going to update the `CreateType()` method.  It will create a static property by using the `ProvidedProperty` type, then that value will be added as a member to the generated type.
+
+Here's the code
+{% codeblock lang:fsharp %}
+let CreateType () =
+    let t = ProvidedTypeDefinition(thisAssembly,namespaceName,
+                                    "Hello",
+                                    baseType = Some typeof<obj>)
+
+    // create a new static property
+    let staticProp = ProvidedProperty(propertyName = "StaticProperty",     // specify the name of the property
+                                        propertyType = typeof<string>,     // make it a string type
+                                        IsStatic=true,                     // make it a static property
+                                        GetterCode= (fun args -> <@@ "World!" @@>))  // code quotation.  When someone gets this property 
+                                                                                     // this function will be executed and "World!" will be returned
+
+    // Add documentation to the provided static property.
+    staticProp.AddXmlDocDelayed(fun () -> "This is a static property")
+
+    // Add the static property to the type.
+    t.AddMember staticProp
+    t
+{% endcodeblock %}
+
+##### Breakdown
+1.  The function `ProvidedProperty` is the most important piece in this step.  It creates a Property member which can then be added to our generated type.
+1.  `t.AddMember staticProp` we add the Static Property we created to our type `Hello`.
+1.  `staticProp.AddXmlDocDelayed` just adds Intellisense documentation for this property.  You'll see this text if you over your mouse over `Tutorial.Hello.StaticProperty`.
