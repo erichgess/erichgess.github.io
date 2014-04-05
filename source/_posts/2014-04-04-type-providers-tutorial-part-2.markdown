@@ -37,12 +37,42 @@ open Microsoft.FSharp.Quotations
 // This defines the type provider. When compiled to a DLL it can be added as a reference to an F#
 // command-line compilation, script or project.
 [<TypeProvider>]
-type SampleTypeProvider(config: TypeProviderConfig) as this = 
+type HelloWorldTypeProvider(config: TypeProviderConfig) as this = 
 
     // Inheriting from this type provides implementations of ITypeProvider in terms of the
     // provided types below.
     inherit TypeProviderForNamespaces()
 
-    let namespaceName = "Samples.HelloWorldTypeProvider"
-    let thisAssembly = Assembly.GetExecutingAssembly()
+[<assembly:TypeProviderAssembly>] 
+do()
 {% endcodeblock %}
+
+This code will compile, but won't do anything fun yet :).
+
+##### Breakdown
+1.  `[<TypeProvider>]` this attribute tells the compiler that my type `HelloWorldTypeProvider` is a Type Provider.
+1.  Within `HelloWorldTypeProvider` we will put the code which actually generates new types.
+1.  `[<assembly:TypeProviderAssembly]>` this attribute indicates that this assembly contains a Type Provider.
+
+#### The `Hello` Type
+With the skeleton in place, it's time to start adding a little muscle.  The following code will create a type named `Hello`.  This type won't do anything because there are no members (static or instance).  The code tells the type what assembly it belongs to, what namespace it is in, and the name of the type.
+{% codeblock lang:fsharp %}
+    let namespaceName = "Tutorial"
+    let thisAssembly = Assembly.GetExecutingAssembly()
+    
+    let CreateType () =
+        let t = ProvidedTypeDefinition(thisAssembly,namespaceName,
+                                        "Hello",
+                                        baseType = Some typeof<obj>)
+        t
+
+    let types = [ CreateType() ] 
+
+    // And add them to the namespace
+    do this.AddNamespace(namespaceName, types)
+{% endcodeblock %}
+
+##### Breakdown
+1.  I added the method `CreateType` which will return a new provided type when called.  Right now, all this method does is create the most boring type ever.
+1.  `types` is a list of types which the Type Provider generates
+1.  `do this.AddNamespace(namespaceName, types)` adds the generated types to the namespace `namespaceName` so that they can be used by a developer.
