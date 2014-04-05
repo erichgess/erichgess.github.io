@@ -100,3 +100,32 @@ open Tutorial;;
 let c = new Tutorial.Hello(3);;
 c.Value;;
 {% endcodeblock %}
+
+### Instance Methods - Elementary
+Finally, to wrap up this part of the tutorial.  We will add an instance method which, when invoked, will return twice the `Value` of our instance of `Hello`.
+
+The code for this is eerily similar to most of the other code we've written for properties, methods, and constructors:
+{% codeblock lang:fsharp %}
+        let instanceMeth = 
+            ProvidedMethod(methodName = "DoubleValue", 
+                           parameters = [], 
+                           returnType = typeof<int>,
+                           InvokeCode = (fun args -> 
+                              <@@ ((%%(args.[0]) : obj) :?> int) * 2 @@>))
+        t.AddMember instanceMeth
+{% endcodeblock %}
+
+##### Testing
+Try running:
+{% codeblock lang:fsharp %}
+open Tutorial;;
+let c = new Tutorial.Hello(3);;
+c.DoubleValue();;
+{% endcodeblock %}
+
+### Conclusion
+This is probably the most important part of the tutorial so far.  We have actually created a Type Provider which generates a type named `Hello` that can store some data (granted only a single integer :)).  We also made this an instantiable type.  The most important thing is that we got to see the underlying `obj` upon which our generated type is built.
+
+This underlying type is critical and we will explore it further in a later section of this tutorial.
+
+If anything is learned from Part 3, it's that our generated type is really just some frosting put on top of an existing type (in `Hello`'s case an integer).  This may seem silly right now, but keep in mind, the real purpose of a type provider is to allow us to point to a source of data and get a bunch of types which will let us work with that data source in a very F# like manner.
