@@ -22,3 +22,35 @@ Here's the order of what we'll be doing in Part 3 of this tutorial series
 1.  Add an instance method which doubles the integer set by the constructor.
 
 Along the way, we'll see the backing `obj` type for the first time.  This is where the idea of "Erased Types" I mentioned in Part 1 becomes important.  Remember, as far as the runtime is concerned, our generated types are just instances of `obj` (all the methods, properties, and names we generate with our Type Providers are illusions to help developers write better code).
+
+### Constructors - Tonka Tough
+In order to make our type instantiable, we have to have a constructor.  It could be a default constructor or one with parameters, it doesn't matter, but at least one must exist.
+
+The ProvidedTypes module includes a nice type specifically for handling constructors:  `ProvidedConstructor`.  Not a very surprising name, if you've been paying attention :).
+
+We're going to add a default constructor to `Hello` (meaning it takes no parameters) which sets the value of our `Hello` instance to 0.
+
+{% codeblock lang:fsharp %}
+    let CreateType () =
+    	/// ....
+    	/// Code from the previous tutorials, removed to save space
+    	/// ....
+        let ctor = ProvidedConstructor(parameters = [ ], 
+                                       InvokeCode= (fun args -> <@@ 0 :> obj @@>))
+
+        // Add documentation to the provided constructor.
+        ctor.AddXmlDocDelayed(fun () -> "This is the default constructor.  It sets the value of Hello to 0.")
+
+        // Add the provided constructor to the provided type.
+        t.AddMember ctor
+        t
+{% endcodeblock %}
+
+##### Breakdown
+There really is not much to talk about here, it's very simple.  Except, I want to call out the `InvokeCode`, because this is the first time we interact with the backing `obj`.
+
+{% codeblock lang:fsharp %}
+InvokeCode= (fun args -> <@@ 0 :> obj @@>))
+{% endcodeblock %}
+
+As I mentioned before, our `Hello` type basically sits on top of an instance of a formless `obj` type.  `InvokeCode` defines a function which gets executed when the construtor for `Hello` is called.  The value returned by our function is assigned to our underlying `obj`.  In our case, our `InvokeCode` function just returns `0`, because this will get assigned to a `obj' type we cast it to `obj` using `0 :> obj`.
