@@ -12,6 +12,8 @@ let x = new Hello()
 {% endcodeblock %}
 
 We'll also make `Hello` store some data, that means our type providers will be one step closer to awesome.  Also, one step closer to being an effective means of interacting with structured data sources.
+
+The full code for what we make in this part will be at the end of this post.
 <!-- more -->
 ### Quick Overview
 Here's the order of what we'll be doing in Part 3 of this tutorial series
@@ -129,3 +131,93 @@ This is probably the most important part of the tutorial so far.  We have actual
 This underlying type is critical and we will explore it further in a later section of this tutorial.
 
 If anything is learned from Part 3, it's that our generated type is really just some frosting put on top of an existing type (in `Hello`'s case an integer).  This may seem silly right now, but keep in mind, the real purpose of a type provider is to allow us to point to a source of data and get a bunch of types which will let us work with that data source in a very F# like manner.
+
+## Full Code
+{% codeblock lang:fsharp %}
+namespace Samples.FSharp.HelloWorldTypeProvider
+
+open System
+open System.Reflection
+open Samples.FSharp.ProvidedTypes
+open Microsoft.FSharp.Core.CompilerServices
+open Microsoft.FSharp.Quotations
+
+// This defines the type provider. When compiled to a DLL it can be added as a reference to an F#
+// command-line compilation, script or project.
+[<TypeProvider>]
+type HelloWorldTypeProvider(config: TypeProviderConfig) as this = 
+
+    // Inheriting from this type provides implementations of ITypeProvider in terms of the
+    // provided types below.
+    inherit TypeProviderForNamespaces()
+
+    let namespaceName = "Tutorial"
+    let thisAssembly = Assembly.GetExecutingAssembly()
+    
+    let CreateType () =
+        let t = ProvidedTypeDefinition(thisAssembly,namespaceName,
+                                        "Hello",
+                                        baseType = Some typeof<obj>)
+
+        let staticProp = ProvidedProperty(propertyName = "StaticProperty", 
+                                            propertyType = typeof<string>, 
+                                            IsStatic=true,
+                                            GetterCode= (fun args -> <@@ "World!" @@>))
+
+        // Add documentation to the provided static property.
+        staticProp.AddXmlDocDelayed(fun () -> "This is a static property")
+
+        // Add the static property to the type.
+        t.AddMember staticProp
+
+        // Add a static method
+        let staticMeth = 
+            ProvidedMethod(methodName = "StaticMethod", 
+                           parameters = [], 
+                           returnType = typeof<string>, 
+                           IsStaticMethod = true,
+                           InvokeCode = (fun args -> 
+                              <@@ "World!" @@>))
+        t.AddMember staticMeth
+
+        let ctor = ProvidedConstructor(parameters = [ ], 
+                                       InvokeCode= (fun args -> <@@ 0 :> obj @@>))
+
+        // Add documentation to the provided constructor.
+        ctor.AddXmlDocDelayed(fun () -> "This is the default constructor.  It sets the value of Hello to 0.")
+
+        // Add the provided constructor to the provided type.
+        t.AddMember ctor
+
+        let ctorParams = ProvidedConstructor(parameters = [ ProvidedParameter("v", typeof<int>)], 
+                                       InvokeCode= (fun args -> <@@ ( %%(args.[0]) : int) :> obj @@>))
+
+        // Add documentation to the provided constructor.
+        ctorParams.AddXmlDocDelayed(fun () -> "This another constructor.  It sets the value of Hello to the parametr.")
+
+        // Add the provided constructor to the provided type.
+        t.AddMember ctorParams
+
+        let instProperty = ProvidedProperty("Value",
+                                            typeof<int>,
+                                            GetterCode = (fun args -> <@@ (%%(args.[0]) : obj) :?> int @@>))
+        t.AddMember instProperty
+
+        let instanceMeth = 
+            ProvidedMethod(methodName = "DoubleValue", 
+                           parameters = [], 
+                           returnType = typeof<int>,
+                           InvokeCode = (fun args -> 
+                              <@@ ((%%(args.[0]) : obj) :?> int) * 2 @@>))
+        t.AddMember instanceMeth
+
+        t
+
+    let types = [ CreateType() ] 
+
+    // And add them to the namespace
+    do this.AddNamespace(namespaceName, types)
+
+[<assembly:TypeProviderAssembly>] 
+do()
+{% endcodeblock %}
