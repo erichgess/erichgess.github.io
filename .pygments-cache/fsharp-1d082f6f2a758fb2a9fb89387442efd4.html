@@ -1,0 +1,23 @@
+<div class="highlight"><pre><span class="k">let</span> <span class="nc">CreateType</span> <span class="bp">()</span> <span class="o">=&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+
+<span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="k">let</span> <span class="n">t</span> <span class="o">=</span> <span class="nc">ProvidedTypeDefinition</span><span class="o">(</span><span class="n">thisAssembly</span><span class="o">,</span><span class="n">namespaceName</span><span class="o">,</span>
+                                <span class="s2">&quot;Hello&quot;</span><span class="o">,</span>
+                                <span class="n">baseType</span> <span class="o">=</span> <span class="nc">Some</span> <span class="n">typeof</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="n">obj</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;)</span>
+
+<span class="c1">// create a new static property</span>
+<span class="k">let</span> <span class="n">staticProp</span> <span class="o">=</span> <span class="nc">ProvidedProperty</span><span class="o">(</span><span class="n">propertyName</span> <span class="o">=</span> <span class="s2">&quot;StaticProperty&quot;</span><span class="o">,</span>     <span class="c1">// specify the name of the property</span>
+                                    <span class="n">propertyType</span> <span class="o">=</span> <span class="n">typeof</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="kt">string</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;,</span>     <span class="c1">// make it a string type</span>
+                                    <span class="nc">IsStatic</span><span class="o">=</span><span class="bp">true</span><span class="o">,</span>                     <span class="c1">// make it a static property</span>
+                                    <span class="nc">GetterCode</span><span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;@@</span> <span class="s2">&quot;World!&quot;</span> <span class="o">@@&amp;</span><span class="n">gt</span><span class="o">;))</span>  <span class="c1">// code quotation.  When someone gets this property </span>
+                                                                                 <span class="c1">// this function will be executed and &quot;World!&quot; will be returned</span>
+
+<span class="c1">// Add documentation to the provided static property.</span>
+<span class="n">staticProp</span><span class="o">.</span><span class="nc">AddXmlDocDelayed</span><span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="s2">&quot;This is a static property&quot;</span><span class="o">)</span>
+
+<span class="c1">// Add the static property to the type.</span>
+<span class="n">t</span><span class="o">.</span><span class="nc">AddMember</span> <span class="n">staticProp</span>
+<span class="n">t</span>
+<span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>
+</pre></div>
