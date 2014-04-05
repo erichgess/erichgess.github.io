@@ -54,3 +54,24 @@ InvokeCode= (fun args -> <@@ 0 :> obj @@>))
 {% endcodeblock %}
 
 As I mentioned before, our `Hello` type basically sits on top of an instance of a formless `obj` type.  `InvokeCode` defines a function which gets executed when the construtor for `Hello` is called.  The value returned by our function is assigned to our underlying `obj`.  In our case, our `InvokeCode` function just returns `0`, because this will get assigned to a `obj' type we cast it to `obj` using `0 :> obj`.
+
+### Constructors with Parameters - Construx
+Now, being able to instantiate `Hello` is nice, but pretty pointless if we can't give it any values other than 0.  So here's how we create a constructor which takes a parameter.
+
+{% codeblock lang:fsharp %}
+        let ctorParams = ProvidedConstructor(parameters = [ ProvidedParameter("v", typeof<int>)], 
+                                       InvokeCode= (fun args -> <@@ ( %%(args.[0]) : int) :> obj @@>))
+
+        // Add documentation to the provided constructor.
+        ctorParams.AddXmlDocDelayed(fun () -> "This another constructor.  It sets the value of Hello to the parametr.")
+
+        // Add the provided constructor to the provided type.
+        t.AddMember ctorParams
+{% endcodeblock %}
+
+##### Breakdown
+1.  `ProvidedParameter("v", typeof<int>)]` - This is how we define a paramter for a function or constructor.  The `"v"` is the name of the parameter.  Followed by the type of our parameter.
+1.  `<@@ ( %%(args.[0]) : int) :> obj @@>` - This extracts the value of our first parameter (which is `v` for those keeping score), casts it to an integer, and then boxes it to `obj`.  The `%%` is a Code Quotation operator used for "splicing"; this is used to "splice" the `args` value into a Code Quotation.
+
+##### Testing
+Try loading our new type provider into F# interactive and executing `let x = new Tutorial.Hello(1)`!
