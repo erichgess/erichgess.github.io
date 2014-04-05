@@ -1,5 +1,6 @@
 # deployPost.ps1
 
+rake generate
 rm -r c:\temp\*
 xcopy .\public\* c:\temp /E
 git checkout master
