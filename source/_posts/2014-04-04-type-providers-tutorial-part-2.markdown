@@ -125,3 +125,6 @@ let CreateType () =
 1.  The function `ProvidedProperty` is the most important piece in this step.  It creates a Property member which can then be added to our generated type.
 1.  `t.AddMember staticProp` we add the Static Property we created to our type `Hello`.
 1.  `staticProp.AddXmlDocDelayed` just adds Intellisense documentation for this property.  You'll see this text if you over your mouse over `Tutorial.Hello.StaticProperty`.
+
+##### Testing
+Build and send our Library to F# Interactive then open the "Tutorial" namespace.  Try executing `Tutorial.Hello.StaticProperty` and see what you get.  It should be `val it : string = "World!"`.  Which is awesome!  We now have a generated type which actually does something!
