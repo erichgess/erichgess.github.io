@@ -121,3 +121,28 @@ The constructor will initialize the underlying data upon which our type is built
 {% endcodeblock %}
 
 Note in both `GetterCode` and `SetterCode` the lambda functions have `%%args.[0] : TutorialType)` instead of `%%args.[0] : obj`.  This is because we defined our `baseType` to be `TutorialType`.
+
+### Validation - A Short Tangent
+Something which is obviously missing is logic to make sure that a valid schema is passed in.  For example, what if a column name is "2", our code would try to create a property named "2" which is illegal.  Other cases would be: an empty list of columns, an empty or null string for a column name, illegal characters, and duplicate names.
+
+Now, if you're like me, the next question you have is: what the fuck happens when a Type Provider throws an exception?  To find out, let's add some simple validation to our TypeProvider and run a test where we fail the validation.
+
+We'll add some code to check if the list of columns is empty.  In the below codeblock, I added a new function `ValidateColumnSchema` and called that function at the beginning of `CreateType`.
+{% codeblock lang:fsharp %}
+    let ValidateColumnSchema (columns: string list) =
+        if columns.Length = 0 then
+            failwith "The column list is empty"
+
+    let CreateType (columns: string list) =
+        ValidateColumnSchema columns
+{% endcodeblock %}
+
+Now, just for this test, update the call to create type to look like this:
+{% codeblock lang:fsharp %}
+    let types = [ CreateType([]) ] 
+{% endcodeblock %}
+Build and send the project output to the FSI.  You should get an output that looks like:
+{% codeblock %}
+stdin(2,1): error FS3053: The type provider 'Samples.FSharp.TutorialTypeProvider.TutorialTypeProvider' reported an error: The type provider constructor has thrown an exception: The column list is empty
+{% endcodeblock %}
+
