@@ -33,3 +33,11 @@ type TutorialType = int array
 {% endcodeblock %}
 
 I am using a type alias here, because in the future we will probably build this up in to a more complex type than just an integer array.
+
+We must now configure our Type Provider to use our new underlying type rather than `obj1`.  So we update the `ProvidedTypeDefinition` and make the `baseType` be of type `TutorialType`:
+
+{% codeblock lang:fsharp %}
+let t = ProvidedTypeDefinition(thisAssembly,namespaceName,
+                                "Hello",
+                                baseType = Some typeof<TutorialType>)
+{% endcodeblock %}
