@@ -22,7 +22,7 @@ Tutorials Parts 1 through 3 were all about building up the basic skills and, mos
 
 Looking back at the `Hello` generated type we built in this tutorial; we've got something which is a bit slapdash.  That's fine for tinkering and learning the basics, but now that we have that under our belt it's time to build an actual (though still only practice) type provider.
 
-All this adds up to: starting our code over.  Here's the fresh foundation we will start from:
+All this adds up to: starting our code over.  Below is the fresh foundation from which we will build our Type Provider.  Note, that this does NOT include any constructor.
 {% codeblock lang:fsharp %}
 namespace Samples.FSharp.TutorialTypeProvider
 
@@ -77,10 +77,47 @@ type TutorialType = int array
 
 I am using a type alias here, because in the future we will probably build this up in to a more complex type than just an integer array.
 
-We must now configure our Type Provider to use our new underlying type rather than `obj1`.  So we update the `ProvidedTypeDefinition` and make the `baseType` be of type `TutorialType`:
+We must now configure our Type Provider to use our new underlying type rather than `obj`.  So we update the `ProvidedTypeDefinition` (in the function 'CreateType') and make the `baseType` be of type `TutorialType`:
 
 {% codeblock lang:fsharp %}
 let t = ProvidedTypeDefinition(thisAssembly,namespaceName,
                                 "Hello",
                                 baseType = Some typeof<TutorialType>)
 {% endcodeblock %}
+
+
+### Schema To Type
+Above in "Data Source and Schema", the schema was defined as just a list of column names.  This schema will need to be passsed to `CreateType` so that it will have the data needed to generate our type.  So, update `CreateType` to take a list of strings:
+{% codeblock lang:fsharp %}
+    let CreateType (columns: string list) =
+{% endcodeblock %}
+
+And also update the call to `CreateType` to pass in some simple test data:
+{% codeblock lang:fsharp %}
+    let types = [ CreateType(["Tom"; "Dick"; "Harry"]) ] 
+{% endcodeblock %}
+
+Now that `CreateType` has the schema for our data source, it's time to build up our type provider.
+
+#### Constructor I barely know her
+The first thing to add is the missing constructor.  This will be simple, based upon the number of column names passed to `CreateType` we want to create an array of integers, all initialized to 1.
+
+{% codeblock lang:fsharp %}
+        let ctor = ProvidedConstructor(parameters = [ ], 
+                                       InvokeCode= (fun args -> <@@ Array.init columns.Length (fun i -> 0) @@>))
+
+        // Add documentation to the provided constructor.
+        ctor.AddXmlDocDelayed(fun () -> "This is the default constructor.  It sets the value of TutorialType to 0.")
+{% endcodeblock %}
+
+#### Properties - Insert Uncle Pennybags Joke
+The constructor will initialize the underlying data upon which our type is built.  Now we can add a field for each column, which will get and set the value of that field.  To do this, we will iterate the list of columns and create a property with the corresponding name.  The Getter and Setter functions will be defined as lambdas which store an index to the appropriate location in the array.
+{% codeblock lang:fsharp %}
+        columns |> List.mapi ( fun i col -> ProvidedProperty(col,
+                                                typeof<int>,
+                                                GetterCode = (fun args -> <@@ (%%args.[0] : TutorialType).[i] @@>),
+                                                SetterCode = (fun args -> <@@ (%%args.[0] : TutorialType).[i] <- (%%args.[1] : int) @@>)))
+                |> List.iter t.AddMember
+{% endcodeblock %}
+
+Note in both `GetterCode` and `SetterCode` the lambda functions have `%%args.[0] : TutorialType)` instead of `%%args.[0] : obj`.  This is because we defined our `baseType` to be `TutorialType`.
