@@ -9,7 +9,7 @@
   <meta name="author" content="Erich G. Ess">
 
   
-  <meta name="description" content="In the last tutorial, we built a simple type named Hello which had some static members. In this tutorial, we&rsquo;ll expand our Hello type to &hellip;">
+  <meta name="description" content="In Part 3 of this Tutorial, I talked a little about erased types and how the types we generate are actually built on top of a obj. Previously, I just &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -65,6 +65,56 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/04/16/type-providers-tutorial-part-4/">Type Providers Tutorial Part 4 - Base Types</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-16T22:09:16-07:00" pubdate data-updated="true">Apr 16<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>In Part 3 of this Tutorial, I talked a little about erased types and how the types we generate are actually built on top of a <code>obj</code>.  Previously, I just used a plan <code>obj</code> type and cast an integer to and from the <code>obj</code> types.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="nc">InvokeCode</span><span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&gt;</span> <span class="o">&lt;@@</span> <span class="mi">0</span> <span class="o">:&gt;</span> <span class="n">obj</span> <span class="o">@@&gt;))</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Using just the basic <code>obj</code> works well enough for a very simple generated type (like the simple integer from part 3).  However, it becomes a bit of a mess when you want to make anything complicated.</p>
+
+<p>In this part, we will update our Type Provider to use a more advanced type as our base type.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/04/16/type-providers-tutorial-part-4/">Lay on, MacDuff &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -564,54 +614,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/03/08/rabbitmq-and-f-number-part-2/">RabbitMQ and F# - Part 2</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-03-08T21:15:36-08:00" pubdate data-updated="true">Mar 8<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Notes about RabbitMQ:</p>
-
-<pre><code>- You should have one connection per application and one channel per thread (http://stackoverflow.com/a/10501593)
-</code></pre>
-
-<p>I was able to build and run my sender and receiver, both using my client.</p>
-
-<p>However, something odd happened.  The receiver was only printing out every other message which the Sender sent.</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/03/08/rabbitmq-and-f-number-part-2/">Lay on, MacDuff &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -627,6 +629,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/04/16/type-providers-tutorial-part-4/">Type Providers Tutorial Part 4 - Base Types</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/04/05/type-providers-tutorial-part-3-instantiables/">Type Providers - Tutorial Part 3 - Instantiables</a>
       </li>
     
@@ -640,10 +646,6 @@
     
       <li class="post">
         <a href="/blog/2014/03/20/first-haskell-meetup/">First Haskell Meetup</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/03/11/ravendb/">RavenDB, MapReduce, and Logging</a>
       </li>
     
   </ul>

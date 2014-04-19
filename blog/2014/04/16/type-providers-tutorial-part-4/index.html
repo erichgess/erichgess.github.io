@@ -1,0 +1,441 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Type Providers Tutorial Part 4 - Base Types - Elegant Architecture</title>
+  <meta name="author" content="Erich G. Ess">
+
+  
+  <meta name="description" content="In Part 3 of this Tutorial, I talked a little about erased types and how the types we generate are actually built on top of a obj. Previously, I just &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://erichgess.github.io/blog/2014/04/16/type-providers-tutorial-part-4">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Elegant Architecture" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Elegant Architecture</a></h1>
+  
+    <h2>Architecture, Functional Languages, Style</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:erichgess.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Type Providers Tutorial Part 4 - Base Types</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-16T22:09:16-07:00" pubdate data-updated="true">Apr 16<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>In Part 3 of this Tutorial, I talked a little about erased types and how the types we generate are actually built on top of a <code>obj</code>.  Previously, I just used a plan <code>obj</code> type and cast an integer to and from the <code>obj</code> types.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="nc">InvokeCode</span><span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&gt;</span> <span class="o">&lt;@@</span> <span class="mi">0</span> <span class="o">:&gt;</span> <span class="n">obj</span> <span class="o">@@&gt;))</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Using just the basic <code>obj</code> works well enough for a very simple generated type (like the simple integer from part 3).  However, it becomes a bit of a mess when you want to make anything complicated.</p>
+
+<p>In this part, we will update our Type Provider to use a more advanced type as our base type.</p>
+
+<!-- more -->
+
+
+<p>The ultimate goal of this tutorial is to build a type provider, which takes a schema for a data source and generates a type which matches that schema.  For example, suppose our data source is a table with 3 columns labeled &ldquo;Tom&rdquo;, &ldquo;Dick&rdquo;, and &ldquo;Harry&rdquo;, all three of integer type.  Then the type provider shall generate a type with 3 fields labeled &ldquo;Tom&rdquo;, &ldquo;Dick&rdquo;, and &ldquo;Harry&rdquo; of type <code>int</code>.  To make coding this managable, we will need an base type which can keep track of the names of our fields and the values each of each of those fields.</p>
+
+<h3>Spring Cleaning</h3>
+
+<p>Tutorials Parts 1 through 3 were all about building up the basic skills and, most importantly, understanding needed to work with Type Providers.  Learning how to generate a type, how to add methods, properties, constructors, etc.  Through practice and application, hopefully, you get comfortable with erased types and how generated types are built on top of an base type.</p>
+
+<p>Looking back at the <code>Hello</code> generated type we built in this tutorial; we&rsquo;ve got something which is a bit slapdash.  That&rsquo;s fine for tinkering and learning the basics, but now that we have that under our belt it&rsquo;s time to build an actual (though still only practice) type provider.</p>
+
+<p>All this adds up to: starting our code over.  Below is the fresh foundation from which we will build our Type Provider.  Note, that this does NOT include any constructor.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">namespace</span> <span class="nn">Samples</span><span class="p">.</span><span class="nn">FSharp</span><span class="p">.</span><span class="nc">TutorialTypeProvider</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">open</span> <span class="nc">System</span>
+</span><span class='line'><span class="k">open</span> <span class="nn">System</span><span class="p">.</span><span class="nc">Reflection</span>
+</span><span class='line'><span class="k">open</span> <span class="nn">Samples</span><span class="p">.</span><span class="nn">FSharp</span><span class="p">.</span><span class="nc">ProvidedTypes</span>
+</span><span class='line'><span class="k">open</span> <span class="nn">Microsoft</span><span class="p">.</span><span class="nn">FSharp</span><span class="p">.</span><span class="nn">Core</span><span class="p">.</span><span class="nc">CompilerServices</span>
+</span><span class='line'><span class="k">open</span> <span class="nn">Microsoft</span><span class="p">.</span><span class="nn">FSharp</span><span class="p">.</span><span class="nc">Quotations</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// This defines the type provider. When compiled to a DLL it can be added as a reference to an F#</span>
+</span><span class='line'><span class="c1">// command-line compilation, script or project.</span>
+</span><span class='line'><span class="o">[&lt;</span><span class="nc">TypeProvider</span><span class="o">&gt;]</span>
+</span><span class='line'><span class="k">type</span> <span class="nc">TutorialTypeProvider</span><span class="o">(</span><span class="n">config</span><span class="o">:</span> <span class="nc">TypeProviderConfig</span><span class="o">)</span> <span class="k">as</span> <span class="n">this</span> <span class="o">=</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Inheriting from this type provides implementations of ITypeProvider in terms of the</span>
+</span><span class='line'>    <span class="c1">// provided types below.</span>
+</span><span class='line'>    <span class="k">inherit</span> <span class="nc">TypeProviderForNamespaces</span><span class="bp">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="n">namespaceName</span> <span class="o">=</span> <span class="s2">&quot;Tutorial&quot;</span>
+</span><span class='line'>    <span class="k">let</span> <span class="n">thisAssembly</span> <span class="o">=</span> <span class="nn">Assembly</span><span class="p">.</span><span class="nc">GetExecutingAssembly</span><span class="bp">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="nc">CreateType</span> <span class="bp">()</span> <span class="o">=</span>
+</span><span class='line'>        <span class="k">let</span> <span class="n">t</span> <span class="o">=</span> <span class="nc">ProvidedTypeDefinition</span><span class="o">(</span><span class="n">thisAssembly</span><span class="o">,</span><span class="n">namespaceName</span><span class="o">,</span>
+</span><span class='line'>                                        <span class="s2">&quot;TutorialType&quot;</span><span class="o">,</span>
+</span><span class='line'>                                        <span class="n">baseType</span> <span class="o">=</span> <span class="nc">Some</span> <span class="n">typeof</span><span class="o">&lt;</span><span class="nc">TutorialType</span><span class="o">&gt;)</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">t</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="n">types</span> <span class="o">=</span> <span class="o">[</span> <span class="nc">CreateType</span><span class="bp">()</span> <span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// And add them to the namespace</span>
+</span><span class='line'>    <span class="k">do</span> <span class="n">this</span><span class="o">.</span><span class="nc">AddNamespace</span><span class="o">(</span><span class="n">namespaceName</span><span class="o">,</span> <span class="n">types</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">[&lt;</span><span class="n">assembly</span><span class="o">:</span><span class="nc">TypeProviderAssembly</span><span class="o">&gt;]</span>
+</span><span class='line'><span class="k">do</span><span class="bp">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Data Source and Schema</h3>
+
+<p>The first thing we need is a data source and schema off of which we work.  Let&rsquo;s start with a simple data source: just a table with some number of columns.  To keep things simple, we will start with all the columns be integer values.  Our schema, then, would just be a list of the names of the columns.</p>
+
+<p>For example, if we had a table with columns &ldquo;Tom&rdquo;, &ldquo;Dick&rdquo;, and &ldquo;Harry&rdquo;; then our schema would be <code>["Tom"; "Dick"; "Harry"]</code>. That would get passed to our type provider and a type with 3 integer fields named &ldquo;Tom&rdquo;, &ldquo;Dick&rdquo;, and &ldquo;Harry&rdquo; would be generated.</p>
+
+<p>Our schema, then, will be a very simple list of column names.</p>
+
+<h3>Base Type</h3>
+
+<p>Now that we know how to define what the data source looks like, it&rsquo;s time to make a type which can represent datum which matches our schema.  In our case, this would need to be able to store an integer for each column.  We also know how the generated type will look: a field named for each column defined in our schema.  This means that our base type will be randomly accessed.  So, we should use an array to store the value of each column.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">type</span> <span class="nc">TutorialType</span> <span class="o">=</span> <span class="kt">int</span> <span class="kt">array</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I am using a type alias here, because in the future we will probably build this up in to a more complex type than just an integer array.</p>
+
+<p>We must now configure our Type Provider to use our new base type rather than <code>obj</code>.  So we update the <code>ProvidedTypeDefinition</code> (in the function &lsquo;CreateType&rsquo;) and make the <code>baseType</code> be of type <code>TutorialType</code>:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">t</span> <span class="o">=</span> <span class="nc">ProvidedTypeDefinition</span><span class="o">(</span><span class="n">thisAssembly</span><span class="o">,</span><span class="n">namespaceName</span><span class="o">,</span>
+</span><span class='line'>                                <span class="s2">&quot;Hello&quot;</span><span class="o">,</span>
+</span><span class='line'>                                <span class="n">baseType</span> <span class="o">=</span> <span class="nc">Some</span> <span class="n">typeof</span><span class="o">&lt;</span><span class="nc">TutorialType</span><span class="o">&gt;)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Schema To Type</h3>
+
+<p>Above in &ldquo;Data Source and Schema&rdquo;, the schema was defined as just a list of column names.  This schema will need to be passsed to <code>CreateType</code> so that it will have the data needed to generate our type.  So, update <code>CreateType</code> to take a list of strings:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'>    <span class="k">let</span> <span class="nc">CreateType</span> <span class="o">(</span><span class="n">columns</span><span class="o">:</span> <span class="kt">string</span> <span class="kt">list</span><span class="o">)</span> <span class="o">=</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And also update the call to <code>CreateType</code> to pass in some simple test data:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'>    <span class="k">let</span> <span class="n">types</span> <span class="o">=</span> <span class="o">[</span> <span class="nc">CreateType</span><span class="o">([</span><span class="s2">&quot;Tom&quot;</span><span class="o">;</span> <span class="s2">&quot;Dick&quot;</span><span class="o">;</span> <span class="s2">&quot;Harry&quot;</span><span class="o">])</span> <span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now that <code>CreateType</code> has the schema for our data source, it&rsquo;s time to build up our type provider.</p>
+
+<h4>Constructor I barely know her</h4>
+
+<p>The first thing to add is the missing constructor.  This will be simple, based upon the number of column names passed to <code>CreateType</code> we want to create an array of integers, all initialized to 1.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'>        <span class="k">let</span> <span class="n">ctor</span> <span class="o">=</span> <span class="nc">ProvidedConstructor</span><span class="o">(</span><span class="n">parameters</span> <span class="o">=</span> <span class="o">[</span> <span class="o">],</span>
+</span><span class='line'>                                       <span class="nc">InvokeCode</span><span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&gt;</span> <span class="o">&lt;@@</span> <span class="nn">Array</span><span class="p">.</span><span class="n">init</span> <span class="n">columns</span><span class="o">.</span><span class="nc">Length</span> <span class="o">(</span><span class="k">fun</span> <span class="n">i</span> <span class="o">-&gt;</span> <span class="mi">0</span><span class="o">)</span> <span class="o">@@&gt;))</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="c1">// Add documentation to the provided constructor.</span>
+</span><span class='line'>        <span class="n">ctor</span><span class="o">.</span><span class="nc">AddXmlDocDelayed</span><span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&gt;</span> <span class="s2">&quot;This is the default constructor.  It sets the value of TutorialType to 0.&quot;</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>Properties &ndash; Insert Uncle Pennybags Joke</h4>
+
+<p>The constructor will initialize the base data upon which our type is built.  Now we can add a field for each column, which will get and set the value of that field.  To do this, we will iterate the list of columns and create a property with the corresponding name.  The Getter and Setter functions will be defined as lambdas which store an index to the appropriate location in the array.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'>        <span class="n">columns</span> <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">mapi</span> <span class="o">(</span> <span class="k">fun</span> <span class="n">i</span> <span class="n">col</span> <span class="o">-&gt;</span> <span class="nc">ProvidedProperty</span><span class="o">(</span><span class="n">col</span><span class="o">,</span>
+</span><span class='line'>                                                <span class="n">typeof</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;,</span>
+</span><span class='line'>                                                <span class="nc">GetterCode</span> <span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&gt;</span> <span class="o">&lt;@@</span> <span class="o">(%%</span><span class="n">args</span><span class="o">.[</span><span class="mi">0</span><span class="o">]</span> <span class="o">:</span> <span class="nc">TutorialType</span><span class="o">).[</span><span class="n">i</span><span class="o">]</span> <span class="o">@@&gt;),</span>
+</span><span class='line'>                                                <span class="nc">SetterCode</span> <span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&gt;</span> <span class="o">&lt;@@</span> <span class="o">(%%</span><span class="n">args</span><span class="o">.[</span><span class="mi">0</span><span class="o">]</span> <span class="o">:</span> <span class="nc">TutorialType</span><span class="o">).[</span><span class="n">i</span><span class="o">]</span> <span class="o">&lt;-</span> <span class="o">(%%</span><span class="n">args</span><span class="o">.[</span><span class="mi">1</span><span class="o">]</span> <span class="o">:</span> <span class="kt">int</span><span class="o">)</span> <span class="o">@@&gt;)))</span>
+</span><span class='line'>                <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">iter</span> <span class="n">t</span><span class="o">.</span><span class="nc">AddMember</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Note in both <code>GetterCode</code> and <code>SetterCode</code> the lambda functions have <code>%%args.[0] : TutorialType)</code> instead of <code>%%args.[0] : obj</code>.  This is because we defined our <code>baseType</code> to be <code>TutorialType</code>.</p>
+
+<h3>Validation &ndash; A Short Tangent</h3>
+
+<p>Something which is obviously missing is logic to make sure that a valid schema is passed in.  For example, what if a column name is &ldquo;2&rdquo;, our code would try to create a property named &ldquo;2&rdquo; which is illegal.  Other cases would be: an empty list of columns, an empty or null string for a column name, illegal characters, and duplicate names.</p>
+
+<p>Now, if you&rsquo;re like me, the next question you have is: what the fuck happens when a Type Provider throws an exception?  To find out, let&rsquo;s add some simple validation to our TypeProvider and run a test where we fail the validation.</p>
+
+<p>We&rsquo;ll add some code to check if the list of columns is empty.  In the below codeblock, I added a new function <code>ValidateColumnSchema</code> and called that function at the beginning of <code>CreateType</code>.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'>    <span class="k">let</span> <span class="nc">ValidateColumnSchema</span> <span class="o">(</span><span class="n">columns</span><span class="o">:</span> <span class="kt">string</span> <span class="kt">list</span><span class="o">)</span> <span class="o">=</span>
+</span><span class='line'>        <span class="k">if</span> <span class="n">columns</span><span class="o">.</span><span class="nc">Length</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">then</span>
+</span><span class='line'>            <span class="n">failwith</span> <span class="s2">&quot;The column list is empty&quot;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="nc">CreateType</span> <span class="o">(</span><span class="n">columns</span><span class="o">:</span> <span class="kt">string</span> <span class="kt">list</span><span class="o">)</span> <span class="o">=</span>
+</span><span class='line'>        <span class="nc">ValidateColumnSchema</span> <span class="n">columns</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now, just for this test, update the call to create type to look like this:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'>    <span class="k">let</span> <span class="n">types</span> <span class="o">=</span> <span class="o">[</span> <span class="nc">CreateType</span><span class="o">(</span><span class="bp">[]</span><span class="o">)</span> <span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Build and send the project output to the FSI.  You should get an output that looks like:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>stdin(2,1): error FS3053: The type provider 'Samples.FSharp.TutorialTypeProvider.TutorialTypeProvider' reported an error: The type provider constructor has thrown an exception: The column list is empty</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Make sure to change the call to <code>CreateType</code> back to:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'>    <span class="k">let</span> <span class="n">types</span> <span class="o">=</span> <span class="o">[</span> <span class="nc">CreateType</span><span class="o">([</span><span class="s2">&quot;Tom&quot;</span><span class="o">;</span> <span class="s2">&quot;Dick&quot;</span><span class="o">;</span> <span class="s2">&quot;Harry&quot;</span><span class="o">])</span> <span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Summary</h3>
+
+<p>In this tutorial, we examined the base type which our Type Provider uses as the base for generated types.  We updated the function which generates our type, so that it will take a list of field names and generate a type which has the corresponding fields.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Erich G. Ess</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-16T22:09:16-07:00" pubdate data-updated="true">Apr 16<span>th</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/f-number/'>F#</a>, <a class='category' href='/blog/categories/tutorials/'>Tutorials</a>, <a class='category' href='/blog/categories/type-providers/'>Type Providers</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://erichgess.github.io/blog/2014/04/16/type-providers-tutorial-part-4/" data-via="" data-counturl="http://erichgess.github.io/blog/2014/04/16/type-providers-tutorial-part-4/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/04/05/type-providers-tutorial-part-3-instantiables/" title="Previous Post: Type Providers -  Tutorial Part 3 - Instantiables">&laquo; Type Providers -  Tutorial Part 3 - Instantiables</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2014/04/16/type-providers-tutorial-part-4/">Type Providers Tutorial Part 4 - Base Types</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/04/05/type-providers-tutorial-part-3-instantiables/">Type Providers - Tutorial Part 3 - Instantiables</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/04/04/type-providers-tutorial-part-2/">Type Providers - Tutorial Part 2</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/04/03/type-providers-tutorial-part-1/">Type Providers - Tutorial Part 1 - Concepts</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/03/20/first-haskell-meetup/">First Haskell Meetup</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014 - Erich G. Ess -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

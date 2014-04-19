@@ -9,7 +9,7 @@
   <meta name="author" content="Erich G. Ess">
 
   
-  <meta name="description" content="In my previous post, I described a distributed monitoring system called Odin. Which I am building because it will help me learn and explore topics in &hellip;">
+  <meta name="description" content="Notes about RabbitMQ: - You should have one connection per application and one channel per thread (http://stackoverflow.com/a/10501593) I was able to &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -65,6 +65,54 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/03/08/rabbitmq-and-f-number-part-2/">RabbitMQ and F# - Part 2</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-08T21:15:36-08:00" pubdate data-updated="true">Mar 8<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Notes about RabbitMQ:</p>
+
+<pre><code>- You should have one connection per application and one channel per thread (http://stackoverflow.com/a/10501593)
+</code></pre>
+
+<p>I was able to build and run my sender and receiver, both using my client.</p>
+
+<p>However, something odd happened.  The receiver was only printing out every other message which the Sender sent.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/03/08/rabbitmq-and-f-number-part-2/">Lay on, MacDuff &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -290,6 +338,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/04/16/type-providers-tutorial-part-4/">Type Providers Tutorial Part 4 - Base Types</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2014/04/05/type-providers-tutorial-part-3-instantiables/">Type Providers - Tutorial Part 3 - Instantiables</a>
       </li>
     
@@ -303,10 +355,6 @@
     
       <li class="post">
         <a href="/blog/2014/03/20/first-haskell-meetup/">First Haskell Meetup</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/03/11/ravendb/">RavenDB, MapReduce, and Logging</a>
       </li>
     
   </ul>
