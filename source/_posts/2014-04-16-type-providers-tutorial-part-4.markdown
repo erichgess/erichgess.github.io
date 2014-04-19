@@ -151,3 +151,5 @@ Make sure to change the call to `CreateType` back to:
     let types = [ CreateType(["Tom"; "Dick"; "Harry"]) ] 
 {% endcodeblock %}
 
+### Summary
+In this tutorial, we examined the base type which our Type Provider uses as the base for generated types.  We updated the function which generates our type, so that it will take a list of field names and generate a type which has the corresponding fields.
