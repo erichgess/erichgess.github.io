@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>First Haskell Meetup - Elegant Architecture</title>
+  <title>Odin Prototype - Elegant Architecture</title>
   <meta name="author" content="Erich G. Ess">
 
   
-  <meta name="description" content="Last night was the first meet up for the San Diego Haskell Users Group. I have to say that it was a lot of fun and probably the most interesting dev &hellip;">
+  <meta name="description" content="In my previous post, I described a distributed monitoring system called Odin. Which I am building because it will help me learn and explore topics in &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://erichgess.github.io/blog/2014/03/20/first-haskell-meetup">
+  <link rel="canonical" href="http://erichgess.github.io/blog/2014/03/08/odin-prototype">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Elegant Architecture" type="application/atom+xml">
@@ -68,7 +68,7 @@
   
   <header>
     
-      <h1 class="entry-title">First Haskell Meetup</h1>
+      <h1 class="entry-title">Odin Prototype</h1>
     
     
       <p class="meta">
@@ -84,22 +84,21 @@
   
 
 
-<time datetime="2014-03-20T10:47:44-05:00" pubdate data-updated="true">Mar 20<span>th</span>, 2014</time>
+<time datetime="2014-03-08T01:32:30-06:00" pubdate data-updated="true">Mar 8<span>th</span>, 2014</time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>Last night was the first meet up for the San Diego Haskell Users Group.  I have to say that it was a lot of fun and probably the most interesting dev meet up I&rsquo;ve been to so far in San Diego.  I have barely done any Haskell, beyond get the compiler setup on my computer and make &ldquo;Hello, World&rdquo;.  As such, I learned a lot.</p>
+<div class="entry-content"><p>In my previous post, I described a distributed monitoring system called Odin.  Which I am building because it will help me learn and explore topics in distributed computing independent of work.</p>
 
-<ol>
-<li>I reallly love how Haskell allows you to build &ldquo;pipelines of data&rdquo;:  when you chain together several functions, put data into the top function and get the output of the bottom.  This is one of my favorite things to get in F# code and Haskell just seems to make it even easier.</li>
-<li>Generic Algebraic Data Types:  something which was mentioned to me when I made a comment about doing a presentation on &ldquo;Algebraic Data Types&rdquo;.  I have no clue what the difference between ADT and GADT is but now I have to find out.</li>
-<li>Cabal might be the simplest project management/build management tool I&rsquo;ve yet seen.  Though I&rsquo;ve only looked a little at Leiningen, I think, Cabal fills the same role.  However, I found it much easier to read.</li>
-<li>Having a meetup be a 15 minute walk from my apartment is the best.</li>
-</ol>
+<p>I&rsquo;ve been slowly working on it when I get a chance and have put together a very basic prototype:
+<a href="https://github.com/erichgess/OdinPrototype">https://github.com/erichgess/OdinPrototype</a></p>
 
+<p>This prototype is some hacking I did over a few, very spread out days, to try out some concepts.  It has a very simple agent, which reads %CPU used and sends a message to a receiver.  That receiver this publishes that message as an IObservable.  Multiple mailbox processors subscribe to the Observable and use Reactive to do some queries on the incoming messages.</p>
+
+<p>This is very very little.  However, it served as a way for me to try out a few different concepts: RabbitMQ, Mailbox Processors, and Reactive.</p>
 </div>
 
 
@@ -122,12 +121,12 @@
   
 
 
-<time datetime="2014-03-20T10:47:44-05:00" pubdate data-updated="true">Mar 20<span>th</span>, 2014</time>
+<time datetime="2014-03-08T01:32:30-06:00" pubdate data-updated="true">Mar 8<span>th</span>, 2014</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/haskell/'>Haskell</a>, <a class='category' href='/blog/categories/social/'>Social</a>
+    <a class='category' href='/blog/categories/distributed-computing/'>Distributed Computing</a>, <a class='category' href='/blog/categories/odin/'>Odin</a>
   
 </span>
 
@@ -136,7 +135,7 @@
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://erichgess.github.io/blog/2014/03/20/first-haskell-meetup/" data-via="" data-counturl="http://erichgess.github.io/blog/2014/03/20/first-haskell-meetup/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://erichgess.github.io/blog/2014/03/08/odin-prototype/" data-via="" data-counturl="http://erichgess.github.io/blog/2014/03/08/odin-prototype/" >Tweet</a>
   
   
   
@@ -145,10 +144,10 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2014/03/11/ravendb/" title="Previous Post: RavenDB, MapReduce, and Logging">&laquo; RavenDB, MapReduce, and Logging</a>
+        <a class="basic-alignment left" href="/blog/2014/03/08/odin-learning-distributed-computing/" title="Previous Post: Odin - Learning Distributed Computing">&laquo; Odin - Learning Distributed Computing</a>
       
       
-        <a class="basic-alignment right" href="/blog/2014/04/03/type-providers-tutorial-part-1/" title="Next Post: Type Providers - Tutorial Part 1 - Concepts">Type Providers - Tutorial Part 1 - Concepts &raquo;</a>
+        <a class="basic-alignment right" href="/blog/2014/03/08/rabbitmq-and-f-number-part-2/" title="Next Post: RabbitMQ and F# - Part 2">RabbitMQ and F# - Part 2 &raquo;</a>
       
     </p>
   </footer>

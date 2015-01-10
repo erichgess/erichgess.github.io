@@ -4,7 +4,7 @@
   <title><![CDATA[Category: RabbitMQ | Elegant Architecture]]></title>
   <link href="http://erichgess.github.io/blog/categories/rabbitmq/atom.xml" rel="self"/>
   <link href="http://erichgess.github.io/"/>
-  <updated>2014-04-03T22:03:11-07:00</updated>
+  <updated>2015-01-10T17:48:57-06:00</updated>
   <id>http://erichgess.github.io/</id>
   <author>
     <name><![CDATA[Erich G. Ess]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[RabbitMQ and F# - Part 6]]></title>
-    <link href="http://erichgess.github.io/blog/2014/03/08/rabbitmq-and-f-number-part-6/"/>
-    <updated>2014-03-08T22:08:19-08:00</updated>
-    <id>http://erichgess.github.io/blog/2014/03/08/rabbitmq-and-f-number-part-6</id>
+    <link href="http://erichgess.github.io/blog/2014/03/09/rabbitmq-and-f-number-part-6/"/>
+    <updated>2014-03-09T00:08:19-06:00</updated>
+    <id>http://erichgess.github.io/blog/2014/03/09/rabbitmq-and-f-number-part-6</id>
     <content type="html"><![CDATA[<p>A final round of polish.  Now that I have the layout and flow for using my RabbitMQ library defined, it&rsquo;s time to go through and do a bit of clean up on my names.  There&rsquo;s a lot I can do to make it so that code you write with this library becomes as readable and literate as possible.</p>
 
 <p>Here&rsquo;s the code you write to do the initial setup:
@@ -60,9 +60,9 @@ I&rsquo;ll also make the second line a little more fluent:
   
   <entry>
     <title type="html"><![CDATA[RabbitMQ and F# - Part 5]]></title>
-    <link href="http://erichgess.github.io/blog/2014/03/08/rabbitmq-and-f-number-part-5/"/>
-    <updated>2014-03-08T22:00:00-08:00</updated>
-    <id>http://erichgess.github.io/blog/2014/03/08/rabbitmq-and-f-number-part-5</id>
+    <link href="http://erichgess.github.io/blog/2014/03/09/rabbitmq-and-f-number-part-5/"/>
+    <updated>2014-03-09T00:00:00-06:00</updated>
+    <id>http://erichgess.github.io/blog/2014/03/09/rabbitmq-and-f-number-part-5</id>
     <content type="html"><![CDATA[<p>Alright, I now have a simple usable RabbitMQ client library which fits comfortably with F#.  However, there&rsquo;s still some inconsistency in the design which I want to polish out:</p>
 
 <ol>
@@ -308,7 +308,7 @@ I&rsquo;ll also make the second line a little more fluent:
   <entry>
     <title type="html"><![CDATA[RabbitMQ and F# - Part 4]]></title>
     <link href="http://erichgess.github.io/blog/2014/03/08/rabbitmq-and-f-number-part-4/"/>
-    <updated>2014-03-08T21:55:44-08:00</updated>
+    <updated>2014-03-08T23:55:44-06:00</updated>
     <id>http://erichgess.github.io/blog/2014/03/08/rabbitmq-and-f-number-part-4</id>
     <content type="html"><![CDATA[<p>In my previous post, I made my RabbitMQ client library a bit more functional by removing the Queue record type and replacing it with higher order functions.  These higher order functions are used for creating functions for reading/writing queues.  If you want to use &ldquo;MyQueue&rdquo; for writing, you use the &ldquo;writeTo&rdquo; higher order function to create a function for writing to &ldquo;MyQueue&rdquo;.  It&rsquo;s sounds more complex than it really is.</p>
 
@@ -454,7 +454,7 @@ This will take a channel and a queue name, then return a function which will ret
   <entry>
     <title type="html"><![CDATA[RabbitMQ and F# - Part 3]]></title>
     <link href="http://erichgess.github.io/blog/2014/03/08/rabbitmq-and-f-number-part-3/"/>
-    <updated>2014-03-08T21:38:01-08:00</updated>
+    <updated>2014-03-08T23:38:01-06:00</updated>
     <id>http://erichgess.github.io/blog/2014/03/08/rabbitmq-and-f-number-part-3</id>
     <content type="html"><![CDATA[<p>I now have a functioning RabbitMQ Library!  Though, there is a lot more to be done to make it satisfactory.</p>
 
@@ -740,7 +740,7 @@ I find that this design is a lot better.  Functions for reading and writing are 
   <entry>
     <title type="html"><![CDATA[RabbitMQ and F# - Part 2]]></title>
     <link href="http://erichgess.github.io/blog/2014/03/08/rabbitmq-and-f-number-part-2/"/>
-    <updated>2014-03-08T21:15:36-08:00</updated>
+    <updated>2014-03-08T23:15:36-06:00</updated>
     <id>http://erichgess.github.io/blog/2014/03/08/rabbitmq-and-f-number-part-2</id>
     <content type="html"><![CDATA[<p>Notes about RabbitMQ:</p>
 
