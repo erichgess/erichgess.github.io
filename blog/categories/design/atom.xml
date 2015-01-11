@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Design | Elegant Architecture]]></title>
   <link href="http://erichgess.github.io/blog/categories/design/atom.xml" rel="self"/>
   <link href="http://erichgess.github.io/"/>
-  <updated>2015-01-10T17:48:57-06:00</updated>
+  <updated>2014-04-03T22:03:11-07:00</updated>
   <id>http://erichgess.github.io/</id>
   <author>
     <name><![CDATA[Erich G. Ess]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Building a RabbitMQ Library in F#]]></title>
     <link href="http://erichgess.github.io/blog/2014/03/06/building-a-rabbitmq-library-in-f-number/"/>
-    <updated>2014-03-06T09:44:30-06:00</updated>
+    <updated>2014-03-06T07:44:30-08:00</updated>
     <id>http://erichgess.github.io/blog/2014/03/06/building-a-rabbitmq-library-in-f-number</id>
     <content type="html"><![CDATA[<p>I&rsquo;ve been doing a lot of experimenting with F# and distributed computing via messaging.  As evidenced by my previous, I&rsquo;m using RabbitMQ as my messaging platform, for a couple of reasons: it&rsquo;s easy to use, it&rsquo;s free and open source, and I might decide to switch to RabbitMQ at work.  I&rsquo;ve been having a lot of fun experimenting with RabbitMQ and F#.  However, I spend a lot of my time just writing and copy/pasting the boilerplate code needed to configure the RabbitMQ client libraries, add the fact that the .Net client library is written for C#, and you get a constant block of boring work.  So, purely for fun and profit, I&rsquo;m going to write a quick F# wrapper.  The purpose of it being to let me very quickly setup RabbitMQ and, just as importantly, work with RabbitMQ in a manner that better fits F#.</p>
 
