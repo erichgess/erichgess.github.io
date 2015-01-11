@@ -4,7 +4,7 @@
   <title><![CDATA[Elegant Architecture]]></title>
   <link href="http://erichgess.github.io/atom.xml" rel="self"/>
   <link href="http://erichgess.github.io/"/>
-  <updated>2014-04-18T22:12:40-07:00</updated>
+  <updated>2015-01-10T18:22:53-06:00</updated>
   <id>http://erichgess.github.io/</id>
   <author>
     <name><![CDATA[Erich G. Ess]]></name>
@@ -14,10 +14,25 @@
 
   
   <entry>
+    <title type="html"><![CDATA[It's Been 8 Months]]></title>
+    <link href="http://erichgess.github.io/blog/2015/01/10/its-been-8-months/"/>
+    <updated>2015-01-10T17:42:32-06:00</updated>
+    <id>http://erichgess.github.io/blog/2015/01/10/its-been-8-months</id>
+    <content type="html"><![CDATA[<p>It has been quite a long time since my last blog post.  Quite a lot has happened in that time.  I moved from San Diego to Chicago.  I got a new job and now the CTO for a small start up company out in Chicago.  I have switched off of Windows development to Linux development.  I have gone though doing my work on a Windows box, to a Linux box, and now I&rsquo;m on a MacBook.  I have been doing a lot of learning about Cassandra, Python, Clojure, and Spark.  I have been learning about data science and machine learning.</p>
+
+<p>It&rsquo;s been an exciting and challenging year for me.</p>
+
+<p>I also realized that I miss writing posts (though I only did a few) which help me organize my thoughts and enforce new things which I have learned.</p>
+
+<p>So, now I&rsquo;ll be kicking that learning off again.</p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[Type Providers Tutorial Part 4 - Base Types]]></title>
-    <link href="http://erichgess.github.io/blog/2014/04/16/type-providers-tutorial-part-4/"/>
-    <updated>2014-04-16T22:09:16-07:00</updated>
-    <id>http://erichgess.github.io/blog/2014/04/16/type-providers-tutorial-part-4</id>
+    <link href="http://erichgess.github.io/blog/2014/04/17/type-providers-tutorial-part-4/"/>
+    <updated>2014-04-17T00:09:16-05:00</updated>
+    <id>http://erichgess.github.io/blog/2014/04/17/type-providers-tutorial-part-4</id>
     <content type="html"><![CDATA[<p>In Part 3 of this Tutorial, I talked a little about erased types and how the types we generate are actually built on top of a <code>obj</code>.  Previously, I just used a plan <code>obj</code> type and cast an integer to and from the <code>obj</code> types.</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
@@ -249,7 +264,7 @@
   <entry>
     <title type="html"><![CDATA[Type Providers - Tutorial Part 3 - Instantiables]]></title>
     <link href="http://erichgess.github.io/blog/2014/04/05/type-providers-tutorial-part-3-instantiables/"/>
-    <updated>2014-04-05T13:42:52-07:00</updated>
+    <updated>2014-04-05T15:42:52-05:00</updated>
     <id>http://erichgess.github.io/blog/2014/04/05/type-providers-tutorial-part-3-instantiables</id>
     <content type="html"><![CDATA[<p>In the last tutorial, we built a simple type named <code>Hello</code> which had some static members.  In this tutorial, we&rsquo;ll expand our <code>Hello</code> type to include a constructor, an instance property, and an instance method.  Adding these will allow us to create instances of <code>Hello</code> using the <code>new</code> operator:</p>
 
@@ -627,7 +642,7 @@
   <entry>
     <title type="html"><![CDATA[Type Providers - Tutorial Part 2]]></title>
     <link href="http://erichgess.github.io/blog/2014/04/04/type-providers-tutorial-part-2/"/>
-    <updated>2014-04-04T17:51:36-07:00</updated>
+    <updated>2014-04-04T19:51:36-05:00</updated>
     <id>http://erichgess.github.io/blog/2014/04/04/type-providers-tutorial-part-2</id>
     <content type="html"><![CDATA[<p>In Part 1 of this series, I briefly explained what a Type Provider was and some of the main concepts which you would need to know.  In Part 2, I am going to build a very simple Type Provider.  The purpose of Part 2 is to cover the basics of developing Type Providers, how to test them with F# Interactive, and the support tools which make developing Type Providers easy.</p>
 
@@ -865,7 +880,7 @@ Do this by right clicking on the FSI window and choosing the reset option.</p>
   <entry>
     <title type="html"><![CDATA[Type Providers - Tutorial Part 1 - Concepts]]></title>
     <link href="http://erichgess.github.io/blog/2014/04/03/type-providers-tutorial-part-1/"/>
-    <updated>2014-04-03T20:36:12-07:00</updated>
+    <updated>2014-04-03T22:36:12-05:00</updated>
     <id>http://erichgess.github.io/blog/2014/04/03/type-providers-tutorial-part-1</id>
     <content type="html"><![CDATA[<p>I&rsquo;ve only been working with the F# language for the last year.  Which means that all of my learning has been with version 3.x of the F# language.  One of the biggest features of 3.x, and something which I have yet to work with, is the Type Provider.  Type Providers dynamically generate new types, usually from some data source (e.g. databases, XML documents, web services), which a developer can use in their code.  For C# developers this is analogous to the Entity Framework or the &ldquo;Add Service Reference&rdquo; in VS, both of which take a database or WSDL, respectively, and generate classes and functions that can be used in code.  For Java this would be similar to Hibernate or wsdl2java.  Just to be clear, when you create a Type Provider, what you&rsquo;ve built is an Entity Framework or a wsdl2java.  What F# provides is a framework for building your own Type Providers as easily as possible.</p>
 
@@ -901,7 +916,7 @@ Do this by right clicking on the FSI window and choosing the reset option.</p>
   <entry>
     <title type="html"><![CDATA[First Haskell Meetup]]></title>
     <link href="http://erichgess.github.io/blog/2014/03/20/first-haskell-meetup/"/>
-    <updated>2014-03-20T08:47:44-07:00</updated>
+    <updated>2014-03-20T10:47:44-05:00</updated>
     <id>http://erichgess.github.io/blog/2014/03/20/first-haskell-meetup</id>
     <content type="html"><![CDATA[<p>Last night was the first meet up for the San Diego Haskell Users Group.  I have to say that it was a lot of fun and probably the most interesting dev meet up I&rsquo;ve been to so far in San Diego.  I have barely done any Haskell, beyond get the compiler setup on my computer and make &ldquo;Hello, World&rdquo;.  As such, I learned a lot.</p>
 
@@ -918,7 +933,7 @@ Do this by right clicking on the FSI window and choosing the reset option.</p>
   <entry>
     <title type="html"><![CDATA[RavenDB, MapReduce, and Logging]]></title>
     <link href="http://erichgess.github.io/blog/2014/03/11/ravendb/"/>
-    <updated>2014-03-11T08:38:11-07:00</updated>
+    <updated>2014-03-11T10:38:11-05:00</updated>
     <id>http://erichgess.github.io/blog/2014/03/11/ravendb</id>
     <content type="html"><![CDATA[<p>Working with a system which is distributed and uses messaging for communication presents some interesting challenges.  One frequent challenge I&rsquo;ve gotten to deal with a few times is:  how to tell what&rsquo;s happening to a request as the system is processing it.  A request comes into the my system, which wakes one service up and it does some work, then it sends off commands to two other services which both do some work, and then, when both are done, a final service does some work and completes the task.  A little vague, but the scenario should illustrate that when trying to figure out what happened to the initial request, I&rsquo;ve got to dig through at least 4 services worth of logs.  That&rsquo;s assuming everything has only one instance; multiple instances on multiple servers and it becomes a huge chore.</p>
 
@@ -989,9 +1004,9 @@ Do this by right clicking on the FSI window and choosing the reset option.</p>
   
   <entry>
     <title type="html"><![CDATA[RabbitMQ and F# - Part 6]]></title>
-    <link href="http://erichgess.github.io/blog/2014/03/08/rabbitmq-and-f-number-part-6/"/>
-    <updated>2014-03-08T22:08:19-08:00</updated>
-    <id>http://erichgess.github.io/blog/2014/03/08/rabbitmq-and-f-number-part-6</id>
+    <link href="http://erichgess.github.io/blog/2014/03/09/rabbitmq-and-f-number-part-6/"/>
+    <updated>2014-03-09T00:08:19-06:00</updated>
+    <id>http://erichgess.github.io/blog/2014/03/09/rabbitmq-and-f-number-part-6</id>
     <content type="html"><![CDATA[<p>A final round of polish.  Now that I have the layout and flow for using my RabbitMQ library defined, it&rsquo;s time to go through and do a bit of clean up on my names.  There&rsquo;s a lot I can do to make it so that code you write with this library becomes as readable and literate as possible.</p>
 
 <p>Here&rsquo;s the code you write to do the initial setup:</p>
@@ -1045,9 +1060,9 @@ Do this by right clicking on the FSI window and choosing the reset option.</p>
   
   <entry>
     <title type="html"><![CDATA[RabbitMQ and F# - Part 5]]></title>
-    <link href="http://erichgess.github.io/blog/2014/03/08/rabbitmq-and-f-number-part-5/"/>
-    <updated>2014-03-08T22:00:00-08:00</updated>
-    <id>http://erichgess.github.io/blog/2014/03/08/rabbitmq-and-f-number-part-5</id>
+    <link href="http://erichgess.github.io/blog/2014/03/09/rabbitmq-and-f-number-part-5/"/>
+    <updated>2014-03-09T00:00:00-06:00</updated>
+    <id>http://erichgess.github.io/blog/2014/03/09/rabbitmq-and-f-number-part-5</id>
     <content type="html"><![CDATA[<p>Alright, I now have a simple usable RabbitMQ client library which fits comfortably with F#.  However, there&rsquo;s still some inconsistency in the design which I want to polish out:</p>
 
 <ol>
@@ -1273,7 +1288,7 @@ Do this by right clicking on the FSI window and choosing the reset option.</p>
   <entry>
     <title type="html"><![CDATA[RabbitMQ and F# - Part 4]]></title>
     <link href="http://erichgess.github.io/blog/2014/03/08/rabbitmq-and-f-number-part-4/"/>
-    <updated>2014-03-08T21:55:44-08:00</updated>
+    <updated>2014-03-08T23:55:44-06:00</updated>
     <id>http://erichgess.github.io/blog/2014/03/08/rabbitmq-and-f-number-part-4</id>
     <content type="html"><![CDATA[<p>In my previous post, I made my RabbitMQ client library a bit more functional by removing the Queue record type and replacing it with higher order functions.  These higher order functions are used for creating functions for reading/writing queues.  If you want to use &ldquo;MyQueue&rdquo; for writing, you use the &ldquo;writeTo&rdquo; higher order function to create a function for writing to &ldquo;MyQueue&rdquo;.  It&rsquo;s sounds more complex than it really is.</p>
 
@@ -1409,7 +1424,7 @@ Do this by right clicking on the FSI window and choosing the reset option.</p>
   <entry>
     <title type="html"><![CDATA[RabbitMQ and F# - Part 3]]></title>
     <link href="http://erichgess.github.io/blog/2014/03/08/rabbitmq-and-f-number-part-3/"/>
-    <updated>2014-03-08T21:38:01-08:00</updated>
+    <updated>2014-03-08T23:38:01-06:00</updated>
     <id>http://erichgess.github.io/blog/2014/03/08/rabbitmq-and-f-number-part-3</id>
     <content type="html"><![CDATA[<p>I now have a functioning RabbitMQ Library!  Though, there is a lot more to be done to make it satisfactory.</p>
 
@@ -1668,7 +1683,7 @@ Do this by right clicking on the FSI window and choosing the reset option.</p>
   <entry>
     <title type="html"><![CDATA[RabbitMQ and F# - Part 2]]></title>
     <link href="http://erichgess.github.io/blog/2014/03/08/rabbitmq-and-f-number-part-2/"/>
-    <updated>2014-03-08T21:15:36-08:00</updated>
+    <updated>2014-03-08T23:15:36-06:00</updated>
     <id>http://erichgess.github.io/blog/2014/03/08/rabbitmq-and-f-number-part-2</id>
     <content type="html"><![CDATA[<p>Notes about RabbitMQ:</p>
 
@@ -1877,9 +1892,9 @@ Do this by right clicking on the FSI window and choosing the reset option.</p>
   
   <entry>
     <title type="html"><![CDATA[Odin Prototype]]></title>
-    <link href="http://erichgess.github.io/blog/2014/03/07/odin-prototype/"/>
-    <updated>2014-03-07T23:32:30-08:00</updated>
-    <id>http://erichgess.github.io/blog/2014/03/07/odin-prototype</id>
+    <link href="http://erichgess.github.io/blog/2014/03/08/odin-prototype/"/>
+    <updated>2014-03-08T01:32:30-06:00</updated>
+    <id>http://erichgess.github.io/blog/2014/03/08/odin-prototype</id>
     <content type="html"><![CDATA[<p>In my previous post, I described a distributed monitoring system called Odin.  Which I am building because it will help me learn and explore topics in distributed computing independent of work.</p>
 
 <p>I&rsquo;ve been slowly working on it when I get a chance and have put together a very basic prototype:
@@ -1893,9 +1908,9 @@ Do this by right clicking on the FSI window and choosing the reset option.</p>
   
   <entry>
     <title type="html"><![CDATA[Odin - Learning Distributed Computing]]></title>
-    <link href="http://erichgess.github.io/blog/2014/03/07/odin-learning-distributed-computing/"/>
-    <updated>2014-03-07T22:39:00-08:00</updated>
-    <id>http://erichgess.github.io/blog/2014/03/07/odin-learning-distributed-computing</id>
+    <link href="http://erichgess.github.io/blog/2014/03/08/odin-learning-distributed-computing/"/>
+    <updated>2014-03-08T00:39:00-06:00</updated>
+    <id>http://erichgess.github.io/blog/2014/03/08/odin-learning-distributed-computing</id>
     <content type="html"><![CDATA[<p>Over the last two years, I&rsquo;ve really become interested in distributed computing and things like big data.  My interest in these topics grew in coincidence with my falling in love with F#.  I do a lot of different projects at work and not all of them involve any of those three topics.  So, to provide a motive for learning more about distributed computing and sharpening my F# skills I have decided to start working on a small side project (currently, by myself but several friends are interested).  This is called Odin, inspired by the Riemann project, it&rsquo;s a distributed monitoring system.  It will consist of lightweight agents and heavyweight monitoring engines.  The agents will run on servers collecting data and sending it to the monitors.  The monitors will read the stream of events coming from all the servers then process, analyze, and act.</p>
 
 <!-- more -->
@@ -1956,7 +1971,7 @@ Do this by right clicking on the FSI window and choosing the reset option.</p>
   <entry>
     <title type="html"><![CDATA[Building a RabbitMQ Library in F#]]></title>
     <link href="http://erichgess.github.io/blog/2014/03/06/building-a-rabbitmq-library-in-f-number/"/>
-    <updated>2014-03-06T07:44:30-08:00</updated>
+    <updated>2014-03-06T09:44:30-06:00</updated>
     <id>http://erichgess.github.io/blog/2014/03/06/building-a-rabbitmq-library-in-f-number</id>
     <content type="html"><![CDATA[<p>I&rsquo;ve been doing a lot of experimenting with F# and distributed computing via messaging.  As evidenced by my previous, I&rsquo;m using RabbitMQ as my messaging platform, for a couple of reasons: it&rsquo;s easy to use, it&rsquo;s free and open source, and I might decide to switch to RabbitMQ at work.  I&rsquo;ve been having a lot of fun experimenting with RabbitMQ and F#.  However, I spend a lot of my time just writing and copy/pasting the boilerplate code needed to configure the RabbitMQ client libraries, add the fact that the .Net client library is written for C#, and you get a constant block of boring work.  So, purely for fun and profit, I&rsquo;m going to write a quick F# wrapper.  The purpose of it being to let me very quickly setup RabbitMQ and, just as importantly, work with RabbitMQ in a manner that better fits F#.</p>
 
@@ -2035,7 +2050,7 @@ Do this by right clicking on the FSI window and choosing the reset option.</p>
   <entry>
     <title type="html"><![CDATA[Using RabbitMQ With F#]]></title>
     <link href="http://erichgess.github.io/blog/2014/03/04/using-rabbitmq-with-f-number/"/>
-    <updated>2014-03-04T19:56:20-08:00</updated>
+    <updated>2014-03-04T21:56:20-06:00</updated>
     <id>http://erichgess.github.io/blog/2014/03/04/using-rabbitmq-with-f-number</id>
     <content type="html"><![CDATA[<p>Over the last few years, one of the topics on which I have done much of my work has been distributed computing using message queues.  Recently, I&rsquo;ve been playing around with RabbitMQ, not for any reason other than that I wanted a simple, easy to setup, and easy to use messaging framework, which I could use for little experiments at home.</p>
 
@@ -2179,7 +2194,7 @@ Do this by right clicking on the FSI window and choosing the reset option.</p>
   <entry>
     <title type="html"><![CDATA[Experimenting With Quotations]]></title>
     <link href="http://erichgess.github.io/blog/2014/02/16/my-first-post/"/>
-    <updated>2014-02-16T20:37:19-08:00</updated>
+    <updated>2014-02-16T22:37:19-06:00</updated>
     <id>http://erichgess.github.io/blog/2014/02/16/my-first-post</id>
     <content type="html"><![CDATA[<p>One of the more interesting featuers of F# is the Code Quotation.  Though I do find this interesting now, it has taken over a year before I saw any reason I might have even slight interest.  Even now, as I have taken a much greater interest in the topic, it&rsquo;s been difficult finding anything detailed on the topic.</p>
 

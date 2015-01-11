@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rx | Elegant Architecture]]></title>
   <link href="http://erichgess.github.io/blog/categories/rx/atom.xml" rel="self"/>
   <link href="http://erichgess.github.io/"/>
-  <updated>2014-04-18T22:12:40-07:00</updated>
+  <updated>2015-01-10T18:22:53-06:00</updated>
   <id>http://erichgess.github.io/</id>
   <author>
     <name><![CDATA[Erich G. Ess]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Odin - Learning Distributed Computing]]></title>
-    <link href="http://erichgess.github.io/blog/2014/03/07/odin-learning-distributed-computing/"/>
-    <updated>2014-03-07T22:39:00-08:00</updated>
-    <id>http://erichgess.github.io/blog/2014/03/07/odin-learning-distributed-computing</id>
+    <link href="http://erichgess.github.io/blog/2014/03/08/odin-learning-distributed-computing/"/>
+    <updated>2014-03-08T00:39:00-06:00</updated>
+    <id>http://erichgess.github.io/blog/2014/03/08/odin-learning-distributed-computing</id>
     <content type="html"><![CDATA[<p>Over the last two years, I&rsquo;ve really become interested in distributed computing and things like big data.  My interest in these topics grew in coincidence with my falling in love with F#.  I do a lot of different projects at work and not all of them involve any of those three topics.  So, to provide a motive for learning more about distributed computing and sharpening my F# skills I have decided to start working on a small side project (currently, by myself but several friends are interested).  This is called Odin, inspired by the Riemann project, it&rsquo;s a distributed monitoring system.  It will consist of lightweight agents and heavyweight monitoring engines.  The agents will run on servers collecting data and sending it to the monitors.  The monitors will read the stream of events coming from all the servers then process, analyze, and act.</p>
 
 <!-- more -->

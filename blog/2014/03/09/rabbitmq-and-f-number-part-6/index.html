@@ -1,0 +1,266 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>RabbitMQ and F# - Part 6 - Elegant Architecture</title>
+  <meta name="author" content="Erich G. Ess">
+
+  
+  <meta name="description" content="A final round of polish. Now that I have the layout and flow for using my RabbitMQ library defined, it&rsquo;s time to go through and do a bit of &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://erichgess.github.io/blog/2014/03/09/rabbitmq-and-f-number-part-6">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Elegant Architecture" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Elegant Architecture</a></h1>
+  
+    <h2>Architecture, Functional Languages, Style</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:erichgess.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">RabbitMQ and F# - Part 6</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-09T00:08:19-06:00" pubdate data-updated="true">Mar 9<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>A final round of polish.  Now that I have the layout and flow for using my RabbitMQ library defined, it&rsquo;s time to go through and do a bit of clean up on my names.  There&rsquo;s a lot I can do to make it so that code you write with this library becomes as readable and literate as possible.</p>
+
+<p>Here&rsquo;s the code you write to do the initial setup:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">openConnection</span> <span class="s2">&quot;localhost&quot;</span>
+</span><span class='line'><span class="k">let</span> <span class="n">myChannel</span> <span class="o">=</span> <span class="n">openChannel</span> <span class="n">connection</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If I just look at this, I have to ask:  open connection to what?  Context would probably help, but this function will get called only once in an entire application, so there&rsquo;s not much reason to hold back on the name.  I like the fluent style of naming, so I&rsquo;ll go with:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">connectToRabbitMqServerAt</span> <span class="s2">&quot;localhost&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I&rsquo;ll also make the second line a little more fluent:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">myChannel</span> <span class="o">=</span> <span class="n">openChannelOn</span> <span class="n">connection</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Which turns my setup code to:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">connectToRabbitMqServerAt</span> <span class="s2">&quot;localhost&quot;</span>
+</span><span class='line'><span class="k">let</span> <span class="n">myChannel</span> <span class="o">=</span> <span class="n">openChannelOn</span> <span class="n">connection</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And that&rsquo;s it for now!  I have a library which will let me write code to connect to and send a message on RabbitMQ in about 4 lines of code.  Pretty damn good, IMO.</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">connectToRabbitMqServerAt</span> <span class="s2">&quot;localhost&quot;</span>
+</span><span class='line'><span class="k">let</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">openChannelOn</span> <span class="n">connection</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">let</span> <span class="n">writeToHelloQueue</span> <span class="o">=</span> <span class="n">createQueueWriter</span> <span class="n">channel</span> <span class="s2">&quot;MyQueue&quot;</span>
+</span><span class='line'><span class="s2">&quot;Hello&quot;</span> <span class="o">|&gt;</span> <span class="n">writeToHelloQueue</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Erich G. Ess</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-09T00:08:19-06:00" pubdate data-updated="true">Mar 9<span>th</span>, 2014</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/f-number/'>F#</a>, <a class='category' href='/blog/categories/rabbitmq/'>RabbitMQ</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://erichgess.github.io/blog/2014/03/09/rabbitmq-and-f-number-part-6/" data-via="" data-counturl="http://erichgess.github.io/blog/2014/03/09/rabbitmq-and-f-number-part-6/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2014/03/09/rabbitmq-and-f-number-part-5/" title="Previous Post: RabbitMQ and F# - Part 5">&laquo; RabbitMQ and F# - Part 5</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2014/03/11/ravendb/" title="Next Post: RavenDB, MapReduce, and Logging">RavenDB, MapReduce, and Logging &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/01/10/its-been-8-months/">It's Been 8 Months</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/04/17/type-providers-tutorial-part-4/">Type Providers Tutorial Part 4 - Base Types</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/04/05/type-providers-tutorial-part-3-instantiables/">Type Providers - Tutorial Part 3 - Instantiables</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/04/04/type-providers-tutorial-part-2/">Type Providers - Tutorial Part 2</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/04/03/type-providers-tutorial-part-1/">Type Providers - Tutorial Part 1 - Concepts</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Erich G. Ess -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

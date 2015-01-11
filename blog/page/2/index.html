@@ -9,7 +9,7 @@
   <meta name="author" content="Erich G. Ess">
 
   
-  <meta name="description" content="Notes about RabbitMQ: - You should have one connection per application and one channel per thread (http://stackoverflow.com/a/10501593) I was able to &hellip;">
+  <meta name="description" content="I now have a functioning RabbitMQ Library! Though, there is a lot more to be done to make it satisfactory. There are two problems: Missing the Queue &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -71,6 +71,55 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2014/03/08/rabbitmq-and-f-number-part-3/">RabbitMQ and F# - Part 3</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-08T23:38:01-06:00" pubdate data-updated="true">Mar 8<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>I now have a functioning RabbitMQ Library!  Though, there is a lot more to be done to make it satisfactory.</p>
+
+<p>There are two problems:</p>
+
+<ol>
+<li>Missing the Queue Consumer functionality.  This makes it a lot easier to deal with RabbitMQ so I definitely want to get this in.</li>
+<li>I&rsquo;m not happy with using the record type to capture the Read and Publish functions for a queue.   After all, how often are you going to be writing to and reading from a specific queue in the same process?</li>
+</ol>
+
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/03/08/rabbitmq-and-f-number-part-3/">Lay on, MacDuff &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2014/03/08/rabbitmq-and-f-number-part-2/">RabbitMQ and F# - Part 2</a></h1>
     
     
@@ -87,7 +136,7 @@
   
 
 
-<time datetime="2014-03-08T21:15:36-08:00" pubdate data-updated="true">Mar 8<span>th</span>, 2014</time>
+<time datetime="2014-03-08T23:15:36-06:00" pubdate data-updated="true">Mar 8<span>th</span>, 2014</time>
         
       </p>
     
@@ -119,7 +168,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/03/07/odin-prototype/">Odin Prototype</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/03/08/odin-prototype/">Odin Prototype</a></h1>
     
     
       <p class="meta">
@@ -135,7 +184,7 @@
   
 
 
-<time datetime="2014-03-07T23:32:30-08:00" pubdate data-updated="true">Mar 7<span>th</span>, 2014</time>
+<time datetime="2014-03-08T01:32:30-06:00" pubdate data-updated="true">Mar 8<span>th</span>, 2014</time>
         
       </p>
     
@@ -162,7 +211,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/03/07/odin-learning-distributed-computing/">Odin - Learning Distributed Computing</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/03/08/odin-learning-distributed-computing/">Odin - Learning Distributed Computing</a></h1>
     
     
       <p class="meta">
@@ -178,7 +227,7 @@
   
 
 
-<time datetime="2014-03-07T22:39:00-08:00" pubdate data-updated="true">Mar 7<span>th</span>, 2014</time>
+<time datetime="2014-03-08T00:39:00-06:00" pubdate data-updated="true">Mar 8<span>th</span>, 2014</time>
         
       </p>
     
@@ -191,7 +240,7 @@
   
   
     <footer>
-      <a rel="full-article" href="/blog/2014/03/07/odin-learning-distributed-computing/">Lay on, MacDuff &rarr;</a>
+      <a rel="full-article" href="/blog/2014/03/08/odin-learning-distributed-computing/">Lay on, MacDuff &rarr;</a>
     </footer>
   
 
@@ -219,7 +268,7 @@
   
 
 
-<time datetime="2014-03-06T07:44:30-08:00" pubdate data-updated="true">Mar 6<span>th</span>, 2014</time>
+<time datetime="2014-03-06T09:44:30-06:00" pubdate data-updated="true">Mar 6<span>th</span>, 2014</time>
         
       </p>
     
@@ -260,7 +309,7 @@
   
 
 
-<time datetime="2014-03-04T19:56:20-08:00" pubdate data-updated="true">Mar 4<span>th</span>, 2014</time>
+<time datetime="2014-03-04T21:56:20-06:00" pubdate data-updated="true">Mar 4<span>th</span>, 2014</time>
         
       </p>
     
@@ -303,7 +352,7 @@
   
 
 
-<time datetime="2014-02-16T20:37:19-08:00" pubdate data-updated="true">Feb 16<span>th</span>, 2014</time>
+<time datetime="2014-02-16T22:37:19-06:00" pubdate data-updated="true">Feb 16<span>th</span>, 2014</time>
         
       </p>
     
@@ -338,7 +387,11 @@
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/04/16/type-providers-tutorial-part-4/">Type Providers Tutorial Part 4 - Base Types</a>
+        <a href="/blog/2015/01/10/its-been-8-months/">It&#8217;s Been 8 Months</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/04/17/type-providers-tutorial-part-4/">Type Providers Tutorial Part 4 - Base Types</a>
       </li>
     
       <li class="post">
@@ -351,10 +404,6 @@
     
       <li class="post">
         <a href="/blog/2014/04/03/type-providers-tutorial-part-1/">Type Providers - Tutorial Part 1 - Concepts</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/03/20/first-haskell-meetup/">First Haskell Meetup</a>
       </li>
     
   </ul>
@@ -370,7 +419,7 @@
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2014 - Erich G. Ess -
+  Copyright &copy; 2015 - Erich G. Ess -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 
