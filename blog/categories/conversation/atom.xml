@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: Design, | Elegant Architecture]]></title>
-  <link href="http://erichgess.github.io/blog/categories/design/atom.xml" rel="self"/>
+  <title><![CDATA[Category: Conversation, | Elegant Architecture]]></title>
+  <link href="http://erichgess.github.io/blog/categories/conversation/atom.xml" rel="self"/>
   <link href="http://erichgess.github.io/"/>
   <updated>2015-07-11T14:00:29-05:00</updated>
   <id>http://erichgess.github.io/</id>
