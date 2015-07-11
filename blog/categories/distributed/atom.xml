@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Distributed | Elegant Architecture]]></title>
+  <link href="http://erichgess.github.io/blog/categories/distributed/atom.xml" rel="self"/>
+  <link href="http://erichgess.github.io/"/>
+  <updated>2015-07-11T14:26:46-05:00</updated>
+  <id>http://erichgess.github.io/</id>
+  <author>
+    <name><![CDATA[Erich G. Ess]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Tuplespaces?]]></title>
+    <link href="http://erichgess.github.io/blog/2015/07/11/tuplespaces/"/>
+    <updated>2015-07-11T14:01:31-05:00</updated>
+    <id>http://erichgess.github.io/blog/2015/07/11/tuplespaces</id>
+    <content type="html"><![CDATA[<p>I have recently become very interested in the tuplespace architecture.  What got me interested (also what even made me aware at all) was a <a href="http://writings.quilt.org/2014/05/12/distributed-systems-and-the-end-of-the-api/">blog post</a> from Chas Emerick.  In that post, he talked about alternative ways for communication in distributed systems.  The usual things were covered:  event sourcing, streaming, messaging, etc.  Tuplespaces were also mentioned, and I had no idea what that was, but the name is intriguing and I had to explore.</p>
+
+<!-- more -->
+
+
+<p>In my free time, I&rsquo;ve been reading what I can find on the topic.  The problem is, there really isn&rsquo;t that much.  I have gotten the original paper on Linda:  a programming language based upon the tuplespace concept.  The lack of reading material makes it hard to figure out how to build a prototype system.</p>
+
+<p>The basic concept is easy.  A tuple is a datastructure with a name and a set of values.  Some examples are: &lt;&ldquo;foo&rdquo;, 1, 2> (the name is &ldquo;foo&rdquo; and the value is (1,2)), &lt;&ldquo;name&rdquo;, &ldquo;erich&rdquo;, 33>, or &lt;&ldquo;example&rdquo;, 1, 1.0, 3.0>.  Applications that want to communicate put and read tuples from a data store.  Tuples are looked up by name and pattern matching the values.  So you can specify a strict tuple: get(&lt;&ldquo;foo&rdquo;, 1, 2>) would check the tuplespace for &lt;&ldquo;foo&rdquo;, 1, 2>.  You can also search with a pattern: get(&lt;&ldquo;foo&rdquo;, 1, float>) this would find any tuple with the name &ldquo;foo&rdquo;, first value is 1, and the second value is a float.  Multiple tuples can have the same name and exact duplicates can also be put into the tuplespace.  There are three basic operations:  put &ndash; write a tuple to the space, get &ndash; take a tuple from the space (the tuple is deleted), copy &ndash; make a copy of the tuple matching the pattern but don&rsquo;t delete it from the space.</p>
+
+<p>Right now, I&rsquo;m trying to figure out:</p>
+
+<ol>
+<li>Is the tuplespace data storage handled at the application level or is there a central tuplespace service?  I would expect it to be like RabbitMQ where there is a central tuplespace store that all services ping when they want to work with data.  These seems like the only way a tuplespace could work.</li>
+<li>What happens when there are duplicate tuples?  It is possible to have duplicate tuples in the space.  When you read from the space, do you get all the tuples or only one?</li>
+<li>When asking for a tuple from the tuplespace, you can specify a pattern the tuple must match (e.g. the name is &ldquo;foo&rdquo; and the first value is 1 and the second value is a float.  This would match on the tuples &lt;&ldquo;foo&rdquo;, 1, 0.5> and &lt;&ldquo;foo&rdquo;, 1, 2.3>).  When you ask for a pattern with multiple matches, what do you get back?  Is it all the matches or just the first one?</li>
+<li>Why allow duplicate tuples in the tuplespace?</li>
+</ol>
+
+
+<p>I&rsquo;ve been playing around with building a demo tuplespace system in Clojure, so that I am forced to find the answers to these questions.</p>
+]]></content>
+  </entry>
+  
+</feed>

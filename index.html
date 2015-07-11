@@ -9,7 +9,7 @@
   <meta name="author" content="Erich G. Ess">
 
   
-  <meta name="description" content="While visiting San Diego, for some much needed time off from work, I had a fantastic evening hanging out my friend Steve Bjorg and his family. As the &hellip;">
+  <meta name="description" content="I have recently become very interested in the tuplespace architecture. What got me interested (also what even made me aware at all) was a blog post &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -65,6 +65,47 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/07/11/tuplespaces/">Tuplespaces?</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-07-11T14:01:31-05:00" pubdate data-updated="true">Jul 11<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>I have recently become very interested in the tuplespace architecture.  What got me interested (also what even made me aware at all) was a <a href="http://writings.quilt.org/2014/05/12/distributed-systems-and-the-end-of-the-api/">blog post</a> from Chas Emerick.  In that post, he talked about alternative ways for communication in distributed systems.  The usual things were covered:  event sourcing, streaming, messaging, etc.  Tuplespaces were also mentioned, and I had no idea what that was, but the name is intriguing and I had to explore.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/07/11/tuplespaces/">Lay on, MacDuff &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -506,83 +547,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/03/09/rabbitmq-and-f-number-part-5/">RabbitMQ and F# - Part 5</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-03-09T00:00:00-06:00" pubdate data-updated="true">Mar 9<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Alright, I now have a simple usable RabbitMQ client library which fits comfortably with F#.  However, there&rsquo;s still some inconsistency in the design which I want to polish out:</p>
-
-<ol>
-<li>To create a consumer on a  queue, you call:</li>
-</ol>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="n">createQueueConsumer</span> <span class="n">myChannel</span> <span class="s2">&quot;myQueue&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ol>
-<li>To create a read function for a queue, you call:</li>
-</ol>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="o">(</span><span class="n">readFrom</span><span class="o">,_)</span> <span class="o">=</span> <span class="n">createQueueFuntions</span> <span class="n">myChannel</span>
-</span><span class='line'><span class="k">let</span> <span class="n">readFromMyQueue</span> <span class="o">=</span> <span class="n">readFrom</span> <span class="s2">&quot;myQueue&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ol>
-<li>To create a write function for a queue, you call:</li>
-</ol>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="o">(_,</span><span class="n">writeTo</span><span class="o">)</span> <span class="o">=</span> <span class="n">createQueueFuntions</span> <span class="n">myChannel</span>
-</span><span class='line'><span class="k">let</span> <span class="n">writeToMyQueue</span> <span class="o">=</span> <span class="n">writeTo</span> <span class="s2">&quot;myQueue&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Why have a function which manages both the read AND the writes for a channel?  Why not split the read and write out to their own functions?  This is better in my opinion for one very obvious reason:  the code will explicitly explain what is happening.  With my current createQueueFuntions  function, there is nothing which tells you that you get a tuple and that the first element in the tuple is a write function and the second element is a read function.</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/03/09/rabbitmq-and-f-number-part-5/">Lay on, MacDuff &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -598,6 +562,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/07/11/tuplespaces/">Tuplespaces?</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/02/13/a-cartoon-map-of-knowledge/">A Cartoon Map of Knowledge</a>
       </li>
     
@@ -611,10 +579,6 @@
     
       <li class="post">
         <a href="/blog/2014/04/05/type-providers-tutorial-part-3-instantiables/">Type Providers - Tutorial Part 3 - Instantiables</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/04/04/type-providers-tutorial-part-2/">Type Providers - Tutorial Part 2</a>
       </li>
     
   </ul>
