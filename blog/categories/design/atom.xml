@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: Design | Elegant Architecture]]></title>
+  <title><![CDATA[Category: Design, | Elegant Architecture]]></title>
   <link href="http://erichgess.github.io/blog/categories/design/atom.xml" rel="self"/>
   <link href="http://erichgess.github.io/"/>
-  <updated>2014-04-03T22:03:11-07:00</updated>
+  <updated>2015-07-19T17:09:36-05:00</updated>
   <id>http://erichgess.github.io/</id>
   <author>
     <name><![CDATA[Erich G. Ess]]></name>
@@ -14,81 +14,20 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Building a RabbitMQ Library in F#]]></title>
-    <link href="http://erichgess.github.io/blog/2014/03/06/building-a-rabbitmq-library-in-f-number/"/>
-    <updated>2014-03-06T07:44:30-08:00</updated>
-    <id>http://erichgess.github.io/blog/2014/03/06/building-a-rabbitmq-library-in-f-number</id>
-    <content type="html"><![CDATA[<p>I&rsquo;ve been doing a lot of experimenting with F# and distributed computing via messaging.  As evidenced by my previous, I&rsquo;m using RabbitMQ as my messaging platform, for a couple of reasons: it&rsquo;s easy to use, it&rsquo;s free and open source, and I might decide to switch to RabbitMQ at work.  I&rsquo;ve been having a lot of fun experimenting with RabbitMQ and F#.  However, I spend a lot of my time just writing and copy/pasting the boilerplate code needed to configure the RabbitMQ client libraries, add the fact that the .Net client library is written for C#, and you get a constant block of boring work.  So, purely for fun and profit, I&rsquo;m going to write a quick F# wrapper.  The purpose of it being to let me very quickly setup RabbitMQ and, just as importantly, work with RabbitMQ in a manner that better fits F#.</p>
+    <title type="html"><![CDATA[A Cartoon Map of Knowledge]]></title>
+    <link href="http://erichgess.github.io/blog/2015/02/13/a-cartoon-map-of-knowledge/"/>
+    <updated>2015-02-13T15:48:53-06:00</updated>
+    <id>http://erichgess.github.io/blog/2015/02/13/a-cartoon-map-of-knowledge</id>
+    <content type="html"><![CDATA[<p>While visiting San Diego, for some much needed time off from work, I had a fantastic evening hanging out my friend Steve Bjorg and his family.  As the bookend to the evening, Steve and I sat down and had chatted about reading books.  It started as merely a random topic on which to build an enjoyable conversation, but quickly morphed into a discussion about how to represent knowledge.</p>
 
-<!-- more -->
+<p>The driver behind our discussion was an exploration of my inability to read technical books on a Kindle or computer.  The reason I dislike reading technical books on devices is because they don’t allow me to do my prefered method of navigation.  When I’m reading a technical book, there are two possible reasons that are making me read:  1. to solve a specific problem that I am having or 2. to find something which sparks my interest and passion and causes me to explore and experiment.  For example, I’ve been learning Clojure, my main resource for that as been one of the O’Reilly books on Clojure.  I have the Clojure basics down, so now what I do is flip through the book quickly until I see a diagram, image, or something which catches my attention, at which point I stop and start reading the context.  So the question Steve and I began exploring was:  can you represent the contents of a large complex technical manual, online, in a way which allows a reader to guide themselves through the entire subject matter in a way which only requires a glance to find what is important.</p>
 
+<p>The problem with doing this sequential flip through of online documentation is that online documenation is not sequential; it is a heirarchical tree or maybe even a directed graph.  Each section linking to children which dive in to more detail about each topic covered in the parent section or linking over to related topics.  When your book is a choose your own adventure tree, how can you flip through it sequentially while still keeping context?  Our first idea was to make this tree a sequence by enumerating it with a breadth first search.  Our guess here is that a breadth first search will keep some level of connection between parent and children topics and allow the reader to build an over laying context to keep things reasonable.</p>
 
-<h2>Design</h2>
+<p>My own personal vision of what this would become is something like a cartoon map of an amusement park.  Ideally, a wordless, visual guide which represents the broad strokes of what is in the manual while cartooonishly exagerating the features of interest.  In other words, and adventurer’s map:  pointing out where there be dragons, and trolls, and krakens, and dungeons.  So a user can look at it, find something which looks fascinating instantly, and diving into the full granular details and context to learn.</p>
 
-<p>I want to use this as an opportuntity to practice all of my engineering skills.  So, I&rsquo;m going to start by defining the problem I want to solve, the scope of work, and then the design itself.  For the problem: I will try to understand what my needs are, right now, and predict what they will be in the future.  For the scope of work:  RabbitMQ has a lot of stuff, so I will use the definition of the problem to decide how much of the RabbitMQ framework I will expose with my wrapper.  The design:  this is when I will figure out how I want to use this library and how to make it fit the F#/functional paradigm.  I will do all of this, before I start writing any code!</p>
+<p>This is all about providing a way for someone who already knows the basics of a topic to keep themselves diving further and further into the ocean.  Basically, it’s a carrot to dangle in front of people to motivate them to learn your software by showing them adventures they can have.</p>
 
-<h4>The Problem(s)</h4>
-
-<p>Right now, I have two problems when I&rsquo;m trying to do a messaging experiment in F#:</p>
-
-<ol>
-<li>I have to rewrite the RabbitMQ setup code every time I make a new endpoint.</li>
-<li>It&rsquo;s OO/C# focused design doesn&rsquo;t fit very well with F#.  It works, but, I think, it will be better if it&rsquo;s functional.</li>
-<li>Long term, I&rsquo;d like to make up a simple RabbitMQ F# Client library which anyone could use.</li>
-</ol>
-
-
-<p>I threw number 3 on there, not because it is a problem I am trying to solve right now, but because this something which could contribute to the F# community.  By keeping this in mind as a long term goal, it will help me write my solution so that it is easy to expand.</p>
-
-<h4>The Scope</h4>
-
-<p>For scope, I&rsquo;ll look at the first two problems and ignore the third.  Problem 2 shouldn&rsquo;t impact the scope very much, as it&rsquo;s really a restriction on my design:  make the design fit the functional paradigm.  Problem 1 definitely can impact the scope of work:  there is a lot to RabbitMQ and doing a full client implementation in F# would be a LOT of work.  To define the scope of work I am going to do, I&rsquo;ll focus on explicitly writing out my needs and then only do the amount of work necessary to meet those needs.</p>
-
-<h5>Problem 1 Needs</h5>
-
-<p>I am doing very little with RabbitMQ in my experiments.  I am not using subjects, or fan-out exchanges, or anything; except making queues, publishing messages to the queue, and reading from the queue.  The messages, for this post, will also just be simple text messages, so no serialization/deserialization.  So this is all I need (in version 1 :) ):</p>
-
-<ol>
-<li>Create a queue on a RabbitMQ server</li>
-<li>Publish a message to a specific queue</li>
-<li>Read messages from a specific queue</li>
-<li>Messages are just text messages</li>
-</ol>
-
-
-<p>Easy Enough!  My first version of the RabbitMQ F# client will only do those 3 things.</p>
-
-<h5>Problem 2 Needs</h5>
-
-<p>This is purely aesthetic.  The more I worke in F#, the more I find writing up classes and implementing interfaces to feel a bit &ldquo;ehhh&rdquo;.  So I want to make the way a developer uses and interacts with RabbitMQ to be more functional.  This is a bit more vague than I&rsquo;d like, because this will require a bit more learning on my part; which is why I put it here!</p>
-
-<h5>Scope</h5>
-
-<p>At the end of all of this, my library will do just provide these three features:</p>
-
-<ol>
-<li>Connect to or create a specified queue on a RabbitMQ server</li>
-<li>Provide a way to publish messages to the queue</li>
-<li>Provide a way to read messages from the queue</li>
-</ol>
-
-
-<p>Behind the scenes it will do whatever setup/teardown is needed to get those 3 features to work.</p>
-
-<h4>The Design</h4>
-
-<p>The design needs to be more functional than OO, so that it fits better with the general aesthetic flow of writing F#.  Being new to functional design, I&rsquo;ll start with the <a href="http://simontcousins.azurewebsites.net/manifesto/">NOOO Manifesto</a> as my guide:</p>
-
-<ul>
-<li>Functions and Types over classes</li>
-<li>Purity over mutability</li>
-<li>Composition over inheritance</li>
-<li>Higher-order functions over method dispatch</li>
-<li>Options over nulls</li>
-</ul>
-
-
-<p>In my next post, I&rsquo;ll start the actual implementation of my library.</p>
 ]]></content>
   </entry>
   

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Type Providers | Elegant Architecture]]></title>
   <link href="http://erichgess.github.io/blog/categories/type-providers/atom.xml" rel="self"/>
   <link href="http://erichgess.github.io/"/>
-  <updated>2014-04-03T22:03:11-07:00</updated>
+  <updated>2015-07-19T17:09:36-05:00</updated>
   <id>http://erichgess.github.io/</id>
   <author>
     <name><![CDATA[Erich G. Ess]]></name>
@@ -14,38 +14,804 @@
 
   
   <entry>
+    <title type="html"><![CDATA[Type Providers Tutorial Part 4 - Base Types]]></title>
+    <link href="http://erichgess.github.io/blog/2014/04/17/type-providers-tutorial-part-4/"/>
+    <updated>2014-04-17T00:09:16-05:00</updated>
+    <id>http://erichgess.github.io/blog/2014/04/17/type-providers-tutorial-part-4</id>
+    <content type="html"><![CDATA[<p>In Part 3 of this Tutorial, I talked a little about erased types and how the types we generate are actually built on top of a <code>obj</code>.  Previously, I just used a plan <code>obj</code> type and cast an integer to and from the <code>obj</code> types.</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="nc">InvokeCode</span><span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;@@</span> <span class="mi">0</span> <span class="o">:&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">obj</span> <span class="o">@@&amp;</span><span class="n">gt</span><span class="o">;))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Using just the basic <code>obj</code> works well enough for a very simple generated type (like the simple integer from part 3).  However, it becomes a bit of a mess when you want to make anything complicated.</p>
+
+<p>In this part, we will update our Type Provider to use a more advanced type as our base type.
+<!-- more -->
+The ultimate goal of this tutorial is to build a type provider, which takes a schema for a data source and generates a type which matches that schema.  For example, suppose our data source is a table with 3 columns labeled “Tom”, “Dick”, and “Harry”, all three of integer type.  Then the type provider shall generate a type with 3 fields labeled “Tom”, “Dick”, and “Harry” of type <code>int</code>.  To make coding this managable, we will need an base type which can keep track of the names of our fields and the values each of each of those fields.</p>
+
+<h3 id="spring-cleaning">Spring Cleaning</h3>
+<p>Tutorials Parts 1 through 3 were all about building up the basic skills and, most importantly, understanding needed to work with Type Providers.  Learning how to generate a type, how to add methods, properties, constructors, etc.  Through practice and application, hopefully, you get comfortable with erased types and how generated types are built on top of an base type.</p>
+
+<p>Looking back at the <code>Hello</code> generated type we built in this tutorial; we’ve got something which is a bit slapdash.  That’s fine for tinkering and learning the basics, but now that we have that under our belt it’s time to build an actual (though still only practice) type provider.</p>
+
+<p>All this adds up to: starting our code over.  Below is the fresh foundation from which we will build our Type Provider.  Note, that this does NOT include any constructor.
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">namespace</span> <span class="nn">Samples</span><span class="p">.</span><span class="nn">FSharp</span><span class="p">.</span><span class="nc">TutorialTypeProvider</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">open</span> <span class="nc">System</span>
+</span><span class='line'><span class="k">open</span> <span class="nn">System</span><span class="p">.</span><span class="nc">Reflection</span>
+</span><span class='line'><span class="k">open</span> <span class="nn">Samples</span><span class="p">.</span><span class="nn">FSharp</span><span class="p">.</span><span class="nc">ProvidedTypes</span>
+</span><span class='line'><span class="k">open</span> <span class="nn">Microsoft</span><span class="p">.</span><span class="nn">FSharp</span><span class="p">.</span><span class="nn">Core</span><span class="p">.</span><span class="nc">CompilerServices</span>
+</span><span class='line'><span class="k">open</span> <span class="nn">Microsoft</span><span class="p">.</span><span class="nn">FSharp</span><span class="p">.</span><span class="nc">Quotations</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="c1">// This defines the type provider. When compiled to a DLL it can be added as a reference to an F#</span>
+</span><span class='line'><span class="c1">// command-line compilation, script or project.</span>
+</span><span class='line'><span class="o">[&lt;</span><span class="n">typeprovider</span><span class="o">&gt;]</span>
+</span><span class='line'><span class="k">type</span> <span class="nc">TutorialTypeProvider</span><span class="o">(</span><span class="n">config</span><span class="o">:</span> <span class="nc">TypeProviderConfig</span><span class="o">)</span> <span class="k">as</span> <span class="n">this</span> <span class="o">=</span> <span class="o">&lt;/</span><span class="n">typeprovider</span><span class="o">&gt;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="c1">// Inheriting from this type provides implementations of ITypeProvider in terms of the</span>
+</span><span class='line'><span class="c1">// provided types below.</span>
+</span><span class='line'><span class="k">inherit</span> <span class="nc">TypeProviderForNamespaces</span><span class="bp">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">let</span> <span class="n">namespaceName</span> <span class="o">=</span> <span class="s2">&quot;Tutorial&quot;</span>
+</span><span class='line'><span class="k">let</span> <span class="n">thisAssembly</span> <span class="o">=</span> <span class="nn">Assembly</span><span class="p">.</span><span class="nc">GetExecutingAssembly</span><span class="bp">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">let</span> <span class="nc">CreateType</span> <span class="bp">()</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">let</span> <span class="n">t</span> <span class="o">=</span> <span class="nc">ProvidedTypeDefinition</span><span class="o">(</span><span class="n">thisAssembly</span><span class="o">,</span><span class="n">namespaceName</span><span class="o">,</span>
+</span><span class='line'>                                    <span class="s2">&quot;TutorialType&quot;</span><span class="o">,</span>
+</span><span class='line'>                                    <span class="n">baseType</span> <span class="o">=</span> <span class="nc">Some</span> <span class="n">typeof</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="nc">TutorialType</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">t</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">let</span> <span class="n">types</span> <span class="o">=</span> <span class="o">[</span> <span class="nc">CreateType</span><span class="bp">()</span> <span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// And add them to the namespace</span>
+</span><span class='line'><span class="k">do</span> <span class="n">this</span><span class="o">.</span><span class="nc">AddNamespace</span><span class="o">(</span><span class="n">namespaceName</span><span class="o">,</span> <span class="n">types</span><span class="o">)</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;[&lt;</span><span class="n">assembly</span><span class="o">:</span><span class="n">typeproviderassembly</span><span class="o">&gt;]</span>
+</span><span class='line'><span class="k">do</span><span class="bp">()</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></assembly:typeproviderassembly></p>
+
+<h3 id="data-source-and-schema">Data Source and Schema</h3>
+
+<p>The first thing we need is a data source and schema off of which we work.  Let’s start with a simple data source: just a table with some number of columns.  To keep things simple, we will start with all the columns be integer values.  Our schema, then, would just be a list of the names of the columns.</p>
+
+<p>For example, if we had a table with columns “Tom”, “Dick”, and “Harry”; then our schema would be <code>["Tom"; "Dick"; "Harry"]</code>. That would get passed to our type provider and a type with 3 integer fields named “Tom”, “Dick”, and “Harry” would be generated.</p>
+
+<p>Our schema, then, will be a very simple list of column names.</p>
+
+<h3 id="base-type">Base Type</h3>
+<p>Now that we know how to define what the data source looks like, it’s time to make a type which can represent datum which matches our schema.  In our case, this would need to be able to store an integer for each column.  We also know how the generated type will look: a field named for each column defined in our schema.  This means that our base type will be randomly accessed.  So, we should use an array to store the value of each column.</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">type</span> <span class="nc">TutorialType</span> <span class="o">=</span> <span class="kt">int</span> <span class="kt">array</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>I am using a type alias here, because in the future we will probably build this up in to a more complex type than just an integer array.</p>
+
+<p>We must now configure our Type Provider to use our new base type rather than <code>obj</code>.  So we update the <code>ProvidedTypeDefinition</code> (in the function ‘CreateType’) and make the <code>baseType</code> be of type <code>TutorialType</code>:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">t</span> <span class="o">=</span> <span class="nc">ProvidedTypeDefinition</span><span class="o">(</span><span class="n">thisAssembly</span><span class="o">,</span><span class="n">namespaceName</span><span class="o">,</span>
+</span><span class='line'>                                <span class="err">“</span><span class="nc">Hello</span><span class="err">”</span><span class="o">,</span>
+</span><span class='line'>                                <span class="n">baseType</span> <span class="o">=</span> <span class="nc">Some</span> <span class="n">typeof</span><span class="o">&lt;</span><span class="n">tutorialtype</span><span class="o">&gt;)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></tutorialtype></p>
+
+<h3 id="schema-to-type">Schema To Type</h3>
+<p>Above in “Data Source and Schema”, the schema was defined as just a list of column names.  This schema will need to be passsed to <code>CreateType</code> so that it will have the data needed to generate our type.  So, update <code>CreateType</code> to take a list of strings:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'>    <span class="k">let</span> <span class="nc">CreateType</span> <span class="o">(</span><span class="n">columns</span><span class="o">:</span> <span class="kt">string</span> <span class="kt">list</span><span class="o">)</span> <span class="o">=</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>And also update the call to <code>CreateType</code> to pass in some simple test data:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'>    <span class="k">let</span> <span class="n">types</span> <span class="o">=</span> <span class="o">[</span> <span class="nc">CreateType</span><span class="o">([</span><span class="err">“</span><span class="nc">Tom</span><span class="err">”</span><span class="o">;</span> <span class="err">“</span><span class="nc">Dick</span><span class="err">”</span><span class="o">;</span> <span class="err">“</span><span class="nc">Harry</span><span class="err">”</span><span class="o">])</span> <span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Now that <code>CreateType</code> has the schema for our data source, it’s time to build up our type provider.</p>
+
+<h4 id="constructor-i-barely-know-her">Constructor I barely know her</h4>
+<p>The first thing to add is the missing constructor.  This will be simple, based upon the number of column names passed to <code>CreateType</code> we want to create an array of integers, all initialized to 1.</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'>        <span class="k">let</span> <span class="n">ctor</span> <span class="o">=</span> <span class="nc">ProvidedConstructor</span><span class="o">(</span><span class="n">parameters</span> <span class="o">=</span> <span class="o">[</span> <span class="o">],</span>
+</span><span class='line'>                                       <span class="nc">InvokeCode</span><span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;@@</span> <span class="nn">Array</span><span class="p">.</span><span class="n">init</span> <span class="n">columns</span><span class="o">.</span><span class="nc">Length</span> <span class="o">(</span><span class="k">fun</span> <span class="n">i</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="mi">0</span><span class="o">)</span> <span class="o">@@&amp;</span><span class="n">gt</span><span class="o">;))&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span>    <span class="c1">// Add documentation to the provided constructor.</span>
+</span><span class='line'>    <span class="n">ctor</span><span class="o">.</span><span class="nc">AddXmlDocDelayed</span><span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="s2">&quot;This is the default constructor.  It sets the value of TutorialType to 0.&quot;</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+</code></pre>
+
+<h4 id="properties---insert-uncle-pennybags-joke">Properties - Insert Uncle Pennybags Joke</h4>
+<p>The constructor will initialize the base data upon which our type is built.  Now we can add a field for each column, which will get and set the value of that field.  To do this, we will iterate the list of columns and create a property with the corresponding name.  The Getter and Setter functions will be defined as lambdas which store an index to the appropriate location in the array.
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'>        <span class="n">columns</span> <span class="o">|&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="nn">List</span><span class="p">.</span><span class="n">mapi</span> <span class="o">(</span> <span class="k">fun</span> <span class="n">i</span> <span class="n">col</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="nc">ProvidedProperty</span><span class="o">(</span><span class="n">col</span><span class="o">,</span>
+</span><span class='line'>                                                <span class="n">typeof</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;,</span>
+</span><span class='line'>                                                <span class="nc">GetterCode</span> <span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;@@</span> <span class="o">(%%</span><span class="n">args</span><span class="o">.[</span><span class="mi">0</span><span class="o">]</span> <span class="o">:</span> <span class="nc">TutorialType</span><span class="o">).[</span><span class="n">i</span><span class="o">]</span> <span class="o">@@&amp;</span><span class="n">gt</span><span class="o">;),</span>
+</span><span class='line'>                                                <span class="nc">SetterCode</span> <span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;@@</span> <span class="o">(%%</span><span class="n">args</span><span class="o">.[</span><span class="mi">0</span><span class="o">]</span> <span class="o">:</span> <span class="nc">TutorialType</span><span class="o">).[</span><span class="n">i</span><span class="o">]</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;-</span> <span class="o">(%%</span><span class="n">args</span><span class="o">.[</span><span class="mi">1</span><span class="o">]</span> <span class="o">:</span> <span class="kt">int</span><span class="o">)</span> <span class="o">@@&amp;</span><span class="n">gt</span><span class="o">;)))</span>
+</span><span class='line'>                <span class="o">|&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="nn">List</span><span class="p">.</span><span class="n">iter</span> <span class="n">t</span><span class="o">.</span><span class="nc">AddMember</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></int></p>
+
+<p>Note in both <code>GetterCode</code> and <code>SetterCode</code> the lambda functions have <code>%%args.[0] : TutorialType)</code> instead of <code>%%args.[0] : obj</code>.  This is because we defined our <code>baseType</code> to be <code>TutorialType</code>.</p>
+
+<h3 id="validation---a-short-tangent">Validation - A Short Tangent</h3>
+<p>Something which is obviously missing is logic to make sure that a valid schema is passed in.  For example, what if a column name is “2”, our code would try to create a property named “2” which is illegal.  Other cases would be: an empty list of columns, an empty or null string for a column name, illegal characters, and duplicate names.</p>
+
+<p>Now, if you’re like me, the next question you have is: what the fuck happens when a Type Provider throws an exception?  To find out, let’s add some simple validation to our TypeProvider and run a test where we fail the validation.</p>
+
+<p>We’ll add some code to check if the list of columns is empty.  In the below codeblock, I added a new function <code>ValidateColumnSchema</code> and called that function at the beginning of <code>CreateType</code>.
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'>    <span class="k">let</span> <span class="nc">ValidateColumnSchema</span> <span class="o">(</span><span class="n">columns</span><span class="o">:</span> <span class="kt">string</span> <span class="kt">list</span><span class="o">)</span> <span class="o">=</span>
+</span><span class='line'>        <span class="k">if</span> <span class="n">columns</span><span class="o">.</span><span class="nc">Length</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">then</span>
+</span><span class='line'>            <span class="n">failwith</span> <span class="err">“</span><span class="nc">The</span> <span class="n">column</span> <span class="kt">list</span> <span class="n">is</span> <span class="n">empty</span><span class="err">”</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="k">let</span> <span class="nc">CreateType</span> <span class="o">(</span><span class="n">columns</span><span class="o">:</span> <span class="kt">string</span> <span class="kt">list</span><span class="o">)</span> <span class="o">=</span>
+</span><span class='line'>    <span class="nc">ValidateColumnSchema</span> <span class="n">columns</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+</code></pre>
+
+<p>Now, just for this test, update the call to create type to look like this:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'>    <span class="k">let</span> <span class="n">types</span> <span class="o">=</span> <span class="o">[</span> <span class="nc">CreateType</span><span class="o">(</span><span class="bp">[]</span><span class="o">)</span> <span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+Build and send the project output to the FSI.  You should get an output that looks like:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>stdin(2,1): error FS3053: The type provider ‘Samples.FSharp.TutorialTypeProvider.TutorialTypeProvider’ reported an error: The type provider constructor has thrown an exception: The column list is empty</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Make sure to change the call to <code>CreateType</code> back to:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'>    <span class="k">let</span> <span class="n">types</span> <span class="o">=</span> <span class="o">[</span> <span class="nc">CreateType</span><span class="o">([</span><span class="err">“</span><span class="nc">Tom</span><span class="err">”</span><span class="o">;</span> <span class="err">“</span><span class="nc">Dick</span><span class="err">”</span><span class="o">;</span> <span class="err">“</span><span class="nc">Harry</span><span class="err">”</span><span class="o">])</span> <span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h3 id="summary">Summary</h3>
+<p>In this tutorial, we examined the base type which our Type Provider uses as the base for generated types.  We updated the function which generates our type, so that it will take a list of field names and generate a type which has the corresponding fields.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Type Providers - Tutorial Part 3 - Instantiables]]></title>
+    <link href="http://erichgess.github.io/blog/2014/04/05/type-providers-tutorial-part-3-instantiables/"/>
+    <updated>2014-04-05T15:42:52-05:00</updated>
+    <id>http://erichgess.github.io/blog/2014/04/05/type-providers-tutorial-part-3-instantiables</id>
+    <content type="html"><![CDATA[<p>In the last tutorial, we built a simple type named <code>Hello</code> which had some static members.  In this tutorial, we’ll expand our <code>Hello</code> type to include a constructor, an instance property, and an instance method.  Adding these will allow us to create instances of <code>Hello</code> using the <code>new</code> operator:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">x</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hello</span><span class="bp">()</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>We’ll also make <code>Hello</code> store some data, that means our type providers will be one step closer to awesome.  Also, one step closer to being an effective means of interacting with structured data sources.</p>
+
+<p>The full code for what we make in this part will be at the end of this post.
+<!-- more -->
+### Quick Overview
+Here’s the order of what we’ll be doing in Part 3 of this tutorial series</p>
+
+<ol>
+  <li>Add a constructor to <code>Hello</code> and make <code>Hello</code> store a single integer value.</li>
+  <li>Add a parameterized construtor to <code>Hello</code>.  This will let us set the value for <code>Hello</code>.</li>
+  <li>Add an instance property which returns the integer set by the constructor.</li>
+  <li>Add an instance method which doubles the integer set by the constructor.</li>
+</ol>
+
+<p>Along the way, we’ll see the backing <code>obj</code> type for the first time.  This is where the idea of “Erased Types” I mentioned in Part 1 becomes important.  Remember, as far as the runtime is concerned, our generated types are just instances of <code>obj</code> (all the methods, properties, and names we generate with our Type Providers are illusions to help developers write better code).</p>
+
+<h3 id="constructors---tonka-tough">Constructors - Tonka Tough</h3>
+<p>In order to make our type instantiable, we have to have a constructor.  It could be a default constructor or one with parameters, it doesn’t matter, but at least one must exist.</p>
+
+<p>The ProvidedTypes module includes a nice type specifically for handling constructors:  <code>ProvidedConstructor</code>.  Not a very surprising name, if you’ve been paying attention :).</p>
+
+<p>We’re going to add a default constructor to <code>Hello</code> (meaning it takes no parameters) which sets the value of our <code>Hello</code> instance to 0.</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'>    <span class="k">let</span> <span class="nc">CreateType</span> <span class="bp">()</span> <span class="o">=</span>
+</span><span class='line'>    	<span class="c1">/// ….</span>
+</span><span class='line'>    	<span class="c1">/// Code from the previous tutorials, removed to save space</span>
+</span><span class='line'>    	<span class="c1">/// ….</span>
+</span><span class='line'>        <span class="k">let</span> <span class="n">ctor</span> <span class="o">=</span> <span class="nc">ProvidedConstructor</span><span class="o">(</span><span class="n">parameters</span> <span class="o">=</span> <span class="o">[</span> <span class="o">],</span>
+</span><span class='line'>                                       <span class="nc">InvokeCode</span><span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;@@</span> <span class="mi">0</span> <span class="o">:&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">obj</span> <span class="o">@@&amp;</span><span class="n">gt</span><span class="o">;))&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span>    <span class="c1">// Add documentation to the provided constructor.</span>
+</span><span class='line'>    <span class="n">ctor</span><span class="o">.</span><span class="nc">AddXmlDocDelayed</span><span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="s2">&quot;This is the default constructor.  It sets the value of Hello to 0.&quot;</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Add the provided constructor to the provided type.</span>
+</span><span class='line'>    <span class="n">t</span><span class="o">.</span><span class="nc">AddMember</span> <span class="n">ctor</span>
+</span><span class='line'>    <span class="n">t</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+</code></pre>
+
+<h5 id="breakdown">Breakdown</h5>
+<p>There really is not much to talk about here, it’s very simple.  Except, I want to call out the <code>InvokeCode</code>, because this is the first time we interact with the backing <code>obj</code>.</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="nc">InvokeCode</span><span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;@@</span> <span class="mi">0</span> <span class="o">:&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">obj</span> <span class="o">@@&amp;</span><span class="n">gt</span><span class="o">;))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>As I mentioned before, our <code>Hello</code> type basically sits on top of an instance of a formless <code>obj</code> type.  <code>InvokeCode</code> defines a function which gets executed when the construtor for <code>Hello</code> is called.  The value returned by our function is assigned to our underlying <code>obj</code>.  In our case, our <code>InvokeCode</code> function just returns <code>0</code>, because this will get assigned to a <code>obj' type we cast it to </code>obj<code> using </code>0 :&gt; obj`.</p>
+
+<h3 id="constructors-with-parameters---construx">Constructors with Parameters - Construx</h3>
+<p>Now, being able to instantiate <code>Hello</code> is nice, but pretty pointless if we can’t give it any values other than 0.  So here’s how we create a constructor which takes a parameter.</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'>        <span class="k">let</span> <span class="n">ctorParams</span> <span class="o">=</span> <span class="nc">ProvidedConstructor</span><span class="o">(</span><span class="n">parameters</span> <span class="o">=</span> <span class="o">[</span> <span class="nc">ProvidedParameter</span><span class="o">(</span><span class="err">“</span><span class="n">v</span><span class="err">”</span><span class="o">,</span> <span class="n">typeof</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;)],</span>
+</span><span class='line'>                                       <span class="nc">InvokeCode</span><span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;@@</span> <span class="o">(</span> <span class="o">%%(</span><span class="n">args</span><span class="o">.[</span><span class="mi">0</span><span class="o">])</span> <span class="o">:</span> <span class="kt">int</span><span class="o">)</span> <span class="o">:&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">obj</span> <span class="o">@@&amp;</span><span class="n">gt</span><span class="o">;))&lt;/</span><span class="kt">int</span><span class="o">&gt;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span>    <span class="c1">// Add documentation to the provided constructor.</span>
+</span><span class='line'>    <span class="n">ctorParams</span><span class="o">.</span><span class="nc">AddXmlDocDelayed</span><span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="s2">&quot;This another constructor.  It sets the value of Hello to the parametr.&quot;</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Add the provided constructor to the provided type.</span>
+</span><span class='line'>    <span class="n">t</span><span class="o">.</span><span class="nc">AddMember</span> <span class="n">ctorParams</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+</code></pre>
+
+<h5 id="breakdown-1">Breakdown</h5>
+<ol>
+  <li><code>ProvidedParameter("v", typeof&lt;int&gt;)]</code> - This is how we define a parameter for a function or constructor.  The <code>"v"</code> is the name of the parameter.  Followed by the type of our parameter.</li>
+  <li><code>&lt;@@ ( %%(args.[0]) : int) :&gt; obj @@&gt;</code> - This extracts the value of our first parameter (which is <code>v</code> for those keeping score), casts it to an integer, and then boxes it to <code>obj</code>.  The <code>%%</code> is a Code Quotation operator used for “splicing”; this is used to “splice” the <code>args</code> value into a Code Quotation.</li>
+</ol>
+
+<h5 id="testing">Testing</h5>
+<p>Try loading our new type provider into F# interactive and executing <code>let x = new Tutorial.Hello(1)</code>!</p>
+
+<h3 id="instance-property---910-of-the-law">Instance Property - 9/10 of the Law</h3>
+<p>Now we can instantiate our <code>Hello</code> type.  We have some data behind our type.  Let’s add a way to get that data!</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'>        <span class="k">let</span> <span class="n">instProperty</span> <span class="o">=</span> <span class="nc">ProvidedProperty</span><span class="o">(</span><span class="err">“</span><span class="nc">Value</span><span class="err">”</span><span class="o">,</span>
+</span><span class='line'>                                            <span class="n">typeof</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;,</span>
+</span><span class='line'>                                            <span class="nc">GetterCode</span> <span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;@@</span> <span class="o">(%%(</span><span class="n">args</span><span class="o">.[</span><span class="mi">0</span><span class="o">])</span> <span class="o">:</span> <span class="n">obj</span><span class="o">)</span> <span class="o">:?&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="kt">int</span> <span class="o">@@&amp;</span><span class="n">gt</span><span class="o">;))</span>
+</span><span class='line'>        <span class="n">t</span><span class="o">.</span><span class="nc">AddMember</span> <span class="n">instProperty</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></int></p>
+
+<h5 id="breakdown-2">Breakdown</h5>
+<p>The instance <code>ProvidedProperty</code> is very similar to the one we used for making a static property:  we specify the name of the property and its type.  However, the <code>GetterCode</code> is important for us to review:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="nc">GetterCode</span> <span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;@@</span> <span class="o">(%%(</span><span class="n">args</span><span class="o">.[</span><span class="mi">0</span><span class="o">])</span> <span class="o">:</span> <span class="n">obj</span><span class="o">)</span> <span class="o">:?&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="kt">int</span> <span class="o">@@&amp;</span><span class="n">gt</span><span class="o">;))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+What’s important here is the <code>(%%(args.[0]) : obj)</code>.  More specifically, I want to call out the <code>args.[0]</code>:  when dealing with instance methods or properties <code>arg.[0]</code> is where the value of our instance is stored.  In the case of <code>Hello</code>, our instance is just an integer, so we case <code>arg.[0]</code> to an integer and return that value.</p>
+
+<h5 id="testing-1">Testing</h5>
+<p>Try running this in the F# Interactive console:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">open</span> <span class="nc">Tutorial</span><span class="o">;;</span>
+</span><span class='line'><span class="k">let</span> <span class="n">c</span> <span class="o">=</span> <span class="k">new</span> <span class="nn">Tutorial</span><span class="p">.</span><span class="nc">Hello</span><span class="o">(</span><span class="mi">3</span><span class="o">);;</span>
+</span><span class='line'><span class="n">c</span><span class="o">.</span><span class="nc">Value</span><span class="o">;;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h3 id="instance-methods---elementary">Instance Methods - Elementary</h3>
+<p>Finally, to wrap up this part of the tutorial.  We will add an instance method which, when invoked, will return twice the <code>Value</code> of our instance of <code>Hello</code>.</p>
+
+<p>The code for this is eerily similar to most of the other code we’ve written for properties, methods, and constructors:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'>        <span class="k">let</span> <span class="n">instanceMeth</span> <span class="o">=</span>
+</span><span class='line'>            <span class="nc">ProvidedMethod</span><span class="o">(</span><span class="n">methodName</span> <span class="o">=</span> <span class="err">“</span><span class="nc">DoubleValue</span><span class="err">”</span><span class="o">,</span>
+</span><span class='line'>                           <span class="n">parameters</span> <span class="o">=</span> <span class="bp">[]</span><span class="o">,</span>
+</span><span class='line'>                           <span class="n">returnType</span> <span class="o">=</span> <span class="n">typeof</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;,</span>
+</span><span class='line'>                           <span class="nc">InvokeCode</span> <span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'>                              <span class="o">&amp;</span><span class="n">lt</span><span class="o">;@@</span> <span class="o">((%%(</span><span class="n">args</span><span class="o">.[</span><span class="mi">0</span><span class="o">])</span> <span class="o">:</span> <span class="n">obj</span><span class="o">)</span> <span class="o">:?&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="kt">int</span><span class="o">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">@@&amp;</span><span class="n">gt</span><span class="o">;))</span>
+</span><span class='line'>        <span class="n">t</span><span class="o">.</span><span class="nc">AddMember</span> <span class="n">instanceMeth</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></int></p>
+
+<h5 id="testing-2">Testing</h5>
+<p>Try running:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">open</span> <span class="nc">Tutorial</span><span class="o">;;</span>
+</span><span class='line'><span class="k">let</span> <span class="n">c</span> <span class="o">=</span> <span class="k">new</span> <span class="nn">Tutorial</span><span class="p">.</span><span class="nc">Hello</span><span class="o">(</span><span class="mi">3</span><span class="o">);;</span>
+</span><span class='line'><span class="n">c</span><span class="o">.</span><span class="nc">DoubleValue</span><span class="bp">()</span><span class="o">;;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h3 id="conclusion">Conclusion</h3>
+<p>This is probably the most important part of the tutorial so far.  We have actually created a Type Provider which generates a type named <code>Hello</code> that can store some data (granted only a single integer :)).  We also made this an instantiable type.  The most important thing is that we got to see the underlying <code>obj</code> upon which our generated type is built.</p>
+
+<p>This underlying type is critical and we will explore it further in a later section of this tutorial.</p>
+
+<p>If anything is learned from Part 3, it’s that our generated type is really just some frosting put on top of an existing type (in <code>Hello</code>’s case an integer).  This may seem silly right now, but keep in mind, the real purpose of a type provider is to allow us to point to a source of data and get a bunch of types which will let us work with that data source in a very F# like manner.</p>
+
+<h2 id="full-code">Full Code</h2>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">namespace</span> <span class="nn">Samples</span><span class="p">.</span><span class="nn">FSharp</span><span class="p">.</span><span class="nc">HelloWorldTypeProvider</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">open</span> <span class="nc">System</span>
+</span><span class='line'><span class="k">open</span> <span class="nn">System</span><span class="p">.</span><span class="nc">Reflection</span>
+</span><span class='line'><span class="k">open</span> <span class="nn">Samples</span><span class="p">.</span><span class="nn">FSharp</span><span class="p">.</span><span class="nc">ProvidedTypes</span>
+</span><span class='line'><span class="k">open</span> <span class="nn">Microsoft</span><span class="p">.</span><span class="nn">FSharp</span><span class="p">.</span><span class="nn">Core</span><span class="p">.</span><span class="nc">CompilerServices</span>
+</span><span class='line'><span class="k">open</span> <span class="nn">Microsoft</span><span class="p">.</span><span class="nn">FSharp</span><span class="p">.</span><span class="nc">Quotations</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="c1">// This defines the type provider. When compiled to a DLL it can be added as a reference to an F#</span>
+</span><span class='line'><span class="c1">// command-line compilation, script or project.</span>
+</span><span class='line'><span class="o">[&lt;</span><span class="n">typeprovider</span><span class="o">&gt;]</span>
+</span><span class='line'><span class="k">type</span> <span class="nc">HelloWorldTypeProvider</span><span class="o">(</span><span class="n">config</span><span class="o">:</span> <span class="nc">TypeProviderConfig</span><span class="o">)</span> <span class="k">as</span> <span class="n">this</span> <span class="o">=</span> <span class="o">&lt;/</span><span class="n">typeprovider</span><span class="o">&gt;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="c1">// Inheriting from this type provides implementations of ITypeProvider in terms of the</span>
+</span><span class='line'><span class="c1">// provided types below.</span>
+</span><span class='line'><span class="k">inherit</span> <span class="nc">TypeProviderForNamespaces</span><span class="bp">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">let</span> <span class="n">namespaceName</span> <span class="o">=</span> <span class="s2">&quot;Tutorial&quot;</span>
+</span><span class='line'><span class="k">let</span> <span class="n">thisAssembly</span> <span class="o">=</span> <span class="nn">Assembly</span><span class="p">.</span><span class="nc">GetExecutingAssembly</span><span class="bp">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">let</span> <span class="nc">CreateType</span> <span class="bp">()</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">let</span> <span class="n">t</span> <span class="o">=</span> <span class="nc">ProvidedTypeDefinition</span><span class="o">(</span><span class="n">thisAssembly</span><span class="o">,</span><span class="n">namespaceName</span><span class="o">,</span>
+</span><span class='line'>                                    <span class="s2">&quot;Hello&quot;</span><span class="o">,</span>
+</span><span class='line'>                                    <span class="n">baseType</span> <span class="o">=</span> <span class="nc">Some</span> <span class="n">typeof</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="n">obj</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="n">staticProp</span> <span class="o">=</span> <span class="nc">ProvidedProperty</span><span class="o">(</span><span class="n">propertyName</span> <span class="o">=</span> <span class="s2">&quot;StaticProperty&quot;</span><span class="o">,</span>
+</span><span class='line'>                                        <span class="n">propertyType</span> <span class="o">=</span> <span class="n">typeof</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="kt">string</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;,</span>
+</span><span class='line'>                                        <span class="nc">IsStatic</span><span class="o">=</span><span class="bp">true</span><span class="o">,</span>
+</span><span class='line'>                                        <span class="nc">GetterCode</span><span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;@@</span> <span class="s2">&quot;World!&quot;</span> <span class="o">@@&amp;</span><span class="n">gt</span><span class="o">;))</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Add documentation to the provided static property.</span>
+</span><span class='line'>    <span class="n">staticProp</span><span class="o">.</span><span class="nc">AddXmlDocDelayed</span><span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="s2">&quot;This is a static property&quot;</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Add the static property to the type.</span>
+</span><span class='line'>    <span class="n">t</span><span class="o">.</span><span class="nc">AddMember</span> <span class="n">staticProp</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Add a static method</span>
+</span><span class='line'>    <span class="k">let</span> <span class="n">staticMeth</span> <span class="o">=</span>
+</span><span class='line'>        <span class="nc">ProvidedMethod</span><span class="o">(</span><span class="n">methodName</span> <span class="o">=</span> <span class="s2">&quot;StaticMethod&quot;</span><span class="o">,</span>
+</span><span class='line'>                       <span class="n">parameters</span> <span class="o">=</span> <span class="bp">[]</span><span class="o">,</span>
+</span><span class='line'>                       <span class="n">returnType</span> <span class="o">=</span> <span class="n">typeof</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="kt">string</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;,</span>
+</span><span class='line'>                       <span class="nc">IsStaticMethod</span> <span class="o">=</span> <span class="bp">true</span><span class="o">,</span>
+</span><span class='line'>                       <span class="nc">InvokeCode</span> <span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'>                          <span class="o">&amp;</span><span class="n">lt</span><span class="o">;@@</span> <span class="s2">&quot;World!&quot;</span> <span class="o">@@&amp;</span><span class="n">gt</span><span class="o">;))</span>
+</span><span class='line'>    <span class="n">t</span><span class="o">.</span><span class="nc">AddMember</span> <span class="n">staticMeth</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="n">ctor</span> <span class="o">=</span> <span class="nc">ProvidedConstructor</span><span class="o">(</span><span class="n">parameters</span> <span class="o">=</span> <span class="o">[</span> <span class="o">],</span>
+</span><span class='line'>                                   <span class="nc">InvokeCode</span><span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;@@</span> <span class="mi">0</span> <span class="o">:&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">obj</span> <span class="o">@@&amp;</span><span class="n">gt</span><span class="o">;))</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Add documentation to the provided constructor.</span>
+</span><span class='line'>    <span class="n">ctor</span><span class="o">.</span><span class="nc">AddXmlDocDelayed</span><span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="s2">&quot;This is the default constructor.  It sets the value of Hello to 0.&quot;</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Add the provided constructor to the provided type.</span>
+</span><span class='line'>    <span class="n">t</span><span class="o">.</span><span class="nc">AddMember</span> <span class="n">ctor</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="n">ctorParams</span> <span class="o">=</span> <span class="nc">ProvidedConstructor</span><span class="o">(</span><span class="n">parameters</span> <span class="o">=</span> <span class="o">[</span> <span class="nc">ProvidedParameter</span><span class="o">(</span><span class="s2">&quot;v&quot;</span><span class="o">,</span> <span class="n">typeof</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="kt">int</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;)],</span>
+</span><span class='line'>                                   <span class="nc">InvokeCode</span><span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;@@</span> <span class="o">(</span> <span class="o">%%(</span><span class="n">args</span><span class="o">.[</span><span class="mi">0</span><span class="o">])</span> <span class="o">:</span> <span class="kt">int</span><span class="o">)</span> <span class="o">:&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">obj</span> <span class="o">@@&amp;</span><span class="n">gt</span><span class="o">;))</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Add documentation to the provided constructor.</span>
+</span><span class='line'>    <span class="n">ctorParams</span><span class="o">.</span><span class="nc">AddXmlDocDelayed</span><span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="s2">&quot;This another constructor.  It sets the value of Hello to the parametr.&quot;</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Add the provided constructor to the provided type.</span>
+</span><span class='line'>    <span class="n">t</span><span class="o">.</span><span class="nc">AddMember</span> <span class="n">ctorParams</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="n">instProperty</span> <span class="o">=</span> <span class="nc">ProvidedProperty</span><span class="o">(</span><span class="s2">&quot;Value&quot;</span><span class="o">,</span>
+</span><span class='line'>                                        <span class="n">typeof</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="kt">int</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;,</span>
+</span><span class='line'>                                        <span class="nc">GetterCode</span> <span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;@@</span> <span class="o">(%%(</span><span class="n">args</span><span class="o">.[</span><span class="mi">0</span><span class="o">])</span> <span class="o">:</span> <span class="n">obj</span><span class="o">)</span> <span class="o">:?&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="kt">int</span> <span class="o">@@&amp;</span><span class="n">gt</span><span class="o">;))</span>
+</span><span class='line'>    <span class="n">t</span><span class="o">.</span><span class="nc">AddMember</span> <span class="n">instProperty</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">let</span> <span class="n">instanceMeth</span> <span class="o">=</span>
+</span><span class='line'>        <span class="nc">ProvidedMethod</span><span class="o">(</span><span class="n">methodName</span> <span class="o">=</span> <span class="s2">&quot;DoubleValue&quot;</span><span class="o">,</span>
+</span><span class='line'>                       <span class="n">parameters</span> <span class="o">=</span> <span class="bp">[]</span><span class="o">,</span>
+</span><span class='line'>                       <span class="n">returnType</span> <span class="o">=</span> <span class="n">typeof</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="kt">int</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;,</span>
+</span><span class='line'>                       <span class="nc">InvokeCode</span> <span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'>                          <span class="o">&amp;</span><span class="n">lt</span><span class="o">;@@</span> <span class="o">((%%(</span><span class="n">args</span><span class="o">.[</span><span class="mi">0</span><span class="o">])</span> <span class="o">:</span> <span class="n">obj</span><span class="o">)</span> <span class="o">:?&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="kt">int</span><span class="o">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">@@&amp;</span><span class="n">gt</span><span class="o">;))</span>
+</span><span class='line'>    <span class="n">t</span><span class="o">.</span><span class="nc">AddMember</span> <span class="n">instanceMeth</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">t</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">let</span> <span class="n">types</span> <span class="o">=</span> <span class="o">[</span> <span class="nc">CreateType</span><span class="bp">()</span> <span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// And add them to the namespace</span>
+</span><span class='line'><span class="k">do</span> <span class="n">this</span><span class="o">.</span><span class="nc">AddNamespace</span><span class="o">(</span><span class="n">namespaceName</span><span class="o">,</span> <span class="n">types</span><span class="o">)</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;[&lt;</span><span class="n">assembly</span><span class="o">:</span><span class="n">typeproviderassembly</span><span class="o">&gt;]</span>
+</span><span class='line'><span class="k">do</span><span class="bp">()</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></assembly:typeproviderassembly></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Type Providers - Tutorial Part 2]]></title>
+    <link href="http://erichgess.github.io/blog/2014/04/04/type-providers-tutorial-part-2/"/>
+    <updated>2014-04-04T19:51:36-05:00</updated>
+    <id>http://erichgess.github.io/blog/2014/04/04/type-providers-tutorial-part-2</id>
+    <content type="html"><![CDATA[<p>In Part 1 of this series, I briefly explained what a Type Provider was and some of the main concepts which you would need to know.  In Part 2, I am going to build a very simple Type Provider.  The purpose of Part 2 is to cover the basics of developing Type Providers, how to test them with F# Interactive, and the support tools which make developing Type Providers easy.</p>
+
+<p>I will make a Type Provider which generates a single type named “Hello”.  At first it will just have a static property which returns the string <code>"World"</code>.  Then I will add a static method which takes no parameters.  Finally, I will add a static method which takes a parameter.
+<!-- more -->
+I start by creating a new F# Library Project and name it “TypeProviderTutorial”:</p>
+
+<p><img src="/images/posts/typeprov_tut_p2/1-newproj.png"></p>
+
+<p>I then download the <a href="http://fsharp3sample.codeplex.com/SourceControl/latest#SampleProviders/Shared/ProvidedTypes-0.4.fs">ProvidedTypes-0.4.fs file from the F# 3.0 Sample Pack</a> and add that to my project:</p>
+
+<p><img src="/images/posts/typeprov_tut_p2/2-providedtypes.png" width="300"></p>
+
+<p>Now it’s time to create our Type Provider.  Add a new F# source code file beneath the “ProvidedTypes-0.4.fs” and name it “HelloWorld.fs”.</p>
+
+<p><img src="/images/posts/typeprov_tut_p2/3-addbelow.png">
+<img src="/images/posts/typeprov_tut_p2/4-newsource.png"></p>
+
+<h3 id="skeleton-code">Skeleton Code</h3>
+<p>We’ll build up from the very bare minimum needed for a Type Provider.  Starting with the boilerplate code which actually tells the compiler our type is a Type Provider:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">namespace</span> <span class="nn">Samples</span><span class="p">.</span><span class="nn">FSharp</span><span class="p">.</span><span class="nc">HelloWorldTypeProvider</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">open</span> <span class="nc">System</span>
+</span><span class='line'><span class="k">open</span> <span class="nn">System</span><span class="p">.</span><span class="nc">Reflection</span>
+</span><span class='line'><span class="k">open</span> <span class="nn">Samples</span><span class="p">.</span><span class="nn">FSharp</span><span class="p">.</span><span class="nc">ProvidedTypes</span>
+</span><span class='line'><span class="k">open</span> <span class="nn">Microsoft</span><span class="p">.</span><span class="nn">FSharp</span><span class="p">.</span><span class="nn">Core</span><span class="p">.</span><span class="nc">CompilerServices</span>
+</span><span class='line'><span class="k">open</span> <span class="nn">Microsoft</span><span class="p">.</span><span class="nn">FSharp</span><span class="p">.</span><span class="nc">Quotations</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="c1">// This defines the type provider. When compiled to a DLL it can be added as a reference to an F#</span>
+</span><span class='line'><span class="c1">// command-line compilation, script or project.</span>
+</span><span class='line'><span class="o">[&lt;</span><span class="n">typeprovider</span><span class="o">&gt;]</span>
+</span><span class='line'><span class="k">type</span> <span class="nc">HelloWorldTypeProvider</span><span class="o">(</span><span class="n">config</span><span class="o">:</span> <span class="nc">TypeProviderConfig</span><span class="o">)</span> <span class="k">as</span> <span class="n">this</span> <span class="o">=</span> <span class="o">&lt;/</span><span class="n">typeprovider</span><span class="o">&gt;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="c1">// Inheriting from this type provides implementations of ITypeProvider in terms of the</span>
+</span><span class='line'><span class="c1">// provided types below.</span>
+</span><span class='line'><span class="k">inherit</span> <span class="nc">TypeProviderForNamespaces</span><span class="bp">()</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;[&lt;</span><span class="n">assembly</span><span class="o">:</span><span class="n">typeproviderassembly</span><span class="o">&gt;]</span>
+</span><span class='line'><span class="k">do</span><span class="bp">()</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></assembly:typeproviderassembly></p>
+
+<p>This code will compile, but won’t do anything fun yet :).</p>
+
+<h5 id="breakdown">Breakdown</h5>
+<ol>
+  <li><code>[&lt;TypeProvider&gt;]</code> this attribute tells the compiler that my type <code>HelloWorldTypeProvider</code> is a Type Provider.</li>
+  <li>Within <code>HelloWorldTypeProvider</code> we will put the code which actually generates new types.</li>
+  <li><code>[&lt;assembly:TypeProviderAssembly]&gt;</code> this attribute indicates that this assembly contains a Type Provider.</li>
+</ol>
+
+<h3 id="the-hello-type">The <code>Hello</code> Type</h3>
+<p>With the skeleton in place, it’s time to start adding a little muscle.  The following code will create a type named <code>Hello</code>.  This type won’t do anything because there are no members (static or instance).  The code tells the type what assembly it belongs to, what namespace it is in, and the name of the type.
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'>    <span class="k">let</span> <span class="n">namespaceName</span> <span class="o">=</span> <span class="err">“</span><span class="nc">Tutorial</span><span class="err">”</span>
+</span><span class='line'>    <span class="k">let</span> <span class="n">thisAssembly</span> <span class="o">=</span> <span class="nn">Assembly</span><span class="p">.</span><span class="nc">GetExecutingAssembly</span><span class="bp">()</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="k">let</span> <span class="nc">CreateType</span> <span class="bp">()</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">let</span> <span class="n">t</span> <span class="o">=</span> <span class="nc">ProvidedTypeDefinition</span><span class="o">(</span><span class="n">thisAssembly</span><span class="o">,</span><span class="n">namespaceName</span><span class="o">,</span>
+</span><span class='line'>                                    <span class="s2">&quot;Hello&quot;</span><span class="o">,</span>
+</span><span class='line'>                                    <span class="n">baseType</span> <span class="o">=</span> <span class="nc">Some</span> <span class="n">typeof</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="n">obj</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;)</span>
+</span><span class='line'>    <span class="n">t</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">let</span> <span class="n">types</span> <span class="o">=</span> <span class="o">[</span> <span class="nc">CreateType</span><span class="bp">()</span> <span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// And add them to the namespace</span>
+</span><span class='line'><span class="k">do</span> <span class="n">this</span><span class="o">.</span><span class="nc">AddNamespace</span><span class="o">(</span><span class="n">namespaceName</span><span class="o">,</span> <span class="n">types</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+</code></pre>
+
+<h5 id="breakdown-1">Breakdown</h5>
+<ol>
+  <li>I added the method <code>CreateType</code> which will return a new provided type when called.  Right now, all this method does is create the most boring type ever.</li>
+  <li><code>types</code> is a list of types which the Type Provider generates</li>
+  <li><code>do this.AddNamespace(namespaceName, types)</code> adds the generated types to the namespace <code>namespaceName</code> so that they can be used by a developer.</li>
+</ol>
+
+<h5 id="testing">Testing</h5>
+<p>Build the library.  When the build is complete, right click on the project in the Solution Explorer and choose “Send Project Output To F# Interactive”:</p>
+
+<p><img src="/images/posts/typeprov_tut_p2/5-firstbuild.png"></p>
+
+<p>In F# Interactive run:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>&gt; open Tutorial;;
+</span><span class='line'>&gt; Tutorial.Hello;;</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>When you run <code>Tutorial.Hello</code> you’ll get an error about not having a constructor.  This is a good thing.  The compiler can find the type, but there’s no constructor so it bombs out.</p>
+
+<p>** Before Proceeding make sure to reset F# Interactive **
+<img src="/images/posts/typeprov_tut_p2/6-resetfsi.png">
+Do this by right clicking on the FSI window and choosing the reset option.</p>
+
+<h3 id="adding-a-static-property">Adding a Static Property</h3>
+<p>Time to make that <code>Hello</code> type actually do something.  We’ll add a static property to this type called <code>StaticProperty</code> which will return the string “World!”.  Once we’ve added that, we’ll be able to write <code>Tutorial.Hello.World</code> in our code and it will compile!</p>
+
+<p>To add the static property, I’m going to update the <code>CreateType()</code> method.  It will create a static property by using the <code>ProvidedProperty</code> type, then that value will be added as a member to the generated type.</p>
+
+<p>Here’s the code
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="nc">CreateType</span> <span class="bp">()</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">let</span> <span class="n">t</span> <span class="o">=</span> <span class="nc">ProvidedTypeDefinition</span><span class="o">(</span><span class="n">thisAssembly</span><span class="o">,</span><span class="n">namespaceName</span><span class="o">,</span>
+</span><span class='line'>                                    <span class="err">“</span><span class="nc">Hello</span><span class="err">”</span><span class="o">,</span>
+</span><span class='line'>                                    <span class="n">baseType</span> <span class="o">=</span> <span class="nc">Some</span> <span class="n">typeof</span><span class="o">&lt;</span><span class="n">obj</span><span class="o">&gt;)&lt;/</span><span class="n">obj</span><span class="o">&gt;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="c1">// create a new static property</span>
+</span><span class='line'><span class="k">let</span> <span class="n">staticProp</span> <span class="o">=</span> <span class="nc">ProvidedProperty</span><span class="o">(</span><span class="n">propertyName</span> <span class="o">=</span> <span class="s2">&quot;StaticProperty&quot;</span><span class="o">,</span>     <span class="c1">// specify the name of the property</span>
+</span><span class='line'>                                    <span class="n">propertyType</span> <span class="o">=</span> <span class="n">typeof</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="kt">string</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;,</span>     <span class="c1">// make it a string type</span>
+</span><span class='line'>                                    <span class="nc">IsStatic</span><span class="o">=</span><span class="bp">true</span><span class="o">,</span>                     <span class="c1">// make it a static property</span>
+</span><span class='line'>                                    <span class="nc">GetterCode</span><span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;@@</span> <span class="s2">&quot;World!&quot;</span> <span class="o">@@&amp;</span><span class="n">gt</span><span class="o">;))</span>  <span class="c1">// code quotation.  When someone gets this property </span>
+</span><span class='line'>                                                                                 <span class="c1">// this function will be executed and &quot;World!&quot; will be returned</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Add documentation to the provided static property.</span>
+</span><span class='line'><span class="n">staticProp</span><span class="o">.</span><span class="nc">AddXmlDocDelayed</span><span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="s2">&quot;This is a static property&quot;</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Add the static property to the type.</span>
+</span><span class='line'><span class="n">t</span><span class="o">.</span><span class="nc">AddMember</span> <span class="n">staticProp</span>
+</span><span class='line'><span class="n">t</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+</code></pre>
+
+<h5 id="breakdown-2">Breakdown</h5>
+<ol>
+  <li>The function <code>ProvidedProperty</code> is the most important piece in this step.  It creates a Property member which can then be added to our generated type.</li>
+  <li><code>t.AddMember staticProp</code> we add the Static Property we created to our type <code>Hello</code>.</li>
+  <li><code>staticProp.AddXmlDocDelayed</code> just adds Intellisense documentation for this property.  You’ll see this text if you over your mouse over <code>Tutorial.Hello.StaticProperty</code>.</li>
+</ol>
+
+<h5 id="testing-1">Testing</h5>
+<p>Build and send our Library to F# Interactive then open the “Tutorial” namespace.  Try executing <code>Tutorial.Hello.StaticProperty</code> and see what you get.  It should be <code>val it : string = "World!"</code>.  Which is awesome!  We now have a generated type which actually does something!</p>
+
+<h3 id="adding-a-static-method">Adding a Static Method</h3>
+<p>Finally, we’ll add a static method to our <code>Hello</code> type.  To keep things consistent, this method will also return “World!”.</p>
+
+<p>Again, the work will be done by updating <code>CreateType()</code>.  In this case, we’ll add a ProvidedMethod to our <code>Hello</code> type.  In the code sample below, I left out the StaticProperty to keep the code snippet small:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'>        <span class="k">let</span> <span class="n">staticMeth</span> <span class="o">=</span>
+</span><span class='line'>            <span class="nc">ProvidedMethod</span><span class="o">(</span><span class="n">methodName</span> <span class="o">=</span> <span class="err">“</span><span class="nc">StaticMethod</span><span class="err">”</span><span class="o">,</span>
+</span><span class='line'>                           <span class="n">parameters</span> <span class="o">=</span> <span class="bp">[]</span><span class="o">,</span>
+</span><span class='line'>                           <span class="n">returnType</span> <span class="o">=</span> <span class="n">typeof</span><span class="o">&lt;</span><span class="kt">string</span><span class="o">&gt;,</span>
+</span><span class='line'>                           <span class="nc">IsStaticMethod</span> <span class="o">=</span> <span class="bp">true</span><span class="o">,</span>
+</span><span class='line'>                           <span class="nc">InvokeCode</span> <span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'>                              <span class="o">&amp;</span><span class="n">lt</span><span class="o">;@@</span> <span class="s2">&quot;World!&quot;</span> <span class="o">@@&amp;</span><span class="n">gt</span><span class="o">;))</span>
+</span><span class='line'>        <span class="n">t</span><span class="o">.</span><span class="nc">AddMember</span> <span class="n">staticMeth</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></string></p>
+
+<h5 id="breakdown-3">Breakdown</h5>
+
+<p>There isn’t much which is different between adding a static method and a static property.  We use a different type: <code>ProvidedMethod</code>.  Also note that to make this static we set the <code>IsStaticMethod</code> property to <code>true</code> rather than the <code>IsStatic</code> property.  <code>InvokeCode</code> is the function which will be executed when this method is called.  In our case, it will just return “World!”.</p>
+
+<h5 id="testing-2">Testing</h5>
+
+<p>Try executing <code>Tutorial.Hello.StaticMethod();;</code> and see what you get :).</p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[Type Providers - Tutorial Part 1 - Concepts]]></title>
     <link href="http://erichgess.github.io/blog/2014/04/03/type-providers-tutorial-part-1/"/>
-    <updated>2014-04-03T20:36:12-07:00</updated>
+    <updated>2014-04-03T22:36:12-05:00</updated>
     <id>http://erichgess.github.io/blog/2014/04/03/type-providers-tutorial-part-1</id>
-    <content type="html"><![CDATA[<p>I&rsquo;ve only been working with the F# language for the last year.  Which means that all of my learning has been with version 3.x of the F# language.  One of the biggest features of 3.x, and something which I have yet to work with, is the Type Provider.  Type Providers dynamically generate new types, usually from some data source (e.g. databases, XML documents, web services), which a developer can use in their code.  For C# developers this is analogous to the Entity Framework or the &ldquo;Add Service Reference&rdquo; in VS, both of which take a database or WSDL, respectively, and generate classes and functions that can be used in code.  For Java this would be similar to Hibernate or wsdl2java.  Just to be clear, when you create a Type Provider, what you&rsquo;ve built is an Entity Framework or a wsdl2java.  What F# provides is a framework for building your own Type Providers as easily as possible.</p>
-
+    <content type="html"><![CDATA[<p>I’ve only been working with the F# language for the last year.  Which means that all of my learning has been with version 3.x of the F# language.  One of the biggest features of 3.x, and something which I have yet to work with, is the Type Provider.  Type Providers dynamically generate new types, usually from some data source (e.g. databases, XML documents, web services), which a developer can use in their code.  For C# developers this is analogous to the Entity Framework or the “Add Service Reference” in VS, both of which take a database or WSDL, respectively, and generate classes and functions that can be used in code.  For Java this would be similar to Hibernate or wsdl2java.  Just to be clear, when you create a Type Provider, what you’ve built is an Entity Framework or a wsdl2java.  What F# provides is a framework for building your own Type Providers as easily as possible.
 <!-- more -->
+In order to learn how to build Type Providers, I decided to try my hand at writing a tutorial.  This will, I think, be the first tutorial I’ve ever written.  I’m going to break this tutorial into several phases.  The first phase will be building a very simple “Hello World” type provider, which just creates a type which can be referenced in code (it won’t do anything).  The next phase will be to add static and instance methods, fields, and properties, but, again, the type will be predefined.  Finally, I want to do a true type provider for a data source (I’m thinking Cassandra) which will take the schema for a database and generate a set of types from that schema.</p>
 
+<h3 id="important-things">Important Things</h3>
 
-<p>In order to learn how to build Type Providers, I decided to try my hand at writing a tutorial.  This will, I think, be the first tutorial I&rsquo;ve ever written.  I&rsquo;m going to break this tutorial into several phases.  The first phase will be building a very simple &ldquo;Hello World&rdquo; type provider, which just creates a type which can be referenced in code (it won&rsquo;t do anything).  The next phase will be to add static and instance methods, fields, and properties, but, again, the type will be predefined.  Finally, I want to do a true type provider for a data source (I&rsquo;m thinking Cassandra) which will take the schema for a database and generate a set of types from that schema.</p>
+<h4 id="providedtypesfs">ProvidedTypes.fs</h4>
+<p>This is an F# source code file provided by the F# team.  It includes a bunch of things for simplifying the construction of Type Providers.  I’ll be making heavy use of this in my tutorial.  If you plan on writing your own Type Provider, you definitely want to get this:  it can be found in the F# 3.0 sample pack (http://fsharp3sample.codeplex.com/).</p>
 
-<h3>Important Things</h3>
+<h4 id="erased-types">Erased Types</h4>
+<p>Most of the time, when building Type Providers, you’ll be creating erased types:  although this type may have members and functions when compiled it will be convered into an Object type by the compiler.  With the type provider, you are creating a set of methods, fields, properties, and constructors which enable a developer to work with your type, but, when compiled, all of that is “erased” and it just becomes and Object.  There’s a section in the Type Provider MSDN article which explains erased types (http://msdn.microsoft.com/en-us/library/hh361034.aspx#BK_Erased).</p>
 
-<h4>ProvidedTypes.fs</h4>
+<p>What’s important is that this means there will be a lot of casting to and from the <code>obj</code> type in Type Provider code.  This also means that if the Type Provider is going to work with any kind of meaningful data sources, an underlying type (on which the generated types are built) must be defined.  If you look at the MSDN Type Provider Tutorial (http://msdn.microsoft.com/en-us/library/hh361034.aspx), the underlying type is <code>string</code>.</p>
 
-<p>This is an F# source code file provided by the F# team.  It includes a bunch of things for simplifying the construction of Type Providers.  I&rsquo;ll be making heavy use of this in my tutorial.  If you plan on writing your own Type Provider, you definitely want to get this:  it can be found in the F# 3.0 sample pack (<a href="http://fsharp3sample.codeplex.com/">http://fsharp3sample.codeplex.com/</a>).</p>
-
-<h4>Erased Types</h4>
-
-<p>Most of the time, when building Type Providers, you&rsquo;ll be creating erased types:  although this type may have members and functions when compiled it will be convered into an Object type by the compiler.  With the type provider, you are creating a set of methods, fields, properties, and constructors which enable a developer to work with your type, but, when compiled, all of that is &ldquo;erased&rdquo; and it just becomes and Object.  There&rsquo;s a section in the Type Provider MSDN article which explains erased types (<a href="http://msdn.microsoft.com/en-us/library/hh361034.aspx#BK_Erased">http://msdn.microsoft.com/en-us/library/hh361034.aspx#BK_Erased</a>).</p>
-
-<p>What&rsquo;s important is that this means there will be a lot of casting to and from the <code>obj</code> type in Type Provider code.  This also means that if the Type Provider is going to work with any kind of meaningful data sources, an underlying type (on which the generated types are built) must be defined.  If you look at the MSDN Type Provider Tutorial (<a href="http://msdn.microsoft.com/en-us/library/hh361034.aspx">http://msdn.microsoft.com/en-us/library/hh361034.aspx</a>), the underlying type is <code>string</code>.</p>
-
-<h4>Developing Type Providers</h4>
-
+<h4 id="developing-type-providers">Developing Type Providers</h4>
 <p>A Type Provider cannot be defined in anything except a Library project.  This seems like a pain but it does make sense:  if you are going to use a Type Provider in your code it must be fully compiled before you use it.</p>
 
-<h4>Debugging Type Providers</h4>
+<h4 id="debugging-type-providers">Debugging Type Providers</h4>
+<p>This is probably the biggest pain point of developing Type Providers, in my humble opinion.  Do not create a console project in your Type Provider solution and try to use that console project to test your Type Providers.  The problem is that when you build the console project, VS will lock the DLLs from the Type Provider library project.  Once the DLLs are locked you won’t be able to build the Type Provider library until you restart VS.</p>
 
-<p>This is probably the biggest pain point of developing Type Providers, in my humble opinion.  Do not create a console project in your Type Provider solution and try to use that console project to test your Type Providers.  The problem is that when you build the console project, VS will lock the DLLs from the Type Provider library project.  Once the DLLs are locked you won&rsquo;t be able to build the Type Provider library until you restart VS.</p>
-
-<p>Use the F# Interactive Console.  Build the library project then right click on it in the Solution Explorer and choose &ldquo;Send to F# Interactive&rdquo;.  In the interactive console you can test out your type provider.  IMPORTANT:  Before you try building your project again make sure to reset the interactive console, otherwise it will lock the DLLs and your build will fail.</p>
+<p>Use the F# Interactive Console.  Build the library project then right click on it in the Solution Explorer and choose “Send to F# Interactive”.  In the interactive console you can test out your type provider.  IMPORTANT:  Before you try building your project again make sure to reset the interactive console, otherwise it will lock the DLLs and your build will fail.</p>
 ]]></content>
   </entry>
   

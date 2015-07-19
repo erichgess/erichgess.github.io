@@ -1,3 +1,5 @@
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
 
 <!DOCTYPE html>
 <!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
@@ -84,56 +86,51 @@
   
 
 
-<time datetime="2014-02-16T20:37:19-08:00" pubdate data-updated="true">Feb 16<span>th</span>, 2014</time>
+<time datetime="2014-02-16T22:37:19-06:00" pubdate data-updated="true">Feb 16<span>th</span>, 2014</time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>One of the more interesting featuers of F# is the Code Quotation.  Though I do find this interesting now, it has taken over a year before I saw any reason I might have even slight interest.  Even now, as I have taken a much greater interest in the topic, it&rsquo;s been difficult finding anything detailed on the topic.</p>
-
-<!-- more -->
-
+<div class="entry-content"><p>One of the more interesting featuers of F# is the Code Quotation.  Though I do find this interesting now, it has taken over a year before I saw any reason I might have even slight interest.  Even now, as I have taken a much greater interest in the topic, it’s been difficult finding anything detailed on the topic.
+<!-- more --></p>
 
 <p>Anyone familiar with Lisp or one of its dialects, such as Clojure, will find Quotations familiar.  To put it simply, Quotations allow you to represent F# code as data.  Take the following example, where I bind a Quotation to <code>q</code>:</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">q</span> <span class="o">=</span> <span class="o">&lt;@</span> <span class="mi">2</span> <span class="o">@&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="n">q</span> <span class="o">=</span> <span class="o">&lt;@</span> <span class="mi">2</span> <span class="o">@&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 <p>Running this in the FSI gives the following output:</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">val</span> <span class="n">q</span> <span class="o">:</span> <span class="nn">Quotations</span><span class="p">.</span><span class="nc">Expr</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="o">=</span> <span class="nc">Value</span> <span class="o">(</span><span class="mi">2</span><span class="o">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">val</span> <span class="n">q</span> <span class="o">:</span> <span class="nn">Quotations</span><span class="p">.</span><span class="nc">Expr</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="o">=</span> <span class="nc">Value</span> <span class="o">(</span><span class="mi">2</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 <p>The operator <code>&lt;@ @&gt;</code> takes the F# code which it wraps and converts it into a Quotation data structure.  In this case, it takes the value 2 and creates a Value type, which is part of the <code>Quotations.Expr</code> discriminated union.</p>
 
-<p>I&rsquo;ll do a more interesting example, which will better show what a Quotation actually gives you, using the FSI:</p>
+<p>I’ll do a more interesting example, which will better show what a Quotation actually gives you, using the FSI:</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="o">&gt;</span> <span class="k">let</span> <span class="n">q</span> <span class="o">=</span> <span class="o">&lt;@</span> <span class="o">(</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span><span class="o">)</span> <span class="o">*</span> <span class="o">(</span> <span class="mi">3</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">)</span> <span class="o">@&gt;;;</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">val</span> <span class="n">q</span> <span class="o">:</span> <span class="nn">Quotations</span><span class="p">.</span><span class="nc">Expr</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="o">=</span>
-</span><span class='line'>  <span class="nc">Call</span> <span class="o">(</span><span class="nc">None</span><span class="o">,</span> <span class="n">op_Multiply</span><span class="o">,</span>
-</span><span class='line'>      <span class="o">[</span><span class="nc">Call</span> <span class="o">(</span><span class="nc">None</span><span class="o">,</span> <span class="n">op_Addition</span><span class="o">,</span> <span class="o">[</span><span class="nc">Value</span> <span class="o">(</span><span class="mi">2</span><span class="o">),</span> <span class="nc">Value</span> <span class="o">(</span><span class="mi">3</span><span class="o">)]),</span>
-</span><span class='line'>       <span class="nc">Call</span> <span class="o">(</span><span class="nc">None</span><span class="o">,</span> <span class="n">op_Subtraction</span><span class="o">,</span> <span class="o">[</span><span class="nc">Value</span> <span class="o">(</span><span class="mi">3</span><span class="o">),</span> <span class="nc">Value</span> <span class="o">(</span><span class="mi">1</span><span class="o">)])])</span>
-</span></code></pre></td></tr></table></div></figure>
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="o">&gt;</span> <span class="k">let</span> <span class="n">q</span> <span class="o">=</span> <span class="o">&lt;@</span> <span class="o">(</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span><span class="o">)</span> <span class="o">*</span> <span class="o">(</span> <span class="mi">3</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">)</span> <span class="o">@&gt;;;</span>
+</span><span class="line">
+</span><span class="line"><span class="k">val</span> <span class="n">q</span> <span class="o">:</span> <span class="nn">Quotations</span><span class="p">.</span><span class="nc">Expr</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="o">=</span>
+</span><span class="line">  <span class="nc">Call</span> <span class="o">(</span><span class="nc">None</span><span class="o">,</span> <span class="n">op_Multiply</span><span class="o">,</span>
+</span><span class="line">      <span class="o">[</span><span class="nc">Call</span> <span class="o">(</span><span class="nc">None</span><span class="o">,</span> <span class="n">op_Addition</span><span class="o">,</span> <span class="o">[</span><span class="nc">Value</span> <span class="o">(</span><span class="mi">2</span><span class="o">),</span> <span class="nc">Value</span> <span class="o">(</span><span class="mi">3</span><span class="o">)]),</span>
+</span><span class="line">       <span class="nc">Call</span> <span class="o">(</span><span class="nc">None</span><span class="o">,</span> <span class="n">op_Subtraction</span><span class="o">,</span> <span class="o">[</span><span class="nc">Value</span> <span class="o">(</span><span class="mi">3</span><span class="o">),</span> <span class="nc">Value</span> <span class="o">(</span><span class="mi">1</span><span class="o">)])])</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
+<p>The Quotation gives you the Abstract Syntax Tree (AST) for a given F# expression.  Which, when I first started learning F# a year ago, was nothing but a curiousity.  In fact, it wasn’t until just the other day that I actually started to get excited about Quotations.</p>
 
-<p>The Quotation gives you the Abstract Syntax Tree (AST) for a given F# expression.  Which, when I first started learning F# a year ago, was nothing but a curiousity.  In fact, it wasn&rsquo;t until just the other day that I actually started to get excited about Quotations.</p>
+<p>Whenever I read about Code Quotations, it seems it’s always about using Quotations to handle translating F# code into another language.  The best example of this use case, in my opinion, is WebSharper; which takes F# code and translates it into JavaScript.</p>
 
-<p>Whenever I read about Code Quotations, it seems it&rsquo;s always about using Quotations to handle translating F# code into another language.  The best example of this use case, in my opinion, is WebSharper; which takes F# code and translates it into JavaScript.</p>
-
-<p>However, it&rsquo;s the possibilities of using Quotations with distributed computing which caused my sudden spike in interest.  What&rsquo;s been bouncing around in my brain is:  can I write code in F#, break it apart into discrete chunks, send those chunks to be executing on different servers and then collect the results (MapReduce for sure).</p>
+<p>However, it’s the possibilities of using Quotations with distributed computing which caused my sudden spike in interest.  What’s been bouncing around in my brain is:  can I write code in F#, break it apart into discrete chunks, send those chunks to be executing on different servers and then collect the results (MapReduce for sure).</p>
 </div>
 
 
@@ -156,7 +153,7 @@
   
 
 
-<time datetime="2014-02-16T20:37:19-08:00" pubdate data-updated="true">Feb 16<span>th</span>, 2014</time>
+<time datetime="2014-02-16T22:37:19-06:00" pubdate data-updated="true">Feb 16<span>th</span>, 2014</time>
       
 
 <span class="categories">
@@ -195,23 +192,23 @@
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2014/04/03/type-providers-tutorial-part-1/">Type Providers - Tutorial Part 1 - Concepts</a>
+        <a href="/blog/2015/07/19/fundamental-theorem-of-prog-rock/">Fundamental Theorem of Prog Rock</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/03/20/first-haskell-meetup/">First Haskell Meetup</a>
+        <a href="/blog/2015/02/13/a-cartoon-map-of-knowledge/">A Cartoon Map of Knowledge</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/03/11/ravendb/">RavenDB, MapReduce, and Logging</a>
+        <a href="/blog/2015/01/10/its-been-8-months/">It's Been 8 Months</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/03/08/rabbitmq-and-f-number-part-6/">RabbitMQ and F# - Part 6</a>
+        <a href="/blog/2014/04/17/type-providers-tutorial-part-4/">Type Providers Tutorial Part 4 - Base Types</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2014/03/08/rabbitmq-and-f-number-part-5/">RabbitMQ and F# - Part 5</a>
+        <a href="/blog/2014/04/05/type-providers-tutorial-part-3-instantiables/">Type Providers - Tutorial Part 3 - Instantiables</a>
       </li>
     
   </ul>
@@ -228,7 +225,7 @@
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2014 - Erich G. Ess -
+  Copyright &copy; 2015 - Erich G. Ess -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 
