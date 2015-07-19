@@ -1,0 +1,88 @@
+<div class="highlight"><pre><span class="k">namespace</span> <span class="nn">Samples</span><span class="p">.</span><span class="nn">FSharp</span><span class="p">.</span><span class="nc">HelloWorldTypeProvider</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">open</span> <span class="nc">System</span>
+<span class="k">open</span> <span class="nn">System</span><span class="p">.</span><span class="nc">Reflection</span>
+<span class="k">open</span> <span class="nn">Samples</span><span class="p">.</span><span class="nn">FSharp</span><span class="p">.</span><span class="nc">ProvidedTypes</span>
+<span class="k">open</span> <span class="nn">Microsoft</span><span class="p">.</span><span class="nn">FSharp</span><span class="p">.</span><span class="nn">Core</span><span class="p">.</span><span class="nc">CompilerServices</span>
+<span class="k">open</span> <span class="nn">Microsoft</span><span class="p">.</span><span class="nn">FSharp</span><span class="p">.</span><span class="nc">Quotations</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="c1">// This defines the type provider. When compiled to a DLL it can be added as a reference to an F#</span>
+<span class="c1">// command-line compilation, script or project.</span>
+<span class="o">[&lt;</span><span class="n">typeprovider</span><span class="o">&gt;]</span>
+<span class="k">type</span> <span class="nc">HelloWorldTypeProvider</span><span class="o">(</span><span class="n">config</span><span class="o">:</span> <span class="nc">TypeProviderConfig</span><span class="o">)</span> <span class="k">as</span> <span class="n">this</span> <span class="o">=</span> <span class="o">&lt;/</span><span class="n">typeprovider</span><span class="o">&gt;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+
+<span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="c1">// Inheriting from this type provides implementations of ITypeProvider in terms of the</span>
+<span class="c1">// provided types below.</span>
+<span class="k">inherit</span> <span class="nc">TypeProviderForNamespaces</span><span class="bp">()</span>
+
+<span class="k">let</span> <span class="n">namespaceName</span> <span class="o">=</span> <span class="s2">&quot;Tutorial&quot;</span>
+<span class="k">let</span> <span class="n">thisAssembly</span> <span class="o">=</span> <span class="nn">Assembly</span><span class="p">.</span><span class="nc">GetExecutingAssembly</span><span class="bp">()</span>
+
+<span class="k">let</span> <span class="nc">CreateType</span> <span class="bp">()</span> <span class="o">=</span>
+    <span class="k">let</span> <span class="n">t</span> <span class="o">=</span> <span class="nc">ProvidedTypeDefinition</span><span class="o">(</span><span class="n">thisAssembly</span><span class="o">,</span><span class="n">namespaceName</span><span class="o">,</span>
+                                    <span class="s2">&quot;Hello&quot;</span><span class="o">,</span>
+                                    <span class="n">baseType</span> <span class="o">=</span> <span class="nc">Some</span> <span class="n">typeof</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="n">obj</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;)</span>
+
+    <span class="k">let</span> <span class="n">staticProp</span> <span class="o">=</span> <span class="nc">ProvidedProperty</span><span class="o">(</span><span class="n">propertyName</span> <span class="o">=</span> <span class="s2">&quot;StaticProperty&quot;</span><span class="o">,</span> 
+                                        <span class="n">propertyType</span> <span class="o">=</span> <span class="n">typeof</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="kt">string</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;,</span> 
+                                        <span class="nc">IsStatic</span><span class="o">=</span><span class="bp">true</span><span class="o">,</span>
+                                        <span class="nc">GetterCode</span><span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;@@</span> <span class="s2">&quot;World!&quot;</span> <span class="o">@@&amp;</span><span class="n">gt</span><span class="o">;))</span>
+
+    <span class="c1">// Add documentation to the provided static property.</span>
+    <span class="n">staticProp</span><span class="o">.</span><span class="nc">AddXmlDocDelayed</span><span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="s2">&quot;This is a static property&quot;</span><span class="o">)</span>
+
+    <span class="c1">// Add the static property to the type.</span>
+    <span class="n">t</span><span class="o">.</span><span class="nc">AddMember</span> <span class="n">staticProp</span>
+
+    <span class="c1">// Add a static method</span>
+    <span class="k">let</span> <span class="n">staticMeth</span> <span class="o">=</span> 
+        <span class="nc">ProvidedMethod</span><span class="o">(</span><span class="n">methodName</span> <span class="o">=</span> <span class="s2">&quot;StaticMethod&quot;</span><span class="o">,</span> 
+                       <span class="n">parameters</span> <span class="o">=</span> <span class="bp">[]</span><span class="o">,</span> 
+                       <span class="n">returnType</span> <span class="o">=</span> <span class="n">typeof</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="kt">string</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;,</span> 
+                       <span class="nc">IsStaticMethod</span> <span class="o">=</span> <span class="bp">true</span><span class="o">,</span>
+                       <span class="nc">InvokeCode</span> <span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> 
+                          <span class="o">&amp;</span><span class="n">lt</span><span class="o">;@@</span> <span class="s2">&quot;World!&quot;</span> <span class="o">@@&amp;</span><span class="n">gt</span><span class="o">;))</span>
+    <span class="n">t</span><span class="o">.</span><span class="nc">AddMember</span> <span class="n">staticMeth</span>
+
+    <span class="k">let</span> <span class="n">ctor</span> <span class="o">=</span> <span class="nc">ProvidedConstructor</span><span class="o">(</span><span class="n">parameters</span> <span class="o">=</span> <span class="o">[</span> <span class="o">],</span> 
+                                   <span class="nc">InvokeCode</span><span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;@@</span> <span class="mi">0</span> <span class="o">:&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">obj</span> <span class="o">@@&amp;</span><span class="n">gt</span><span class="o">;))</span>
+
+    <span class="c1">// Add documentation to the provided constructor.</span>
+    <span class="n">ctor</span><span class="o">.</span><span class="nc">AddXmlDocDelayed</span><span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="s2">&quot;This is the default constructor.  It sets the value of Hello to 0.&quot;</span><span class="o">)</span>
+
+    <span class="c1">// Add the provided constructor to the provided type.</span>
+    <span class="n">t</span><span class="o">.</span><span class="nc">AddMember</span> <span class="n">ctor</span>
+
+    <span class="k">let</span> <span class="n">ctorParams</span> <span class="o">=</span> <span class="nc">ProvidedConstructor</span><span class="o">(</span><span class="n">parameters</span> <span class="o">=</span> <span class="o">[</span> <span class="nc">ProvidedParameter</span><span class="o">(</span><span class="s2">&quot;v&quot;</span><span class="o">,</span> <span class="n">typeof</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="kt">int</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;)],</span> 
+                                   <span class="nc">InvokeCode</span><span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;@@</span> <span class="o">(</span> <span class="o">%%(</span><span class="n">args</span><span class="o">.[</span><span class="mi">0</span><span class="o">])</span> <span class="o">:</span> <span class="kt">int</span><span class="o">)</span> <span class="o">:&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">obj</span> <span class="o">@@&amp;</span><span class="n">gt</span><span class="o">;))</span>
+
+    <span class="c1">// Add documentation to the provided constructor.</span>
+    <span class="n">ctorParams</span><span class="o">.</span><span class="nc">AddXmlDocDelayed</span><span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="s2">&quot;This another constructor.  It sets the value of Hello to the parametr.&quot;</span><span class="o">)</span>
+
+    <span class="c1">// Add the provided constructor to the provided type.</span>
+    <span class="n">t</span><span class="o">.</span><span class="nc">AddMember</span> <span class="n">ctorParams</span>
+
+    <span class="k">let</span> <span class="n">instProperty</span> <span class="o">=</span> <span class="nc">ProvidedProperty</span><span class="o">(</span><span class="s2">&quot;Value&quot;</span><span class="o">,</span>
+                                        <span class="n">typeof</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="kt">int</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;,</span>
+                                        <span class="nc">GetterCode</span> <span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;@@</span> <span class="o">(%%(</span><span class="n">args</span><span class="o">.[</span><span class="mi">0</span><span class="o">])</span> <span class="o">:</span> <span class="n">obj</span><span class="o">)</span> <span class="o">:?&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="kt">int</span> <span class="o">@@&amp;</span><span class="n">gt</span><span class="o">;))</span>
+    <span class="n">t</span><span class="o">.</span><span class="nc">AddMember</span> <span class="n">instProperty</span>
+
+    <span class="k">let</span> <span class="n">instanceMeth</span> <span class="o">=</span> 
+        <span class="nc">ProvidedMethod</span><span class="o">(</span><span class="n">methodName</span> <span class="o">=</span> <span class="s2">&quot;DoubleValue&quot;</span><span class="o">,</span> 
+                       <span class="n">parameters</span> <span class="o">=</span> <span class="bp">[]</span><span class="o">,</span> 
+                       <span class="n">returnType</span> <span class="o">=</span> <span class="n">typeof</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="kt">int</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;,</span>
+                       <span class="nc">InvokeCode</span> <span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> 
+                          <span class="o">&amp;</span><span class="n">lt</span><span class="o">;@@</span> <span class="o">((%%(</span><span class="n">args</span><span class="o">.[</span><span class="mi">0</span><span class="o">])</span> <span class="o">:</span> <span class="n">obj</span><span class="o">)</span> <span class="o">:?&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="kt">int</span><span class="o">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">@@&amp;</span><span class="n">gt</span><span class="o">;))</span>
+    <span class="n">t</span><span class="o">.</span><span class="nc">AddMember</span> <span class="n">instanceMeth</span>
+
+    <span class="n">t</span>
+
+<span class="k">let</span> <span class="n">types</span> <span class="o">=</span> <span class="o">[</span> <span class="nc">CreateType</span><span class="bp">()</span> <span class="o">]</span> 
+
+<span class="c1">// And add them to the namespace</span>
+<span class="k">do</span> <span class="n">this</span><span class="o">.</span><span class="nc">AddNamespace</span><span class="o">(</span><span class="n">namespaceName</span><span class="o">,</span> <span class="n">types</span><span class="o">)</span>
+<span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;[&lt;</span><span class="n">assembly</span><span class="o">:</span><span class="n">typeproviderassembly</span><span class="o">&gt;]</span> 
+<span class="k">do</span><span class="bp">()</span>
+</pre></div>

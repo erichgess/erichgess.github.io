@@ -1,0 +1,21 @@
+<div class="highlight"><pre><span class="k">namespace</span> <span class="nn">Samples</span><span class="p">.</span><span class="nn">FSharp</span><span class="p">.</span><span class="nc">HelloWorldTypeProvider</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">open</span> <span class="nc">System</span>
+<span class="k">open</span> <span class="nn">System</span><span class="p">.</span><span class="nc">Reflection</span>
+<span class="k">open</span> <span class="nn">Samples</span><span class="p">.</span><span class="nn">FSharp</span><span class="p">.</span><span class="nc">ProvidedTypes</span>
+<span class="k">open</span> <span class="nn">Microsoft</span><span class="p">.</span><span class="nn">FSharp</span><span class="p">.</span><span class="nn">Core</span><span class="p">.</span><span class="nc">CompilerServices</span>
+<span class="k">open</span> <span class="nn">Microsoft</span><span class="p">.</span><span class="nn">FSharp</span><span class="p">.</span><span class="nc">Quotations</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="c1">// This defines the type provider. When compiled to a DLL it can be added as a reference to an F#</span>
+<span class="c1">// command-line compilation, script or project.</span>
+<span class="o">[&lt;</span><span class="n">typeprovider</span><span class="o">&gt;]</span>
+<span class="k">type</span> <span class="nc">HelloWorldTypeProvider</span><span class="o">(</span><span class="n">config</span><span class="o">:</span> <span class="nc">TypeProviderConfig</span><span class="o">)</span> <span class="k">as</span> <span class="n">this</span> <span class="o">=</span> <span class="o">&lt;/</span><span class="n">typeprovider</span><span class="o">&gt;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+
+<span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="c1">// Inheriting from this type provides implementations of ITypeProvider in terms of the</span>
+<span class="c1">// provided types below.</span>
+<span class="k">inherit</span> <span class="nc">TypeProviderForNamespaces</span><span class="bp">()</span>
+<span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;[&lt;</span><span class="n">assembly</span><span class="o">:</span><span class="n">typeproviderassembly</span><span class="o">&gt;]</span> 
+<span class="k">do</span><span class="bp">()</span>
+</pre></div>

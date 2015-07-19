@@ -1,0 +1,7 @@
+<div class="highlight"><pre>    <span class="k">let</span> <span class="nc">ValidateColumnSchema</span> <span class="o">(</span><span class="n">columns</span><span class="o">:</span> <span class="kt">string</span> <span class="kt">list</span><span class="o">)</span> <span class="o">=</span>
+        <span class="k">if</span> <span class="n">columns</span><span class="o">.</span><span class="nc">Length</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">then</span>
+            <span class="n">failwith</span> <span class="err">“</span><span class="nc">The</span> <span class="n">column</span> <span class="kt">list</span> <span class="n">is</span> <span class="n">empty</span><span class="err">”</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+
+<span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="k">let</span> <span class="nc">CreateType</span> <span class="o">(</span><span class="n">columns</span><span class="o">:</span> <span class="kt">string</span> <span class="kt">list</span><span class="o">)</span> <span class="o">=</span>
+    <span class="nc">ValidateColumnSchema</span> <span class="n">columns</span> 
+</pre></div>
