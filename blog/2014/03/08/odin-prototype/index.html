@@ -1,3 +1,5 @@
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
 
 <!DOCTYPE html>
 <!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
@@ -93,8 +95,8 @@
 
 <div class="entry-content"><p>In my previous post, I described a distributed monitoring system called Odin.  Which I am building because it will help me learn and explore topics in distributed computing independent of work.</p>
 
-<p>I&rsquo;ve been slowly working on it when I get a chance and have put together a very basic prototype:
-<a href="https://github.com/erichgess/OdinPrototype">https://github.com/erichgess/OdinPrototype</a></p>
+<p>I’ve been slowly working on it when I get a chance and have put together a very basic prototype:
+https://github.com/erichgess/OdinPrototype</p>
 
 <p>This prototype is some hacking I did over a few, very spread out days, to try out some concepts.  It has a very simple agent, which reads %CPU used and sends a message to a receiver.  That receiver this publishes that message as an IObservable.  Multiple mailbox processors subscribe to the Observable and use Reactive to do some queries on the incoming messages.</p>
 
@@ -162,7 +164,7 @@
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/07/11/tuplespaces/">Tuplespaces?</a>
+        <a href="/blog/2015/07/19/fundamental-theorem-of-prog-rock/">Fundamental Theorem of Prog Rock</a>
       </li>
     
       <li class="post">

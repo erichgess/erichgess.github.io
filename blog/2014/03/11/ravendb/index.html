@@ -1,3 +1,5 @@
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
 
 <!DOCTYPE html>
 <!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
@@ -9,7 +11,7 @@
   <meta name="author" content="Erich G. Ess">
 
   
-  <meta name="description" content="Working with a system which is distributed and uses messaging for communication presents some interesting challenges. One frequent challenge I&rsquo; &hellip;">
+  <meta name="description" content="Working with a system which is distributed and uses messaging for communication presents some interesting challenges. One frequent challenge I’ve &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -91,70 +93,64 @@
   </header>
 
 
-<div class="entry-content"><p>Working with a system which is distributed and uses messaging for communication presents some interesting challenges.  One frequent challenge I&rsquo;ve gotten to deal with a few times is:  how to tell what&rsquo;s happening to a request as the system is processing it.  A request comes into the my system, which wakes one service up and it does some work, then it sends off commands to two other services which both do some work, and then, when both are done, a final service does some work and completes the task.  A little vague, but the scenario should illustrate that when trying to figure out what happened to the initial request, I&rsquo;ve got to dig through at least 4 services worth of logs.  That&rsquo;s assuming everything has only one instance; multiple instances on multiple servers and it becomes a huge chore.</p>
+<div class="entry-content"><p>Working with a system which is distributed and uses messaging for communication presents some interesting challenges.  One frequent challenge I’ve gotten to deal with a few times is:  how to tell what’s happening to a request as the system is processing it.  A request comes into the my system, which wakes one service up and it does some work, then it sends off commands to two other services which both do some work, and then, when both are done, a final service does some work and completes the task.  A little vague, but the scenario should illustrate that when trying to figure out what happened to the initial request, I’ve got to dig through at least 4 services worth of logs.  That’s assuming everything has only one instance; multiple instances on multiple servers and it becomes a huge chore.</p>
 
-<p>The solution to this is fairly simple:  use a log aggregator like splunk or roll your own with ElasticSearch.  However, I want to have some fun and learn something new and this is a perfect situation for learning and experimentation:  the problem isn&rsquo;t that complex and if I get the solution wrong, no one really cares, so the risk is low.  What I decided to do was build something up using RavenDB and its built in MapReduce index system.</p>
-
+<p>The solution to this is fairly simple:  use a log aggregator like splunk or roll your own with ElasticSearch.  However, I want to have some fun and learn something new and this is a perfect situation for learning and experimentation:  the problem isn’t that complex and if I get the solution wrong, no one really cares, so the risk is low.  What I decided to do was build something up using RavenDB and its built in MapReduce index system.
 <!-- more -->
+Here’s a cleaned up reiteration of the problem:  I have a system consisting of a bunch of services, communicating via message queues.  Completing a request will involve several different services.  To know the status of a request, or to investigate an issue with a request, will require finding out log data for all the services in the system.  A Huge Pain.</p>
 
-
-<p>Here&rsquo;s a cleaned up reiteration of the problem:  I have a system consisting of a bunch of services, communicating via message queues.  Completing a request will involve several different services.  To know the status of a request, or to investigate an issue with a request, will require finding out log data for all the services in the system.  A Huge Pain.</p>
-
-<p>Let me build up an example to explain.  My system, for the fictional company Bloxam, handles processing orders and tracking their shipment.  There&rsquo;s a service which will receive the order from the customer, process it, and either accept or error on the order (maybe the Credit Cart didn&rsquo;t work) then a service which will handle tracking the shipping side.  The different statuses an order can go through are:</p>
+<p>Let me build up an example to explain.  My system, for the fictional company Bloxam, handles processing orders and tracking their shipment.  There’s a service which will receive the order from the customer, process it, and either accept or error on the order (maybe the Credit Cart didn’t work) then a service which will handle tracking the shipping side.  The different statuses an order can go through are:</p>
 
 <ol>
-<li>&ldquo;Order Received&rdquo;</li>
-<li>&ldquo;Processing Order&rdquo;</li>
-<li>&ldquo;Order Accepted&rdquo;</li>
-<li>&ldquo;Order Shipped&rdquo;</li>
-<li>&ldquo;Order Delivered&rdquo;
-1  &ldquo;Error <text description>&rdquo;</li>
+  <li>“Order Received”</li>
+  <li>“Processing Order”</li>
+  <li>“Order Accepted”</li>
+  <li>“Order Shipped”</li>
+  <li>“Order Delivered”
+1  “Error <text description="">&#8220;</text></li>
 </ol>
 
-
-<p>For the duration of this post, I&rsquo;ll call these Facts about the order.</p>
+<p>For the duration of this post, I’ll call these Facts about the order.</p>
 
 <p>I want to know what the current status of any given order is at any time.  I also want to be able to display various things:  for the customer: the statuses of all their orders.  For Operations:  all orders which have thrown an error.  There will be a lot of data written when these little status updates.</p>
 
-<p>There are a lot of ways to solve this problem, but I&rsquo;m using this to learn more about big data, so I&rsquo;m going to go down that path.  I&rsquo;m also using this to learn more about RavenDB.</p>
+<p>There are a lot of ways to solve this problem, but I’m using this to learn more about big data, so I’m going to go down that path.  I’m also using this to learn more about RavenDB.</p>
 
-<p>Here&rsquo;s how I&rsquo;m going to implement my little big data solution:</p>
+<p>Here’s how I’m going to implement my little big data solution:</p>
 
 <ol>
-<li>Each fact will be written to the database</li>
-<li>All facts are immutable</li>
-<li>MapReduce task will aggregate the facts and reduce them down to views which my customers need (actual customers and operations, in this case).</li>
+  <li>Each fact will be written to the database</li>
+  <li>All facts are immutable</li>
+  <li>MapReduce task will aggregate the facts and reduce them down to views which my customers need (actual customers and operations, in this case).</li>
 </ol>
 
+<p>The first item is pretty obvious, without saving the facts how will I know what’s happening.</p>
 
-<p>The first item is pretty obvious, without saving the facts how will I know what&rsquo;s happening.</p>
-
-<p>The second is less obvious:  why not just keep a single record for each order and update the status with the latest fact?  There are a couple reasons for this.  Updates are slow:  the code has to look the record up, then update it, and then save it.  Updates are risky:  what happens if someone is reading that record while I&rsquo;m updating it, two or more updates are happening to the same record, or what if an update contains a bad message (in the latest release, someone changed the text of a status message by accident)?  This is why big data sits on top of immutable data.</p>
+<p>The second is less obvious:  why not just keep a single record for each order and update the status with the latest fact?  There are a couple reasons for this.  Updates are slow:  the code has to look the record up, then update it, and then save it.  Updates are risky:  what happens if someone is reading that record while I’m updating it, two or more updates are happening to the same record, or what if an update contains a bad message (in the latest release, someone changed the text of a status message by accident)?  This is why big data sits on top of immutable data.</p>
 
 <p>The MapReduce step.  RavenDB has a nice MapReduce index feature which will work very well here.  I can tell RavenDB to basically perform a calculation on the entire set of Facts I have stored.  In this casee, what I am going to do is tell RavenDB to divide all the Facts into buckets based on Order Id.  The for each bucket, pick the most recent Fact.  This will generate a table, where each order appears once and has its most recent Fact.  RavenDB will run this task in the back ground and everytime I add a new fact it will update the information.</p>
 
-<p>Here&rsquo;s my order fact type:</p>
+<p>Here’s my order fact type:</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='csharp'><span class='line'><span class="k">public</span> <span class="k">class</span> <span class="nc">OrderFact</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">public</span> <span class="kt">string</span> <span class="n">Id</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
-</span><span class='line'>    <span class="k">public</span> <span class="n">Guid</span> <span class="n">OrderId</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;}</span>
-</span><span class='line'>    <span class="k">public</span> <span class="n">DateTime</span> <span class="n">TimeStamp</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
-</span><span class='line'>    <span class="k">public</span> <span class="kt">string</span> <span class="n">Name</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
-</span><span class='line'>    <span class="k">public</span> <span class="kt">string</span> <span class="n">Fact</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</pre></td><td class="code"><pre><code class="csharp"><span class="line"><span class="k">public</span> <span class="k">class</span> <span class="nc">OrderFact</span> <span class="p">{</span>
+</span><span class="line">    <span class="k">public</span> <span class="kt">string</span> <span class="n">Id</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span><span class="line">    <span class="k">public</span> <span class="n">Guid</span> <span class="n">OrderId</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;}</span>
+</span><span class="line">    <span class="k">public</span> <span class="n">DateTime</span> <span class="n">TimeStamp</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span><span class="line">    <span class="k">public</span> <span class="kt">string</span> <span class="n">Name</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span><span class="line">    <span class="k">public</span> <span class="kt">string</span> <span class="n">Fact</span> <span class="p">{</span> <span class="k">get</span><span class="p">;</span> <span class="k">set</span><span class="p">;</span> <span class="p">}</span>
+</span><span class="line"><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 <p>The Id is a unique identifier which RavenDB will use as the primary key for the OrderFacts table.  The OrderId is a GUID which will identify an order a customer has generated, this will be used to correlate facts to an order.  The timestamp says when the fact was generated.  The name is for who made the order.  The Fact is the string which contains the fact.  The fact is a string so that it is as flexible as possible both at the stage where I create the fact and further down the line when the facts are being analyzed.</p>
 
-<p>I&rsquo;ll add a second post where I explain how I setup the MapReduced on RavenDB.</p>
+<p>I’ll add a second post where I explain how I setup the MapReduced on RavenDB.</p>
 </div>
 
 
@@ -212,7 +208,7 @@
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/07/11/tuplespaces/">Tuplespaces?</a>
+        <a href="/blog/2015/07/19/fundamental-theorem-of-prog-rock/">Fundamental Theorem of Prog Rock</a>
       </li>
     
       <li class="post">

@@ -1,3 +1,5 @@
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
 
 <!DOCTYPE html>
 <!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
@@ -9,7 +11,8 @@
   <meta name="author" content="Erich G. Ess">
 
   
-  <meta name="description" content="I have recently become very interested in the tuplespace architecture. What got me interested (also what even made me aware at all) was a blog post &hellip;">
+  <meta name="description" content="Given , a band, and , the set of all songs composed by then is Prog iff such that contains the sound of a baby.
+">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -71,7 +74,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2015/07/11/tuplespaces/">Tuplespaces?</a></h1>
+      <h1 class="entry-title"><a href="/blog/2015/07/19/fundamental-theorem-of-prog-rock/">Fundamental Theorem of Prog Rock</a></h1>
     
     
       <p class="meta">
@@ -87,21 +90,16 @@
   
 
 
-<time datetime="2015-07-11T14:01:31-05:00" pubdate data-updated="true">Jul 11<span>th</span>, 2015</time>
+<time datetime="2015-07-19T16:47:25-05:00" pubdate data-updated="true">Jul 19<span>th</span>, 2015</time>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><p>I have recently become very interested in the tuplespace architecture.  What got me interested (also what even made me aware at all) was a <a href="http://writings.quilt.org/2014/05/12/distributed-systems-and-the-end-of-the-api/">blog post</a> from Chas Emerick.  In that post, he talked about alternative ways for communication in distributed systems.  The usual things were covered:  event sourcing, streaming, messaging, etc.  Tuplespaces were also mentioned, and I had no idea what that was, but the name is intriguing and I had to explore.</p>
-
+  <div class="entry-content"><p>Given <script type="math/tex">B</script>, a band, and <script type="math/tex">S</script>, the set of all songs composed by <script type="math/tex">B</script> then <script type="math/tex">B</script> is Prog iff <script type="math/tex">\exists s \in S</script> such that <script type="math/tex">s</script> contains the sound of a baby.</p>
 </div>
   
-  
-    <footer>
-      <a rel="full-article" href="/blog/2015/07/11/tuplespaces/">Lay on, MacDuff &rarr;</a>
-    </footer>
   
 
 
@@ -137,13 +135,14 @@
 
   <div class="entry-content"><p>While visiting San Diego, for some much needed time off from work, I had a fantastic evening hanging out my friend Steve Bjorg and his family.  As the bookend to the evening, Steve and I sat down and had chatted about reading books.  It started as merely a random topic on which to build an enjoyable conversation, but quickly morphed into a discussion about how to represent knowledge.</p>
 
-<p>The driver behind our discussion was an exploration of my inability to read technical books on a Kindle or computer.  The reason I dislike reading technical books on devices is because they don&rsquo;t allow me to do my prefered method of navigation.  When I&rsquo;m reading a technical book, there are two possible reasons that are making me read:  1. to solve a specific problem that I am having or 2. to find something which sparks my interest and passion and causes me to explore and experiment.  For example, I&rsquo;ve been learning Clojure, my main resource for that as been one of the O&#8217;Reilly books on Clojure.  I have the Clojure basics down, so now what I do is flip through the book quickly until I see a diagram, image, or something which catches my attention, at which point I stop and start reading the context.  So the question Steve and I began exploring was:  can you represent the contents of a large complex technical manual, online, in a way which allows a reader to guide themselves through the entire subject matter in a way which only requires a glance to find what is important.</p>
+<p>The driver behind our discussion was an exploration of my inability to read technical books on a Kindle or computer.  The reason I dislike reading technical books on devices is because they don’t allow me to do my prefered method of navigation.  When I’m reading a technical book, there are two possible reasons that are making me read:  1. to solve a specific problem that I am having or 2. to find something which sparks my interest and passion and causes me to explore and experiment.  For example, I’ve been learning Clojure, my main resource for that as been one of the O’Reilly books on Clojure.  I have the Clojure basics down, so now what I do is flip through the book quickly until I see a diagram, image, or something which catches my attention, at which point I stop and start reading the context.  So the question Steve and I began exploring was:  can you represent the contents of a large complex technical manual, online, in a way which allows a reader to guide themselves through the entire subject matter in a way which only requires a glance to find what is important.</p>
 
 <p>The problem with doing this sequential flip through of online documentation is that online documenation is not sequential; it is a heirarchical tree or maybe even a directed graph.  Each section linking to children which dive in to more detail about each topic covered in the parent section or linking over to related topics.  When your book is a choose your own adventure tree, how can you flip through it sequentially while still keeping context?  Our first idea was to make this tree a sequence by enumerating it with a breadth first search.  Our guess here is that a breadth first search will keep some level of connection between parent and children topics and allow the reader to build an over laying context to keep things reasonable.</p>
 
-<p>My own personal vision of what this would become is something like a cartoon map of an amusement park.  Ideally, a wordless, visual guide which represents the broad strokes of what is in the manual while cartooonishly exagerating the features of interest.  In other words, and adventurer&rsquo;s map:  pointing out where there be dragons, and trolls, and krakens, and dungeons.  So a user can look at it, find something which looks fascinating instantly, and diving into the full granular details and context to learn.</p>
+<p>My own personal vision of what this would become is something like a cartoon map of an amusement park.  Ideally, a wordless, visual guide which represents the broad strokes of what is in the manual while cartooonishly exagerating the features of interest.  In other words, and adventurer’s map:  pointing out where there be dragons, and trolls, and krakens, and dungeons.  So a user can look at it, find something which looks fascinating instantly, and diving into the full granular details and context to learn.</p>
 
-<p>This is all about providing a way for someone who already knows the basics of a topic to keep themselves diving further and further into the ocean.  Basically, it&rsquo;s a carrot to dangle in front of people to motivate them to learn your software by showing them adventures they can have.</p>
+<p>This is all about providing a way for someone who already knows the basics of a topic to keep themselves diving further and further into the ocean.  Basically, it’s a carrot to dangle in front of people to motivate them to learn your software by showing them adventures they can have.</p>
+
 </div>
   
   
@@ -179,13 +178,13 @@
   </header>
 
 
-  <div class="entry-content"><p>It has been quite a long time since my last blog post.  Quite a lot has happened in that time.  I moved from San Diego to Chicago.  I got a new job and now the CTO for a small start up company out in Chicago.  I have switched off of Windows development to Linux development.  I have gone though doing my work on a Windows box, to a Linux box, and now I&rsquo;m on a MacBook.  I have been doing a lot of learning about Cassandra, Python, Clojure, and Spark.  I have been learning about data science and machine learning.</p>
+  <div class="entry-content"><p>It has been quite a long time since my last blog post.  Quite a lot has happened in that time.  I moved from San Diego to Chicago.  I got a new job and now the CTO for a small start up company out in Chicago.  I have switched off of Windows development to Linux development.  I have gone though doing my work on a Windows box, to a Linux box, and now I’m on a MacBook.  I have been doing a lot of learning about Cassandra, Python, Clojure, and Spark.  I have been learning about data science and machine learning.</p>
 
-<p>It&rsquo;s been an exciting and challenging year for me.</p>
+<p>It’s been an exciting and challenging year for me.</p>
 
 <p>I also realized that I miss writing posts (though I only did a few) which help me organize my thoughts and enforce new things which I have learned.</p>
 
-<p>So, now I&rsquo;ll be kicking that learning off again.</p>
+<p>So, now I’ll be kicking that learning off again.</p>
 </div>
   
   
@@ -223,15 +222,13 @@
 
   <div class="entry-content"><p>In Part 3 of this Tutorial, I talked a little about erased types and how the types we generate are actually built on top of a <code>obj</code>.  Previously, I just used a plan <code>obj</code> type and cast an integer to and from the <code>obj</code> types.</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="nc">InvokeCode</span><span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&gt;</span> <span class="o">&lt;@@</span> <span class="mi">0</span> <span class="o">:&gt;</span> <span class="n">obj</span> <span class="o">@@&gt;))</span>
-</span></code></pre></td></tr></table></div></figure>
-
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="nc">InvokeCode</span><span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&gt;</span> <span class="o">&lt;@@</span> <span class="mi">0</span> <span class="o">:&gt;</span> <span class="n">obj</span> <span class="o">@@&gt;))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 <p>Using just the basic <code>obj</code> works well enough for a very simple generated type (like the simple integer from part 3).  However, it becomes a bit of a mess when you want to make anything complicated.</p>
 
-<p>In this part, we will update our Type Provider to use a more advanced type as our base type.</p>
-
+<p>In this part, we will update our Type Provider to use a more advanced type as our base type.
 </div>
   
   
@@ -271,17 +268,15 @@
   </header>
 
 
-  <div class="entry-content"><p>In the last tutorial, we built a simple type named <code>Hello</code> which had some static members.  In this tutorial, we&rsquo;ll expand our <code>Hello</code> type to include a constructor, an instance property, and an instance method.  Adding these will allow us to create instances of <code>Hello</code> using the <code>new</code> operator:</p>
+  <div class="entry-content"><p>In the last tutorial, we built a simple type named <code>Hello</code> which had some static members.  In this tutorial, we’ll expand our <code>Hello</code> type to include a constructor, an instance property, and an instance method.  Adding these will allow us to create instances of <code>Hello</code> using the <code>new</code> operator:</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">x</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hello</span><span class="bp">()</span>
-</span></code></pre></td></tr></table></div></figure>
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="n">x</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hello</span><span class="bp">()</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
+<p>We’ll also make <code>Hello</code> store some data, that means our type providers will be one step closer to awesome.  Also, one step closer to being an effective means of interacting with structured data sources.</p>
 
-<p>We&rsquo;ll also make <code>Hello</code> store some data, that means our type providers will be one step closer to awesome.  Also, one step closer to being an effective means of interacting with structured data sources.</p>
-
-<p>The full code for what we make in this part will be at the end of this post.</p>
-
+<p>The full code for what we make in this part will be at the end of this post.
 </div>
   
   
@@ -323,8 +318,7 @@
 
   <div class="entry-content"><p>In Part 1 of this series, I briefly explained what a Type Provider was and some of the main concepts which you would need to know.  In Part 2, I am going to build a very simple Type Provider.  The purpose of Part 2 is to cover the basics of developing Type Providers, how to test them with F# Interactive, and the support tools which make developing Type Providers easy.</p>
 
-<p>I will make a Type Provider which generates a single type named &ldquo;Hello&rdquo;.  At first it will just have a static property which returns the string <code>"World"</code>.  Then I will add a static method which takes no parameters.  Finally, I will add a static method which takes a parameter.</p>
-
+<p>I will make a Type Provider which generates a single type named “Hello”.  At first it will just have a static property which returns the string <code>"World"</code>.  Then I will add a static method which takes no parameters.  Finally, I will add a static method which takes a parameter.
 </div>
   
   
@@ -364,8 +358,7 @@
   </header>
 
 
-  <div class="entry-content"><p>I&rsquo;ve only been working with the F# language for the last year.  Which means that all of my learning has been with version 3.x of the F# language.  One of the biggest features of 3.x, and something which I have yet to work with, is the Type Provider.  Type Providers dynamically generate new types, usually from some data source (e.g. databases, XML documents, web services), which a developer can use in their code.  For C# developers this is analogous to the Entity Framework or the &ldquo;Add Service Reference&rdquo; in VS, both of which take a database or WSDL, respectively, and generate classes and functions that can be used in code.  For Java this would be similar to Hibernate or wsdl2java.  Just to be clear, when you create a Type Provider, what you&rsquo;ve built is an Entity Framework or a wsdl2java.  What F# provides is a framework for building your own Type Providers as easily as possible.</p>
-
+  <div class="entry-content"><p>I’ve only been working with the F# language for the last year.  Which means that all of my learning has been with version 3.x of the F# language.  One of the biggest features of 3.x, and something which I have yet to work with, is the Type Provider.  Type Providers dynamically generate new types, usually from some data source (e.g. databases, XML documents, web services), which a developer can use in their code.  For C# developers this is analogous to the Entity Framework or the “Add Service Reference” in VS, both of which take a database or WSDL, respectively, and generate classes and functions that can be used in code.  For Java this would be similar to Hibernate or wsdl2java.  Just to be clear, when you create a Type Provider, what you’ve built is an Entity Framework or a wsdl2java.  What F# provides is a framework for building your own Type Providers as easily as possible.
 </div>
   
   
@@ -405,15 +398,14 @@
   </header>
 
 
-  <div class="entry-content"><p>Last night was the first meet up for the San Diego Haskell Users Group.  I have to say that it was a lot of fun and probably the most interesting dev meet up I&rsquo;ve been to so far in San Diego.  I have barely done any Haskell, beyond get the compiler setup on my computer and make &ldquo;Hello, World&rdquo;.  As such, I learned a lot.</p>
+  <div class="entry-content"><p>Last night was the first meet up for the San Diego Haskell Users Group.  I have to say that it was a lot of fun and probably the most interesting dev meet up I’ve been to so far in San Diego.  I have barely done any Haskell, beyond get the compiler setup on my computer and make “Hello, World”.  As such, I learned a lot.</p>
 
 <ol>
-<li>I reallly love how Haskell allows you to build &ldquo;pipelines of data&rdquo;:  when you chain together several functions, put data into the top function and get the output of the bottom.  This is one of my favorite things to get in F# code and Haskell just seems to make it even easier.</li>
-<li>Generic Algebraic Data Types:  something which was mentioned to me when I made a comment about doing a presentation on &ldquo;Algebraic Data Types&rdquo;.  I have no clue what the difference between ADT and GADT is but now I have to find out.</li>
-<li>Cabal might be the simplest project management/build management tool I&rsquo;ve yet seen.  Though I&rsquo;ve only looked a little at Leiningen, I think, Cabal fills the same role.  However, I found it much easier to read.</li>
-<li>Having a meetup be a 15 minute walk from my apartment is the best.</li>
+  <li>I reallly love how Haskell allows you to build “pipelines of data”:  when you chain together several functions, put data into the top function and get the output of the bottom.  This is one of my favorite things to get in F# code and Haskell just seems to make it even easier.</li>
+  <li>Generic Algebraic Data Types:  something which was mentioned to me when I made a comment about doing a presentation on “Algebraic Data Types”.  I have no clue what the difference between ADT and GADT is but now I have to find out.</li>
+  <li>Cabal might be the simplest project management/build management tool I’ve yet seen.  Though I’ve only looked a little at Leiningen, I think, Cabal fills the same role.  However, I found it much easier to read.</li>
+  <li>Having a meetup be a 15 minute walk from my apartment is the best.</li>
 </ol>
-
 </div>
   
   
@@ -449,10 +441,9 @@
   </header>
 
 
-  <div class="entry-content"><p>Working with a system which is distributed and uses messaging for communication presents some interesting challenges.  One frequent challenge I&rsquo;ve gotten to deal with a few times is:  how to tell what&rsquo;s happening to a request as the system is processing it.  A request comes into the my system, which wakes one service up and it does some work, then it sends off commands to two other services which both do some work, and then, when both are done, a final service does some work and completes the task.  A little vague, but the scenario should illustrate that when trying to figure out what happened to the initial request, I&rsquo;ve got to dig through at least 4 services worth of logs.  That&rsquo;s assuming everything has only one instance; multiple instances on multiple servers and it becomes a huge chore.</p>
+  <div class="entry-content"><p>Working with a system which is distributed and uses messaging for communication presents some interesting challenges.  One frequent challenge I’ve gotten to deal with a few times is:  how to tell what’s happening to a request as the system is processing it.  A request comes into the my system, which wakes one service up and it does some work, then it sends off commands to two other services which both do some work, and then, when both are done, a final service does some work and completes the task.  A little vague, but the scenario should illustrate that when trying to figure out what happened to the initial request, I’ve got to dig through at least 4 services worth of logs.  That’s assuming everything has only one instance; multiple instances on multiple servers and it becomes a huge chore.</p>
 
-<p>The solution to this is fairly simple:  use a log aggregator like splunk or roll your own with ElasticSearch.  However, I want to have some fun and learn something new and this is a perfect situation for learning and experimentation:  the problem isn&rsquo;t that complex and if I get the solution wrong, no one really cares, so the risk is low.  What I decided to do was build something up using RavenDB and its built in MapReduce index system.</p>
-
+<p>The solution to this is fairly simple:  use a log aggregator like splunk or roll your own with ElasticSearch.  However, I want to have some fun and learn something new and this is a perfect situation for learning and experimentation:  the problem isn’t that complex and if I get the solution wrong, no one really cares, so the risk is low.  What I decided to do was build something up using RavenDB and its built in MapReduce index system.
 </div>
   
   
@@ -492,54 +483,49 @@
   </header>
 
 
-  <div class="entry-content"><p>A final round of polish.  Now that I have the layout and flow for using my RabbitMQ library defined, it&rsquo;s time to go through and do a bit of clean up on my names.  There&rsquo;s a lot I can do to make it so that code you write with this library becomes as readable and literate as possible.</p>
+  <div class="entry-content"><p>A final round of polish.  Now that I have the layout and flow for using my RabbitMQ library defined, it’s time to go through and do a bit of clean up on my names.  There’s a lot I can do to make it so that code you write with this library becomes as readable and literate as possible.</p>
 
-<p>Here&rsquo;s the code you write to do the initial setup:</p>
+<p>Here’s the code you write to do the initial setup:</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">openConnection</span> <span class="s2">&quot;localhost&quot;</span>
-</span><span class='line'><span class="k">let</span> <span class="n">myChannel</span> <span class="o">=</span> <span class="n">openChannel</span> <span class="n">connection</span>
-</span></code></pre></td></tr></table></div></figure>
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">openConnection</span> <span class="s2">&quot;localhost&quot;</span>
+</span><span class="line"><span class="k">let</span> <span class="n">myChannel</span> <span class="o">=</span> <span class="n">openChannel</span> <span class="n">connection</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
+<p>If I just look at this, I have to ask:  open connection to what?  Context would probably help, but this function will get called only once in an entire application, so there’s not much reason to hold back on the name.  I like the fluent style of naming, so I’ll go with:</p>
 
-<p>If I just look at this, I have to ask:  open connection to what?  Context would probably help, but this function will get called only once in an entire application, so there&rsquo;s not much reason to hold back on the name.  I like the fluent style of naming, so I&rsquo;ll go with:</p>
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">connectToRabbitMqServerAt</span> <span class="s2">&quot;localhost&quot;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">connectToRabbitMqServerAt</span> <span class="s2">&quot;localhost&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
+<p>I’ll also make the second line a little more fluent:</p>
 
-
-<p>I&rsquo;ll also make the second line a little more fluent:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">myChannel</span> <span class="o">=</span> <span class="n">openChannelOn</span> <span class="n">connection</span>
-</span></code></pre></td></tr></table></div></figure>
-
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="n">myChannel</span> <span class="o">=</span> <span class="n">openChannelOn</span> <span class="n">connection</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
 <p>Which turns my setup code to:</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">connectToRabbitMqServerAt</span> <span class="s2">&quot;localhost&quot;</span>
-</span><span class='line'><span class="k">let</span> <span class="n">myChannel</span> <span class="o">=</span> <span class="n">openChannelOn</span> <span class="n">connection</span>
-</span></code></pre></td></tr></table></div></figure>
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">connectToRabbitMqServerAt</span> <span class="s2">&quot;localhost&quot;</span>
+</span><span class="line"><span class="k">let</span> <span class="n">myChannel</span> <span class="o">=</span> <span class="n">openChannelOn</span> <span class="n">connection</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 
+<p>And that’s it for now!  I have a library which will let me write code to connect to and send a message on RabbitMQ in about 4 lines of code.  Pretty damn good, IMO.</p>
 
-<p>And that&rsquo;s it for now!  I have a library which will let me write code to connect to and send a message on RabbitMQ in about 4 lines of code.  Pretty damn good, IMO.</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">connectToRabbitMqServerAt</span> <span class="s2">&quot;localhost&quot;</span>
-</span><span class='line'><span class="k">let</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">openChannelOn</span> <span class="n">connection</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">let</span> <span class="n">writeToHelloQueue</span> <span class="o">=</span> <span class="n">createQueueWriter</span> <span class="n">channel</span> <span class="s2">&quot;MyQueue&quot;</span>
-</span><span class='line'><span class="s2">&quot;Hello&quot;</span> <span class="o">|&gt;</span> <span class="n">writeToHelloQueue</span>
-</span></code></pre></td></tr></table></div></figure>
-
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">connectToRabbitMqServerAt</span> <span class="s2">&quot;localhost&quot;</span>
+</span><span class="line"><span class="k">let</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">openChannelOn</span> <span class="n">connection</span>
+</span><span class="line">
+</span><span class="line"><span class="k">let</span> <span class="n">writeToHelloQueue</span> <span class="o">=</span> <span class="n">createQueueWriter</span> <span class="n">channel</span> <span class="s2">&quot;MyQueue&quot;</span>
+</span><span class="line"><span class="s2">&quot;Hello&quot;</span> <span class="o">|&gt;</span> <span class="n">writeToHelloQueue</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 </div>
   
   
@@ -562,7 +548,7 @@
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2015/07/11/tuplespaces/">Tuplespaces?</a>
+        <a href="/blog/2015/07/19/fundamental-theorem-of-prog-rock/">Fundamental Theorem of Prog Rock</a>
       </li>
     
       <li class="post">
