@@ -4,7 +4,7 @@
   <title><![CDATA[Elegant Architecture]]></title>
   <link href="http://erichgess.github.io/atom.xml" rel="self"/>
   <link href="http://erichgess.github.io/"/>
-  <updated>2015-07-19T17:14:38-05:00</updated>
+  <updated>2015-07-19T17:19:21-05:00</updated>
   <id>http://erichgess.github.io/</id>
   <author>
     <name><![CDATA[Erich G. Ess]]></name>
@@ -19,6 +19,8 @@
     <updated>2015-07-19T16:47:25-05:00</updated>
     <id>http://erichgess.github.io/blog/2015/07/19/fundamental-theorem-of-prog-rock</id>
     <content type="html"><![CDATA[<p>Given <script type="math/tex">B</script>, a band, and <script type="math/tex">S</script>, the set of all songs composed by <script type="math/tex">B</script> then <script type="math/tex">B</script> is Prog iff <script type="math/tex">\exists s \in S</script> such that <script type="math/tex">s</script> contains the sound of a baby.</p>
+
+<p>Testing out MathJax and Jekyll.</p>
 ]]></content>
   </entry>
   
