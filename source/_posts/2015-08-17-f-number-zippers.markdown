@@ -8,8 +8,11 @@ categories: [F#, Functional Programming, Type Theory]
 
 <!--
 Purpose:
-Primary: to teach what the Zipper type pattern is and what it can do.
-Seconary: To teach how cool it is that you can differentiate ADTs
+Primary: To teach what the Zipper type pattern is and what it can do.  Start with the Zipper of a List.  Explain how
+to use the List Zipper.  Explain how it derives from the List ADT.  Then...
+Seconary: To teach how to create a Zipper for an ADT by differentiating the ADT.  Derive the Zipper for a binary tree
+using mathematical tools.
+Tertiary: How cool is it that you can differentiate an ADT????? :D
 
 Outline
 - Introduction:  This blog post will cover the Zipper type structure.  The Zipper is analogous to the derivative of an
