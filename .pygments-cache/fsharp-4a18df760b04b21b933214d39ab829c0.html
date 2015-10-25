@@ -1,0 +1,14 @@
+<div class="highlight"><pre><span class="k">let</span> <span class="n">t</span> <span class="o">=</span> <span class="nc">Branch</span><span class="o">(</span><span class="nc">Branch</span><span class="o">(</span><span class="nc">Branch</span><span class="o">(</span><span class="nc">Empty</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="nc">Empty</span><span class="o">),</span> <span class="mi">2</span><span class="o">,</span> <span class="nc">Branch</span><span class="o">(</span><span class="nc">Empty</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="nc">Empty</span><span class="o">)),</span> <span class="mi">4</span><span class="o">,</span> <span class="nc">Branch</span><span class="o">(</span><span class="nc">Branch</span><span class="o">(</span><span class="nc">Empty</span><span class="o">,</span> <span class="mi">5</span><span class="o">,</span> <span class="nc">Empty</span><span class="o">),</span> <span class="mi">6</span><span class="o">,</span> <span class="nc">Branch</span><span class="o">(</span><span class="nc">Empty</span><span class="o">,</span> <span class="mi">7</span><span class="o">,</span> <span class="nc">Empty</span><span class="o">)));;</span>
+<span class="c1">//val t : Tree&lt;int&gt; =</span>
+<span class="c1">//  Branch</span>
+<span class="c1">//    (Branch (Branch (Empty,1,Empty),2,Branch (Empty,3,Empty)),4,</span>
+<span class="c1">//     Branch (Branch (Empty,5,Empty),6,Branch (Empty,7,Empty)))&lt;/int&gt;&lt;/p&gt;</span>
+
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">let</span> <span class="n">tz</span> <span class="o">=</span> <span class="nn">TreeZipper</span><span class="p">.</span><span class="n">create</span> <span class="n">t</span><span class="o">;;</span>
+<span class="c1">//val tz : TreeZipper&lt;int&gt; =</span>
+<span class="c1">//  TreeZipper</span>
+<span class="c1">//    (Branch (Branch (Empty,1,Empty),2,Branch (Empty,3,Empty)),4,</span>
+<span class="c1">//     Branch (Branch (Empty,5,Empty),6,Branch (Empty,7,Empty)),[])&lt;/int&gt;&lt;/p&gt;</span>
+
+<span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span>
+</pre></div>

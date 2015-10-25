@@ -1,0 +1,31 @@
+<div class="highlight"><pre><span class="k">let</span> <span class="n">t</span> <span class="o">=</span> <span class="nc">Branch</span><span class="o">(</span><span class="nc">Branch</span><span class="o">(</span><span class="nc">Branch</span><span class="o">(</span><span class="nc">Empty</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="nc">Empty</span><span class="o">),</span> <span class="mi">2</span><span class="o">,</span> <span class="nc">Branch</span><span class="o">(</span><span class="nc">Empty</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="nc">Empty</span><span class="o">)),</span> <span class="mi">4</span><span class="o">,</span> <span class="nc">Branch</span><span class="o">(</span><span class="nc">Branch</span><span class="o">(</span><span class="nc">Empty</span><span class="o">,</span> <span class="mi">5</span><span class="o">,</span> <span class="nc">Empty</span><span class="o">),</span> <span class="mi">6</span><span class="o">,</span> <span class="nc">Branch</span><span class="o">(</span><span class="nc">Empty</span><span class="o">,</span> <span class="mi">7</span><span class="o">,</span> <span class="nc">Empty</span><span class="o">)));;</span>
+<span class="c1">//val t : Tree&lt;int&gt; =</span>
+<span class="c1">//  Branch</span>
+<span class="c1">//    (Branch (Branch (Empty,1,Empty),2,Branch (Empty,3,Empty)),4,</span>
+<span class="c1">//     Branch (Branch (Empty,5,Empty),6,Branch (Empty,7,Empty)))</span>
+
+<span class="k">let</span> <span class="n">tz</span> <span class="o">=</span> <span class="nn">TreeZipper</span><span class="p">.</span><span class="n">create</span> <span class="n">t</span><span class="o">;;</span>
+<span class="c1">//val tz : TreeZipper&lt;int&gt; =</span>
+<span class="c1">//  TreeZipper</span>
+<span class="c1">//    (Branch (Branch (Empty,1,Empty),2,Branch (Empty,3,Empty)),4,</span>
+<span class="c1">//     Branch (Branch (Empty,5,Empty),6,Branch (Empty,7,Empty)),[])</span>
+<span class="c1">// Note how in the TreeZipper, the list is empty `[]`.  When we start moving through the tree, this list will get</span>
+<span class="c1">// populated with the paths which were skipped.  That is what will allow us to backtrack.</span>
+
+<span class="n">tz</span><span class="o">.</span><span class="n">left</span> <span class="bp">()</span><span class="o">;;</span>
+<span class="c1">//val it : TreeZipper&lt;int&gt; =</span>
+<span class="c1">//  TreeZipper</span>
+<span class="c1">//    (Branch (Empty,1,Empty),2,Branch (Empty,3,Empty),</span>
+<span class="c1">//     [Right (4,Branch (Branch (Empty,5,Empty),6,Branch (Empty,7,Empty)))])</span>
+<span class="c1">// We moved down the left branch and the node `4` is now the parent of the cursor.  The list is now populated with the</span>
+<span class="c1">// stop in the traversal history:  the parent node value 4 is saved along with the contents of the right child of `4`.</span>
+
+<span class="n">it</span><span class="o">.</span><span class="n">right</span><span class="bp">()</span><span class="o">;;</span>
+<span class="c1">//val it : TreeZipper&lt;int&gt; =</span>
+<span class="c1">//  TreeZipper</span>
+<span class="c1">//    (Empty,3,Empty,</span>
+<span class="c1">//     [Left (2,Branch (Empty,1,Empty));</span>
+<span class="c1">//      Right (4,Branch (Branch (Empty,5,Empty),6,Branch (Empty,7,Empty)))])</span>
+<span class="c1">// Now we move down the right branch of the node `2` which puts the cursor at the left `3`.  The history list as been</span>
+<span class="c1">// prepended with the cursor&#39;s previous position the node `2` and the left branch of that node.</span>
+</pre></div>

@@ -1,0 +1,519 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Type Theory | Elegant Architecture]]></title>
+  <link href="http://erichgess.github.io/blog/categories/type-theory/atom.xml" rel="self"/>
+  <link href="http://erichgess.github.io/"/>
+  <updated>2015-10-25T11:47:51-04:00</updated>
+  <id>http://erichgess.github.io/</id>
+  <author>
+    <name><![CDATA[Erich G. Ess]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[F# Zippers]]></title>
+    <link href="http://erichgess.github.io/blog/2015/08/17/f-number-zippers/"/>
+    <updated>2015-08-17T14:16:40-04:00</updated>
+    <id>http://erichgess.github.io/blog/2015/08/17/f-number-zippers</id>
+    <content type="html"><![CDATA[<p>One of the coolest things about working with F# (and other ML languages) is the
+incredibly elegant way that mathematics intersects with programming, to inform
+powerful tools for our toolbox.  Algebraic Data Types (ADTs) are the source of a
+large amount of this mathematical invention.  Recently, I’ve been exploring the
+algebra and calculus of types and what happens when you take the derivative
+of a type.</p>
+
+<p>Zippers are a type pattern which provide a functional way to interact with and transform data structures:  linked lists,
+binary trees, rose trees, etc.  The Zipper is a type with a set of functions that create a cursor which moved through a
+data structure, much like you move through your computers file directory tree, and can be used to modify the data
+structure.  They’re also a really cool demonstration of the intersection between programming and higher math, in this
+case: derivatives.</p>
+
+<p>In this blog post, I will explain both the mechanics of the Zipper type and the mathematics of the Zipper.  First,
+I’ll explain the list Zipper:  how to make one in F# and what can be done with it.  Second, the list zipper will be used
+as the basis for teaching how to take the derivative of an Algebraic Data Type (ADT).  Finally, the derivative
+operation will be usd to create a Zipper for the binary tree.</p>
+
+<!-- more -->
+
+<h2 id="the-list-zipper">The List Zipper</h2>
+<p>To start with, we’ll skip the math completely and focus just on the F# code: the type and the functions that, combined,
+form a Zipper.   After that, will be how to use the list zipper to interact with a list.</p>
+
+<h3 id="the-f-list-zipper">The F# List Zipper</h3>
+<p>Imagine that you have a slide show deck that you want to represent in F#.  You’ll want to be able to move back and forth
+through the deck as you give your presentation.  You also want to be able to change a specific slide as you work on your
+presentation.</p>
+
+<p>A list makes a good type to represent our slide show, as a first version.  However, how can we move back and forth
+through the deck and how can we swap out slides as we move through the deck?  We want a type which stores an ordered
+set of slides, has a focus on the slide which is being projected to a screen, and has functions for moving the focus
+to the previous slide, to the next slide, or swapping in a new slide.</p>
+
+<p>The type we just described is the list zipper.  And the above paragraph describes all the things the list Zipper needs
+to have:  something which represents the current slide, all the slides before the current slide, all the slides after
+the current slide, and functions to navigate the slide show.  If we take all of those requirements we get this type in
+F#:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">type</span> <span class="nc">Zipper</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">=</span> <span class="nc">Zipper</span> <span class="k">of</span> <span class="o">(</span><span class="err">‘</span><span class="n">a</span> <span class="kt">list</span> <span class="o">*</span> <span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="err">‘</span><span class="n">a</span> <span class="kt">list</span><span class="o">)</span> <span class="k">with</span>
+</span><span class='line'>    <span class="k">static</span> <span class="k">member</span> <span class="n">create</span> <span class="n">l</span> <span class="o">=</span>
+</span><span class='line'>        <span class="k">match</span> <span class="n">l</span> <span class="k">with</span>
+</span><span class='line'>        <span class="o">|</span> <span class="bp">[]</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">failwith</span> <span class="err">“</span><span class="n">oops</span><span class="err">”</span>
+</span><span class='line'>        <span class="o">|</span> <span class="n">h</span> <span class="o">::</span> <span class="n">t</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="nc">Zipper</span> <span class="o">(</span><span class="bp">[]</span><span class="o">,</span> <span class="n">h</span><span class="o">,</span> <span class="n">t</span><span class="o">)&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="k">member</span> <span class="n">z</span><span class="o">.</span><span class="n">right</span> <span class="bp">()</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">match</span> <span class="n">z</span> <span class="k">with</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">Zipper</span><span class="o">(</span><span class="n">l</span><span class="o">,</span> <span class="n">z</span><span class="o">,</span> <span class="bp">[]</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="nc">Zipper</span><span class="o">(</span><span class="n">l</span><span class="o">,</span> <span class="n">z</span><span class="o">,</span> <span class="bp">[]</span><span class="o">)</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">Zipper</span><span class="o">(</span><span class="n">l</span><span class="o">,</span> <span class="n">z</span><span class="o">,</span> <span class="n">h</span><span class="o">::</span><span class="n">rt</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="nc">Zipper</span><span class="o">(</span><span class="n">z</span><span class="o">::</span><span class="n">l</span><span class="o">,</span> <span class="n">h</span><span class="o">,</span> <span class="n">rt</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">member</span> <span class="n">z</span><span class="o">.</span><span class="n">left</span> <span class="bp">()</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">match</span> <span class="n">z</span> <span class="k">with</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">Zipper</span><span class="o">(</span><span class="bp">[]</span><span class="o">,</span> <span class="n">z</span><span class="o">,</span> <span class="n">r</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="nc">Zipper</span><span class="o">(</span><span class="bp">[]</span><span class="o">,</span> <span class="n">z</span><span class="o">,</span> <span class="n">r</span><span class="o">)</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">Zipper</span><span class="o">(</span><span class="n">h</span><span class="o">::</span><span class="n">lt</span><span class="o">,</span> <span class="n">z</span><span class="o">,</span> <span class="n">r</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="nc">Zipper</span><span class="o">(</span><span class="n">lt</span><span class="o">,</span> <span class="n">h</span><span class="o">,</span> <span class="n">z</span><span class="o">::</span><span class="n">r</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">member</span> <span class="n">z</span><span class="o">.</span><span class="n">update</span> <span class="n">x</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">let</span> <span class="o">(</span><span class="nc">Zipper</span><span class="o">(</span><span class="n">l</span><span class="o">,</span> <span class="o">_,</span> <span class="n">r</span><span class="o">))</span> <span class="o">=</span> <span class="n">z</span> <span class="k">in</span> <span class="nc">Zipper</span><span class="o">(</span><span class="n">l</span><span class="o">,</span> <span class="n">x</span><span class="o">,</span> <span class="n">r</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+</code></pre>
+
+<p>This also has a constructor function which takes a list and returns a zipper on that list.</p>
+
+<p>The core of this type is the tuple: <code>'a list * 'a * 'a list</code>.  The first type represents the list of elements which
+precede the cursor.  The second type, <code>'a</code>, represents the value in the list which the cursor points to.  The third
+type, <code>'a list</code>, represents the list of elements which come after the cursor.</p>
+
+<h4 id="demonstration-of-the-list-zipper">Demonstration of the List Zipper</h4>
+
+<p>Start by creating a zipper from a list
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">z</span> <span class="o">=</span> <span class="nn">Zipper</span><span class="p">.</span><span class="n">create</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span> <span class="mi">2</span><span class="o">;</span> <span class="mi">3</span><span class="o">;</span> <span class="mi">4</span><span class="o">]</span>
+</span><span class='line'><span class="c1">// val z : Zipper&lt;int&gt; = Zipper ([], 1, [2; 3; 4])</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+The cursor points to the first element in the list, there are no elements to the left of the cursor so that list is
+empty, and all the other elements are to the right of the cursor so they are in the respective list.</int></p>
+
+<p>Move the cursor to the right
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="n">z</span><span class="o">.</span><span class="n">right</span><span class="bp">()</span><span class="o">;;</span>
+</span><span class='line'><span class="c1">// val it : Zipper&lt;int&gt; = Zipper ([1], 2, [3; 4])</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+Calling the right function has returned a new zipper with the cursor now pointing to the second element in the list.</int></p>
+
+<p>Take the new zipper and move the cursor right one more time
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="n">it</span><span class="o">.</span><span class="n">right</span><span class="bp">()</span><span class="o">;;</span>
+</span><span class='line'><span class="c1">// val it : Zipper&lt;int&gt; = Zipper ([2; 1], 3, [4])</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+Note that the left list is storing the elements in reverse order.  This is becaues when the cursor moves left in a
+list it is traversing the list in reverse order.</int></p>
+
+<p>Update the value at the cursor:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="n">it</span><span class="o">.</span><span class="n">update</span> <span class="o">-</span><span class="mi">3</span><span class="o">;;</span>
+</span><span class='line'><span class="c1">// val it : Zipper&lt;int&gt; = Zipper ([2; 1], -3, [4])</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></int></p>
+
+<p>Move to the left:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="n">it</span><span class="o">.</span><span class="n">left</span><span class="bp">()</span><span class="o">;;</span>
+</span><span class='line'><span class="c1">// val it : Zipper&lt;int&gt; = Zipper ([1], 2, [-3; 4])</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></int></p>
+
+<h2 id="the-math-behind-the-list-zipper">The Math Behind the List Zipper</h2>
+<p>Here’s an approximate type definition for a list:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">type</span> <span class="nc">List</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">=</span> <span class="nc">Empty</span> <span class="o">|</span> <span class="nc">List</span> <span class="k">of</span> <span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="nc">List</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>This type definition is strictly to make how the algebra &amp; calculus behind the list
+zipper gets derived and to explicitly call out that the list type is, mathematically,
+a recursive type.</p>
+
+<p>Algebraicly, this List is represented as:</p>
+
+<script type="math/tex; mode=display">L = 1 + a\cdot L</script>
+
+<p>The derivative of which is:</p>
+
+<script type="math/tex; mode=display">% &lt;![CDATA[
+
+\begin{eqnarray} 
+\partial_aL &=& L + a\partial_aL \\
+\partial_aL(1 - a) &=& L \\
+\partial_aL &=& \frac{L}{1 - a} \\
+\partial_aL &=& \frac{1 + a + a^2 + a^3...}{1-a} = \frac{(1 + 2a + 3a^2 + ...)(1-a)}{1-a} = L^2 \\
+\end{eqnarray}
+ %]]&gt;</script>
+
+<p>If we take <script type="math/tex">L^2</script> and convert it to a type we get:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">type</span> <span class="n">partial_l</span> <span class="o">=</span> <span class="err">‘</span><span class="n">a</span> <span class="kt">list</span> <span class="o">*</span> <span class="err">‘</span><span class="n">a</span> <span class="kt">list</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+Which is close to our Zipper type but not quite there.</p>
+
+<p>As explained in Colin McBrides paper on the topic of zippers and type derivatives, we can think of the derivative of a
+type as a hole which is poked into the type where the hole represents the cursor.  The hole can can take any value of
+the type <code>'a</code>.  We can think of the pair of lists representing where in the list the hole is and the <code>'a</code> respresents
+the value of the hole.  In other words, take the derivative of <code>List&lt;'a&gt;</code> and multiply it by <code>'a</code> and you have the
+zipper:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">type</span> <span class="nc">Zipper</span> <span class="o">=</span> <span class="err">‘</span><span class="n">a</span> <span class="kt">list</span> <span class="o">*</span> <span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="err">‘</span><span class="n">a</span> <span class="kt">list</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h2 id="deriving-the-binary-tree-zipper">Deriving the Binary Tree Zipper</h2>
+<p>Now that we know how to use differentiation to create the zipper for the List type, let’s use the same technique to
+create the zipper for a binary tree.  This will start with defining a simple type for the binary tree, then
+evaluating the derivative of the binary tree type, and, finally, converting the result into an F# type.</p>
+
+<p>Here’s the binary tree type we’ll work with:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">type</span> <span class="nc">Tree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">=</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">Branch</span> <span class="k">of</span> <span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="nc">Tree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">*</span> <span class="nc">Tree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">Empty</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>We can take this type in represent it mathematically as:</p>
+
+<script type="math/tex; mode=display">T(a) = 1 + a \cdot T^2(a)</script>
+
+<p>And taking the derivative we get:</p>
+
+<script type="math/tex; mode=display">% &lt;![CDATA[
+
+\begin{eqnarray}
+\partial_aT(a) &=& T^2(a) + a \cdot (2 \cdot T(a) \cdot \partial_aT(a)) \\
+
+\partial_aT(a) - 2 \cdot a \cdot T(a) \cdot \partial_aT(a) &=& T^2(a) \\
+
+\partial_aT(a) \cdot (1 - 2 \cdot a \cdot T(a)) &=& T^2(a) \\
+
+\partial_aT(a) &=& \frac{T^2(a)}{1 - 2 \cdot a \cdot T(a)} \\
+\end{eqnarray}
+ %]]&gt;</script>
+
+<p>If we take this result and factor out the <script type="math/tex">T^2</script> to get two terms, we get the following:</p>
+
+<script type="math/tex; mode=display">T^2(a) \cdot \left( \frac{1}{1 - 2 \cdot a \cdot T(a)} \right)</script>
+
+<p>The second term, <script type="math/tex">\frac{1}{1 - 2 \cdot a \cdot T(a)}</script>, looks remarkably similar to <script type="math/tex">\frac{1}{1-a}</script> which, as
+we saw in the section about Lists, becomes <script type="math/tex">L(a)</script>.  So the derivative of the tree becomes:</p>
+
+<script type="math/tex; mode=display">\partial_aT(a) = T^2(a) \cdot L(2 \cdot a \cdot T(a))</script>
+
+<p>Now, we know that the Zipper is equal to the derivative of the type times <script type="math/tex">a</script>, which represents the possible values of
+the focus, this means that our Tree Zipper type will looke like this:</p>
+
+<script type="math/tex; mode=display">a \cdot T^2 \cdot L(2 \cdot a \cdot T)</script>
+
+<p>Translating the <script type="math/tex">a \cdot T^2</script> to F# is easy, but what does the type in the list, <script type="math/tex">2 \cdot a \cdot T</script>, represent?
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">type</span> <span class="nc">TreeZipper</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">=</span> <span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="nc">Tree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">*</span> <span class="nc">Tree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">*</span> <span class="nc">XXX</span> <span class="kt">list</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>We can take <script type="math/tex">2 \cdot a \cdot T</script> and expand it to <script type="math/tex">a \cdot T + a \cdot T</script>, which tells us that <script type="math/tex">XXX</script> is a union
+of a tuple:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">type</span> <span class="nc">XXX</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">=</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">A</span> <span class="k">of</span> <span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="nc">Tree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">B</span> <span class="k">of</span> <span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="nc">Tree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>But what the hell does the list of <script type="math/tex">XXX</script> represent and what purpose does it play in the Zipper?  Remember, the Zipper
+has to have a focus, which tells you the value the cursor points to, a way to move through the type, and a way to go
+back.  With the List Zipper we can think of <code>right</code> as moving down the list and <code>left</code> as reversing, or undoing, the
+move.  So, with the Tree Zipper, the focus is on a node in the tree and the cursor can be moved down the left or right
+branch.  When you traverse down several levels in a tree, how do you go back?  There must be some record of the branches
+of the tree which were skipped.  When the cursor is at the root of the tree and moves down the left branch, the zipper
+must record the value the cursor pointed to and the right branch.  If the cursor moves down a branch again, it must
+record the next skipped branch.  This is where the <script type="math/tex">2 \cdot a \cdot T</script> comes from:  <script type="math/tex">a \cdot T</script> is the node value
+and the skipped branch the branch can be either the left branch or the right branch which makes to possible values
+giving us <script type="math/tex">2 \cdot a \cdot T</script>.  It’s a list of <script type="math/tex">2 \cdot a \cdot T</script> because each move records the branch which was
+skipped.</p>
+
+<p>Using this new understanding we can define the type <code>XXX</code> and the TreeZipper as:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">type</span> <span class="nc">Branch</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">=</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">Left</span> <span class="k">of</span> <span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="nc">Tree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">Right</span> <span class="k">of</span> <span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="nc">Tree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">type</span> <span class="nc">TreeZipper</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">=</span> <span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="nc">Tree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">*</span> <span class="nc">Tree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">*</span> <span class="nc">Branch</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="kt">list</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Now we need the functions to satisfy: creating the Tree Zipper, moving down the right branch, moving down the left
+branch, moving back up the tree, and updating the focus.
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">type</span> <span class="nc">Tree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">=</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">Branch</span> <span class="k">of</span> <span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="nc">Tree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">*</span> <span class="nc">Tree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">Empty</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">type</span> <span class="nc">Branch</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">=</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">Left</span> <span class="k">of</span> <span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="nc">Tree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">Right</span> <span class="k">of</span> <span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="nc">Tree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">type</span> <span class="nc">TreeZipper</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">=</span> <span class="nc">TreeZipper</span> <span class="k">of</span> <span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="nc">Tree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">*</span> <span class="nc">Tree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">*</span> <span class="nc">Branch</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="kt">list</span> <span class="k">with</span>
+</span><span class='line'>    <span class="k">static</span> <span class="k">member</span> <span class="n">create</span> <span class="n">t</span> <span class="o">=</span>
+</span><span class='line'>        <span class="k">match</span> <span class="n">t</span> <span class="k">with</span>
+</span><span class='line'>        <span class="o">|</span> <span class="nc">Empty</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">failwith</span> <span class="err">“</span><span class="n">oops</span><span class="err">”</span>
+</span><span class='line'>        <span class="o">|</span> <span class="nc">Branch</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">l</span><span class="o">,</span> <span class="n">r</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="nc">TreeZipper</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">l</span><span class="o">,</span> <span class="n">r</span><span class="o">,</span> <span class="bp">[]</span><span class="o">)&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="k">member</span> <span class="n">tz</span><span class="o">.</span><span class="n">left</span> <span class="bp">()</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">match</span> <span class="n">tz</span> <span class="k">with</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">TreeZipper</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="nc">Empty</span><span class="o">,</span> <span class="n">r</span><span class="o">,</span> <span class="n">history</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">tz</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">TreeZipper</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="nc">Branch</span><span class="o">(</span><span class="n">lx</span><span class="o">,</span> <span class="n">ll</span><span class="o">,</span> <span class="n">lr</span><span class="o">),</span> <span class="n">r</span><span class="o">,</span> <span class="n">history</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="nc">TreeZipper</span><span class="o">(</span><span class="n">lx</span><span class="o">,</span> <span class="n">ll</span><span class="o">,</span> <span class="n">lr</span><span class="o">,</span> <span class="nc">Right</span><span class="o">(</span> <span class="n">x</span><span class="o">,</span> <span class="n">r</span><span class="o">)::</span><span class="n">history</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">member</span> <span class="n">tz</span><span class="o">.</span><span class="n">right</span> <span class="bp">()</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">match</span> <span class="n">tz</span> <span class="k">with</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">TreeZipper</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">l</span><span class="o">,</span> <span class="nc">Empty</span><span class="o">,</span> <span class="n">history</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">tz</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">TreeZipper</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">l</span><span class="o">,</span> <span class="nc">Branch</span><span class="o">(</span><span class="n">rx</span><span class="o">,</span> <span class="n">rl</span><span class="o">,</span> <span class="n">rr</span><span class="o">),</span> <span class="n">history</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="nc">TreeZipper</span><span class="o">(</span><span class="n">rx</span><span class="o">,</span> <span class="n">rl</span><span class="o">,</span> <span class="n">rr</span><span class="o">,</span> <span class="nc">Left</span><span class="o">(</span> <span class="n">x</span><span class="o">,</span> <span class="n">l</span><span class="o">)::</span><span class="n">history</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">member</span> <span class="n">tz</span><span class="o">.</span><span class="n">back</span> <span class="bp">()</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">match</span> <span class="n">tz</span> <span class="k">with</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">TreeZipper</span><span class="o">(_,</span> <span class="o">_,</span> <span class="o">_,</span> <span class="bp">[]</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">tz</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">TreeZipper</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">l</span><span class="o">,</span> <span class="n">r</span><span class="o">,</span> <span class="nc">Right</span><span class="o">(</span> <span class="n">hx</span><span class="o">,</span> <span class="n">hr</span><span class="o">)::</span><span class="n">history</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="nc">TreeZipper</span><span class="o">(</span><span class="n">hx</span><span class="o">,</span> <span class="nc">Branch</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">l</span><span class="o">,</span> <span class="n">r</span><span class="o">),</span> <span class="n">hr</span><span class="o">,</span> <span class="n">history</span><span class="o">)</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">TreeZipper</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">l</span><span class="o">,</span> <span class="n">r</span><span class="o">,</span> <span class="nc">Left</span><span class="o">(</span> <span class="n">hx</span><span class="o">,</span> <span class="n">hl</span><span class="o">)::</span><span class="n">history</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="nc">TreeZipper</span><span class="o">(</span><span class="n">hx</span><span class="o">,</span> <span class="n">hl</span><span class="o">,</span> <span class="nc">Branch</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">l</span><span class="o">,</span> <span class="n">r</span><span class="o">),</span> <span class="n">history</span><span class="o">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">member</span> <span class="n">tz</span><span class="o">.</span><span class="n">update</span> <span class="n">x</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">let</span> <span class="o">(</span><span class="nc">TreeZipper</span><span class="o">(_,</span> <span class="n">l</span><span class="o">,</span> <span class="n">r</span><span class="o">,</span> <span class="n">history</span><span class="o">))</span> <span class="o">=</span> <span class="n">tz</span> <span class="k">in</span> <span class="nc">TreeZipper</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">l</span><span class="o">,</span> <span class="n">r</span><span class="o">,</span> <span class="n">history</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+</code></pre>
+
+<h3 id="tree-zipper-demonstration">Tree Zipper Demonstration</h3>
+<p>Here’s a simple tree from which a Tree Zipper will be created.  That TreeZipper will be used to traverse the tree.
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">t</span> <span class="o">=</span> <span class="nc">Branch</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span>
+</span><span class='line'>            <span class="nc">Branch</span><span class="o">(</span><span class="mi">2</span><span class="o">,</span>
+</span><span class='line'>                <span class="nc">Branch</span><span class="o">(</span><span class="mi">3</span><span class="o">,</span> <span class="nc">Empty</span><span class="o">,</span> <span class="nc">Empty</span><span class="o">),</span>
+</span><span class='line'>                <span class="nc">Branch</span><span class="o">(</span><span class="mi">4</span><span class="o">,</span> <span class="nc">Empty</span><span class="o">,</span> <span class="nc">Empty</span><span class="o">)),</span>
+</span><span class='line'>            <span class="nc">Branch</span><span class="o">(</span><span class="mi">5</span><span class="o">,</span>
+</span><span class='line'>                <span class="nc">Branch</span><span class="o">(</span><span class="mi">6</span><span class="o">,</span> <span class="nc">Empty</span><span class="o">,</span> <span class="nc">Empty</span><span class="o">),</span>
+</span><span class='line'>                <span class="nc">Branch</span><span class="o">(</span><span class="mi">7</span><span class="o">,</span> <span class="nc">Empty</span><span class="o">,</span> <span class="nc">Empty</span><span class="o">)));;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="c1">//val t : Tree&lt;int&gt; =</span>
+</span><span class='line'><span class="c1">//  Branch</span>
+</span><span class='line'><span class="c1">//    (1,Branch (2,Branch (3,Empty,Empty),Branch (4,Empty,Empty)),</span>
+</span><span class='line'><span class="c1">//     Branch (5,Branch (6,Empty,Empty),Branch (7,Empty,Empty)))&lt;/int&gt;&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">let</span> <span class="n">tz</span> <span class="o">=</span> <span class="nn">TreeZipper</span><span class="p">.</span><span class="n">create</span> <span class="n">t</span><span class="o">;;</span>
+</span><span class='line'><span class="c1">//val tz : TreeZipper&lt;int&gt; =</span>
+</span><span class='line'><span class="c1">//  TreeZipper</span>
+</span><span class='line'><span class="c1">//    (1,Branch (2,Branch (3,Empty,Empty),Branch (4,Empty,Empty)),</span>
+</span><span class='line'><span class="c1">//    Branch (5,Branch (6,Empty,Empty),Branch (7,Empty,Empty)),</span>
+</span><span class='line'><span class="c1">//    [])</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+Note how in the TreeZipper, the history list is empty: `[]`.  When we start moving through the tree, this list will get
+populated with the paths which were skipped.  That is what will allow us to backtrack.</int></p>
+
+<p>Now move the zipper down the left branch:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="n">tz</span><span class="o">.</span><span class="n">left</span> <span class="bp">()</span><span class="o">;;</span>
+</span><span class='line'><span class="c1">//val it : TreeZipper&lt;int&gt; =</span>
+</span><span class='line'><span class="c1">//  TreeZipper</span>
+</span><span class='line'><span class="c1">//    (2,Branch (3,Empty,Empty),Branch (4,Empty,Empty),</span>
+</span><span class='line'><span class="c1">//     [Right (1,Branch (5,Branch (6,Empty,Empty),Branch (7,Empty,Empty)))])</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+The zipper started at the root of the tree, `1`, and moved down to the left branch node.  The zipper is now pointing to
+the value `2` and has the leaves `3` and `4` for the left and right branch, respectively.  When the zipper is moved down
+the left branch, the node it was pointing to and the skipped branch are pushed into the history list.  This is stored as
+`Right`, because it's the right branch, the parent node, `1`, and finally the value of the right branch subtree.</int></p>
+
+<p>Now the cursor is moved down the right branch:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="n">it</span><span class="o">.</span><span class="n">right</span><span class="bp">()</span><span class="o">;;</span>
+</span><span class='line'><span class="c1">//val it : TreeZipper&lt;int&gt; =</span>
+</span><span class='line'><span class="c1">//  TreeZipper</span>
+</span><span class='line'><span class="c1">//    (4,Empty,Empty,</span>
+</span><span class='line'><span class="c1">//     [Left (2,Branch (3,Empty,Empty));</span>
+</span><span class='line'><span class="c1">//      Right (1,Branch (5,Branch (6,Empty,Empty),Branch (7,Empty,Empty)))])</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+Now we move down the right branch of the node `2` which puts the cursor at the left `3`.  The history list as been
+prepended with the cursor's previous position the node `2` and the left branch of that node.</int></p>
+
+<p>Update the value of the cursor:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="n">it</span><span class="o">.</span><span class="n">update</span> <span class="o">-</span><span class="mi">4</span><span class="o">;;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="c1">//val it : TreeZipper&lt;int&gt; =</span>
+</span><span class='line'><span class="c1">//  TreeZipper</span>
+</span><span class='line'><span class="c1">//    (-4,Empty,Empty,</span>
+</span><span class='line'><span class="c1">//     [Left (2,Branch (3,Empty,Empty));</span>
+</span><span class='line'><span class="c1">//      Right (1,Branch (5,Branch (6,Empty,Empty),Branch (7,Empty,Empty)))])</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></int></p>
+
+<p>With that leaf updated, time to move back to to the root of the tree:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="n">it</span><span class="o">.</span><span class="n">back</span> <span class="bp">()</span><span class="o">;;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="c1">//val it : TreeZipper&lt;int&gt; =</span>
+</span><span class='line'><span class="c1">//  TreeZipper</span>
+</span><span class='line'><span class="c1">//    (2,Branch (3,Empty,Empty),Branch (-4,Empty,Empty),</span>
+</span><span class='line'><span class="c1">//     [Right (1,Branch (5,Branch (6,Empty,Empty),Branch (7,Empty,Empty)))])</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+The back operation is pretty straight forward.  Take the head of the history list, in this case `Left (2,Branch (3,Empty,Empty))`,
+This is the Left branch, so the cursor is now pointed to `2` the branch from the history is put in the left Branch slot
+and the branch that the zipper was pointing to, `Branch (-4,Empty,Empty)`, is put in the right Branch slot.</int></p>
+
+<p>The process is repeated when we move back again to get to the tree’s root.  Only this time, we are pulling the Left branch
+from the history list:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="n">it</span><span class="o">.</span><span class="n">back</span><span class="bp">()</span><span class="o">;;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="c1">//val it : TreeZipper&lt;int&gt; =</span>
+</span><span class='line'><span class="c1">//  TreeZipper</span>
+</span><span class='line'><span class="c1">//    (1,Branch (2,Branch (3,Empty,Empty),Branch (-4,Empty,Empty)),</span>
+</span><span class='line'><span class="c1">//     Branch (5,Branch (6,Empty,Empty),Branch (7,Empty,Empty)),[])</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></int></p>
+
+<p>Now this update function only allows the updating of the value of a node.  It wouldn’t be much work to add an update
+function which allows replacing the cursor with a whole new subtree.</p>
+
+<h4 id="flexibility">Flexibility</h4>
+<p>There’s a lot of room for how the algebraic representation of a type is converted to it’s concrete F# equivalent.</p>
+
+<p>For example, the <code>Branch</code> type from the binary that is used in the Zipper history list:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">type</span> <span class="nc">Branch</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">=</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">Left</span> <span class="k">of</span> <span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="nc">Tree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">Right</span> <span class="k">of</span> <span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="nc">Tree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">type</span> <span class="nc">TreeZipper</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">=</span> <span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="nc">Tree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">*</span> <span class="nc">Tree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">*</span> <span class="nc">Branch</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="kt">list</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Could also be written as:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">type</span> <span class="nc">Branch</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">=</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">Left</span> <span class="k">of</span> <span class="nc">Tree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">Right</span> <span class="k">of</span> <span class="nc">Tree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">type</span> <span class="nc">TreeZipper</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">=</span> <span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="nc">Tree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">*</span> <span class="nc">Tree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">*</span> <span class="o">(</span><span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="nc">Branch</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;)</span> <span class="kt">list</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+In algebraic terms, we could think of this being equivalent to <script type="math/tex">a \cdot (2 \cdot T(a))</script>.  The two interpretations of the
+algebraic type are equivalent, mathematically, but the second interpretation may be the superior.  It clearly separates
+the parent node from the branch: it’s the value <code>'a</code> with it’s left or right branch.  Whereas the previous interpretation
+is read as: the right or left branch and it’s parent value is <code>'a</code>.</p>
+
+<h2 id="further-reading">Further Reading</h2>
+
+<p>A few blog posts about ADTs and calculus (in particular, this article
+from <a href="https://codewords.recurse.com/issues/three/algebra-and-calculus-of-algebraic-data-types">Joel Burget</a>
+and this series from <a href="https://chris-taylor.github.io/blog/2013/02/13/the-algebra-of-algebraic-data-types-part-iii/">Chris Taylor</a>)
+helped clarify how the zipper works.</p>
+]]></content>
+  </entry>
+  
+</feed>

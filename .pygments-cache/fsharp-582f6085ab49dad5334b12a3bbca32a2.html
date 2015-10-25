@@ -1,0 +1,8 @@
+<div class="highlight"><pre><span class="k">let</span> <span class="n">tz</span> <span class="o">=</span> <span class="nn">TreeZipper</span><span class="p">.</span><span class="n">create</span> <span class="n">t</span><span class="o">;;</span>
+<span class="c1">//val tz : TreeZipper&lt;int&gt; =</span>
+<span class="c1">//  TreeZipper</span>
+<span class="c1">//    (1,Branch (2,Branch (3,Empty,Empty),Branch (4,Empty,Empty)),</span>
+<span class="c1">//    Branch (5,Branch (6,Empty,Empty),Branch (7,Empty,Empty)),[])</span>
+<span class="c1">// Note how in the TreeZipper, the list is empty `[]`.  When we start moving through the tree, this list will get</span>
+<span class="c1">// populated with the paths which were skipped.  That is what will allow us to backtrack.</span>
+</pre></div>
