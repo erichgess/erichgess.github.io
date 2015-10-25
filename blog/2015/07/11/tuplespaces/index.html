@@ -1,0 +1,236 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Tuplespaces? - Elegant Architecture</title>
+  <meta name="author" content="Erich G. Ess">
+
+  
+  <meta name="description" content="I have recently become very interested in the tuplespace architecture. What got me interested (also what even made me aware at all) was a blog post &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://erichgess.github.io/blog/2015/07/11/tuplespaces">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Elegant Architecture" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Elegant Architecture</a></h1>
+  
+    <h2>Architecture, Functional Languages, Style</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:erichgess.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Tuplespaces?</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-07-11T14:01:31-05:00" pubdate data-updated="true">Jul 11<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>I have recently become very interested in the tuplespace architecture.  What got me interested (also what even made me aware at all) was a <a href="http://writings.quilt.org/2014/05/12/distributed-systems-and-the-end-of-the-api/">blog post</a> from Chas Emerick.  In that post, he talked about alternative ways for communication in distributed systems.  The usual things were covered:  event sourcing, streaming, messaging, etc.  Tuplespaces were also mentioned, and I had no idea what that was, but the name is intriguing and I had to explore.</p>
+
+<!-- more -->
+
+
+<p>In my free time, I&rsquo;ve been reading what I can find on the topic.  The problem is, there really isn&rsquo;t that much.  I have gotten the original paper on Linda:  a programming language based upon the tuplespace concept.  The lack of reading material makes it hard to figure out how to build a prototype system.</p>
+
+<p>The basic concept is easy.  A tuple is a datastructure with a name and a set of values.  Some examples are: &lt;&ldquo;foo&rdquo;, 1, 2> (the name is &ldquo;foo&rdquo; and the value is (1,2)), &lt;&ldquo;name&rdquo;, &ldquo;erich&rdquo;, 33>, or &lt;&ldquo;example&rdquo;, 1, 1.0, 3.0>.  Applications that want to communicate put and read tuples from a data store.  Tuples are looked up by name and pattern matching the values.  So you can specify a strict tuple: get(&lt;&ldquo;foo&rdquo;, 1, 2>) would check the tuplespace for &lt;&ldquo;foo&rdquo;, 1, 2>.  You can also search with a pattern: get(&lt;&ldquo;foo&rdquo;, 1, float>) this would find any tuple with the name &ldquo;foo&rdquo;, first value is 1, and the second value is a float.  Multiple tuples can have the same name and exact duplicates can also be put into the tuplespace.  There are three basic operations:  put &ndash; write a tuple to the space, get &ndash; take a tuple from the space (the tuple is deleted), copy &ndash; make a copy of the tuple matching the pattern but don&rsquo;t delete it from the space.</p>
+
+<p>Right now, I&rsquo;m trying to figure out:</p>
+
+<ol>
+<li>Is the tuplespace data storage handled at the application level or is there a central tuplespace service?  I would expect it to be like RabbitMQ where there is a central tuplespace store that all services ping when they want to work with data.  These seems like the only way a tuplespace could work.</li>
+<li>What happens when there are duplicate tuples?  It is possible to have duplicate tuples in the space.  When you read from the space, do you get all the tuples or only one?</li>
+<li>When asking for a tuple from the tuplespace, you can specify a pattern the tuple must match (e.g. the name is &ldquo;foo&rdquo; and the first value is 1 and the second value is a float.  This would match on the tuples &lt;&ldquo;foo&rdquo;, 1, 0.5> and &lt;&ldquo;foo&rdquo;, 1, 2.3>).  When you ask for a pattern with multiple matches, what do you get back?  Is it all the matches or just the first one?</li>
+<li>Why allow duplicate tuples in the tuplespace?</li>
+</ol>
+
+
+<p>I&rsquo;ve been playing around with building a demo tuplespace system in Clojure, so that I am forced to find the answers to these questions.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Erich G. Ess</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-07-11T14:01:31-05:00" pubdate data-updated="true">Jul 11<span>th</span>, 2015</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/clojure/'>Clojure,</a>, <a class='category' href='/blog/categories/data/'>Data</a>, <a class='category' href='/blog/categories/distributed/'>Distributed</a>, <a class='category' href='/blog/categories/programming/'>Programming,</a>, <a class='category' href='/blog/categories/stores/'>Stores</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://erichgess.github.io/blog/2015/07/11/tuplespaces/" data-via="" data-counturl="http://erichgess.github.io/blog/2015/07/11/tuplespaces/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/02/13/a-cartoon-map-of-knowledge/" title="Previous Post: A Cartoon Map of Knowledge">&laquo; A Cartoon Map of Knowledge</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/07/11/tuplespaces/">Tuplespaces?</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/02/13/a-cartoon-map-of-knowledge/">A Cartoon Map of Knowledge</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/01/10/its-been-8-months/">It's Been 8 Months</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/04/17/type-providers-tutorial-part-4/">Type Providers Tutorial Part 4 - Base Types</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2014/04/05/type-providers-tutorial-part-3-instantiables/">Type Providers - Tutorial Part 3 - Instantiables</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Erich G. Ess -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
