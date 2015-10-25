@@ -11,7 +11,7 @@
   <meta name="author" content="Erich G. Ess">
 
   
-  <meta name="description" content="Alright, I now have a simple usable RabbitMQ client library which fits comfortably with F#. However, there’s still some inconsistency in the design &hellip;">
+  <meta name="description" content="A final round of polish. Now that I have the layout and flow for using my RabbitMQ library defined, it’s time to go through and do a bit of clean up &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -73,6 +73,84 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2014/03/09/rabbitmq-and-f-number-part-6/">RabbitMQ and F# - Part 6</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-09T01:08:19-05:00" pubdate data-updated="true">Mar 9<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>A final round of polish.  Now that I have the layout and flow for using my RabbitMQ library defined, it’s time to go through and do a bit of clean up on my names.  There’s a lot I can do to make it so that code you write with this library becomes as readable and literate as possible.</p>
+
+<p>Here’s the code you write to do the initial setup:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">openConnection</span> <span class="s2">&quot;localhost&quot;</span>
+</span><span class="line"><span class="k">let</span> <span class="n">myChannel</span> <span class="o">=</span> <span class="n">openChannel</span> <span class="n">connection</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>If I just look at this, I have to ask:  open connection to what?  Context would probably help, but this function will get called only once in an entire application, so there’s not much reason to hold back on the name.  I like the fluent style of naming, so I’ll go with:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">connectToRabbitMqServerAt</span> <span class="s2">&quot;localhost&quot;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>I’ll also make the second line a little more fluent:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="n">myChannel</span> <span class="o">=</span> <span class="n">openChannelOn</span> <span class="n">connection</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Which turns my setup code to:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">connectToRabbitMqServerAt</span> <span class="s2">&quot;localhost&quot;</span>
+</span><span class="line"><span class="k">let</span> <span class="n">myChannel</span> <span class="o">=</span> <span class="n">openChannelOn</span> <span class="n">connection</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>And that’s it for now!  I have a library which will let me write code to connect to and send a message on RabbitMQ in about 4 lines of code.  Pretty damn good, IMO.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">connectToRabbitMqServerAt</span> <span class="s2">&quot;localhost&quot;</span>
+</span><span class="line"><span class="k">let</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">openChannelOn</span> <span class="n">connection</span>
+</span><span class="line">
+</span><span class="line"><span class="k">let</span> <span class="n">writeToHelloQueue</span> <span class="o">=</span> <span class="n">createQueueWriter</span> <span class="n">channel</span> <span class="s2">&quot;MyQueue&quot;</span>
+</span><span class="line"><span class="s2">&quot;Hello&quot;</span> <span class="o">|&gt;</span> <span class="n">writeToHelloQueue</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2014/03/09/rabbitmq-and-f-number-part-5/">RabbitMQ and F# - Part 5</a></h1>
     
     
@@ -89,7 +167,7 @@
   
 
 
-<time datetime="2014-03-09T00:00:00-06:00" pubdate data-updated="true">Mar 9<span>th</span>, 2014</time>
+<time datetime="2014-03-09T01:00:00-05:00" pubdate data-updated="true">Mar 9<span>th</span>, 2014</time>
         
       </p>
     
@@ -143,7 +221,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/03/08/rabbitmq-and-f-number-part-4/">RabbitMQ and F# - Part 4</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/03/09/rabbitmq-and-f-number-part-4/">RabbitMQ and F# - Part 4</a></h1>
     
     
       <p class="meta">
@@ -159,7 +237,7 @@
   
 
 
-<time datetime="2014-03-08T23:55:44-06:00" pubdate data-updated="true">Mar 8<span>th</span>, 2014</time>
+<time datetime="2014-03-09T00:55:44-05:00" pubdate data-updated="true">Mar 9<span>th</span>, 2014</time>
         
       </p>
     
@@ -197,7 +275,7 @@
   
   
     <footer>
-      <a rel="full-article" href="/blog/2014/03/08/rabbitmq-and-f-number-part-4/">Lay on, MacDuff &rarr;</a>
+      <a rel="full-article" href="/blog/2014/03/09/rabbitmq-and-f-number-part-4/">Lay on, MacDuff &rarr;</a>
     </footer>
   
 
@@ -209,7 +287,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/03/08/rabbitmq-and-f-number-part-3/">RabbitMQ and F# - Part 3</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/03/09/rabbitmq-and-f-number-part-3/">RabbitMQ and F# - Part 3</a></h1>
     
     
       <p class="meta">
@@ -225,7 +303,7 @@
   
 
 
-<time datetime="2014-03-08T23:38:01-06:00" pubdate data-updated="true">Mar 8<span>th</span>, 2014</time>
+<time datetime="2014-03-09T00:38:01-05:00" pubdate data-updated="true">Mar 9<span>th</span>, 2014</time>
         
       </p>
     
@@ -243,7 +321,7 @@
   
   
     <footer>
-      <a rel="full-article" href="/blog/2014/03/08/rabbitmq-and-f-number-part-3/">Lay on, MacDuff &rarr;</a>
+      <a rel="full-article" href="/blog/2014/03/09/rabbitmq-and-f-number-part-3/">Lay on, MacDuff &rarr;</a>
     </footer>
   
 
@@ -255,7 +333,7 @@
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2014/03/08/rabbitmq-and-f-number-part-2/">RabbitMQ and F# - Part 2</a></h1>
+      <h1 class="entry-title"><a href="/blog/2014/03/09/rabbitmq-and-f-number-part-2/">RabbitMQ and F# - Part 2</a></h1>
     
     
       <p class="meta">
@@ -271,7 +349,7 @@
   
 
 
-<time datetime="2014-03-08T23:15:36-06:00" pubdate data-updated="true">Mar 8<span>th</span>, 2014</time>
+<time datetime="2014-03-09T00:15:36-05:00" pubdate data-updated="true">Mar 9<span>th</span>, 2014</time>
         
       </p>
     
@@ -289,7 +367,7 @@
   
   
     <footer>
-      <a rel="full-article" href="/blog/2014/03/08/rabbitmq-and-f-number-part-2/">Lay on, MacDuff &rarr;</a>
+      <a rel="full-article" href="/blog/2014/03/09/rabbitmq-and-f-number-part-2/">Lay on, MacDuff &rarr;</a>
     </footer>
   
 
@@ -317,7 +395,7 @@
   
 
 
-<time datetime="2014-03-08T01:32:30-06:00" pubdate data-updated="true">Mar 8<span>th</span>, 2014</time>
+<time datetime="2014-03-08T02:32:30-05:00" pubdate data-updated="true">Mar 8<span>th</span>, 2014</time>
         
       </p>
     
@@ -360,7 +438,7 @@ https://github.com/erichgess/OdinPrototype</p>
   
 
 
-<time datetime="2014-03-08T00:39:00-06:00" pubdate data-updated="true">Mar 8<span>th</span>, 2014</time>
+<time datetime="2014-03-08T01:39:00-05:00" pubdate data-updated="true">Mar 8<span>th</span>, 2014</time>
         
       </p>
     
@@ -400,7 +478,7 @@ https://github.com/erichgess/OdinPrototype</p>
   
 
 
-<time datetime="2014-03-06T09:44:30-06:00" pubdate data-updated="true">Mar 6<span>th</span>, 2014</time>
+<time datetime="2014-03-06T10:44:30-05:00" pubdate data-updated="true">Mar 6<span>th</span>, 2014</time>
         
       </p>
     
@@ -441,7 +519,7 @@ https://github.com/erichgess/OdinPrototype</p>
   
 
 
-<time datetime="2014-03-04T21:56:20-06:00" pubdate data-updated="true">Mar 4<span>th</span>, 2014</time>
+<time datetime="2014-03-04T22:56:20-05:00" pubdate data-updated="true">Mar 4<span>th</span>, 2014</time>
         
       </p>
     
@@ -483,7 +561,7 @@ https://github.com/erichgess/OdinPrototype</p>
   
 
 
-<time datetime="2014-02-16T22:37:19-06:00" pubdate data-updated="true">Feb 16<span>th</span>, 2014</time>
+<time datetime="2014-02-16T23:37:19-05:00" pubdate data-updated="true">Feb 16<span>th</span>, 2014</time>
         
       </p>
     
@@ -517,6 +595,10 @@ https://github.com/erichgess/OdinPrototype</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/08/17/f-number-zippers/">F# Zippers</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/07/19/fundamental-theorem-of-prog-rock/">Fundamental Theorem of Prog Rock</a>
       </li>
     
@@ -530,10 +612,6 @@ https://github.com/erichgess/OdinPrototype</p>
     
       <li class="post">
         <a href="/blog/2014/04/17/type-providers-tutorial-part-4/">Type Providers Tutorial Part 4 - Base Types</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/04/05/type-providers-tutorial-part-3-instantiables/">Type Providers - Tutorial Part 3 - Instantiables</a>
       </li>
     
   </ul>

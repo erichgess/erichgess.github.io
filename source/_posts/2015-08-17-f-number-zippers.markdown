@@ -158,7 +158,7 @@ evaluating the derivative of the binary tree type, and, finally, converting the 
 Here's the binary tree type we'll work with:
 {% codeblock lang:fsharp %}
 type Tree<'a> =
-    | Branch of Tree<'a> * 'a * Tree<'a>
+    | Branch of 'a * Tree<'a> * Tree<'a>
     | Empty
 {% endcodeblock %}
 
@@ -182,10 +182,10 @@ $$
 
 If we take this result and factor out the $$T^2$$ to get two terms, we get the following:
 
-$$T^2(a) \cdot frac{1}{1 - 2 \cdot a \cdot T(a)}$$
+$$T^2(a) \cdot \left( \frac{1}{1 - 2 \cdot a \cdot T(a)} \right)$$
 
-The second term looks remarkably similar to $$\frac{1}{1-a}$$ which, we saw in the section about Lists, becomes $$L(a)$$.
-So the derivative of the tree becomes:
+The second term, $$\frac{1}{1 - 2 \cdot a \cdot T(a)}$$, looks remarkably similar to $$\frac{1}{1-a}$$ which, as
+we saw in the section about Lists, becomes $$L(a)$$.  So the derivative of the tree becomes:
 
 $$\partial_aT(a) = T^2(a) \cdot L(2 \cdot a \cdot T(a))$$
 
@@ -232,38 +232,153 @@ Now we need the functions to satisfy: creating the Tree Zipper, moving down the 
 branch, moving back up the tree, and updating the focus.
 {% codeblock lang:fsharp %}
 type Tree<'a> =
-    | Branch of Tree<'a> * 'a * Tree<'a>
+    | Branch of 'a * Tree<'a> * Tree<'a>
     | Empty
 
 type Branch<'a> =
     | Left of 'a * Tree<'a>
     | Right of 'a * Tree<'a>
 
-type TreeZipper<'a> = TreeZipper of Tree<'a> * 'a * Tree<'a> * Branch<'a> list with
+type TreeZipper<'a> = TreeZipper of 'a * Tree<'a> * Tree<'a> * Branch<'a> list with
     static member create t =
         match t with
         | Empty -> failwith "oops"
-        | Branch(l, x, r) -> TreeZipper(l, x, r, [])
+        | Branch(x, l, r) -> TreeZipper(x, l, r, [])
 
-    member tz.moveLeft () =
+    member tz.left () =
         match tz with
-        | TreeZipper(Empty, x, r, history) -> tz
-        | TreeZipper(Branch(ll, lx, lr), x, r, history) -> TreeZipper(ll, lx, lr, Left( x, r)::history)
+        | TreeZipper(x, Empty, r, history) -> tz
+        | TreeZipper(x, Branch(lx, ll, lr), r, history) -> TreeZipper(lx, ll, lr, Right( x, r)::history)
 
-    member tz.moveRight () =
+    member tz.right () =
         match tz with
-        | TreeZipper(l, x, Empty, history) -> tz
-        | TreeZipper(l, x, Branch(rl, rx, rr), history) -> TreeZipper(rl, rx, rr, Right( x, l)::history)
+        | TreeZipper(x, l, Empty, history) -> tz
+        | TreeZipper(x, l, Branch(rx, rl, rr), history) -> TreeZipper(rx, rl, rr, Left( x, l)::history)
 
-    member tz.moveBack () =
+    member tz.back () =
         match tz with
-        | TreeZipper(l, x, r, []) -> tz
-        | TreeZipper(l, x, r, Left( hx, hr)::history) -> TreeZipper(Branch(l, x, r), hx, hr, history)
-        | TreeZipper(l, x, r, Right( hx, hl)::history) -> TreeZipper(hl, hx, Branch(l, x, r), history)
+        | TreeZipper(_, _, _, []) -> tz
+        | TreeZipper(x, l, r, Right( hx, hr)::history) -> TreeZipper(hx, Branch(x, l, r), hr, history)
+        | TreeZipper(x, l, r, Left( hx, hl)::history) -> TreeZipper(hx, hl, Branch(x, l, r), history)
 
-    member tz.updateValue x =
-        let (TreeZipper(l, _, r, history)) = tz in TreeZipper(l, x, r, history)
+    member tz.update x =
+        let (TreeZipper(_, l, r, history)) = tz in TreeZipper(x, l, r, history)
 {% endcodeblock %}
+
+### Tree Zipper Demonstration
+Here's a simple tree from which a Tree Zipper will be created.  That TreeZipper will be used to traverse the tree.
+{% codeblock lang:fsharp %}
+let t = Branch(1, 
+            Branch(2, 
+                Branch(3, Empty, Empty), 
+                Branch(4, Empty, Empty)), 
+            Branch(5, 
+                Branch(6, Empty, Empty), 
+                Branch(7, Empty, Empty)));;
+
+//val t : Tree<int> =
+//  Branch
+//    (1,Branch (2,Branch (3,Empty,Empty),Branch (4,Empty,Empty)),
+//     Branch (5,Branch (6,Empty,Empty),Branch (7,Empty,Empty)))
+
+let tz = TreeZipper.create t;;
+//val tz : TreeZipper<int> =
+//  TreeZipper
+//    (1,Branch (2,Branch (3,Empty,Empty),Branch (4,Empty,Empty)),
+//    Branch (5,Branch (6,Empty,Empty),Branch (7,Empty,Empty)),
+//    [])
+{% endcodeblock %}
+Note how in the TreeZipper, the history list is empty: `[]`.  When we start moving through the tree, this list will get
+populated with the paths which were skipped.  That is what will allow us to backtrack.
+
+
+Now move the zipper down the left branch:
+{% codeblock lang:fsharp %}
+tz.left ();;
+//val it : TreeZipper<int> =
+//  TreeZipper
+//    (2,Branch (3,Empty,Empty),Branch (4,Empty,Empty),
+//     [Right (1,Branch (5,Branch (6,Empty,Empty),Branch (7,Empty,Empty)))])
+{% endcodeblock %}
+The zipper started at the root of the tree, `1`, and moved down to the left branch node.  The zipper is now pointing to
+the value `2` and has the leaves `3` and `4` for the left and right branch, respectively.  When the zipper is moved down
+the left branch, the node it was pointing to and the skipped branch are pushed into the history list.  This is stored as
+`Right`, because it's the right branch, the parent node, `1`, and finally the value of the right branch subtree.
+
+Now the cursor is moved down the right branch:
+{% codeblock lang:fsharp %}
+it.right();;
+//val it : TreeZipper<int> =
+//  TreeZipper
+//    (4,Empty,Empty,
+//     [Left (2,Branch (3,Empty,Empty));
+//      Right (1,Branch (5,Branch (6,Empty,Empty),Branch (7,Empty,Empty)))])
+{% endcodeblock %}
+Now we move down the right branch of the node `2` which puts the cursor at the left `3`.  The history list as been
+prepended with the cursor's previous position the node `2` and the left branch of that node.
+
+Update the value of the cursor:
+{% codeblock lang:fsharp %}
+it.update -4;;
+
+//val it : TreeZipper<int> =
+//  TreeZipper
+//    (-4,Empty,Empty,
+//     [Left (2,Branch (3,Empty,Empty));
+//      Right (1,Branch (5,Branch (6,Empty,Empty),Branch (7,Empty,Empty)))])
+{% endcodeblock %}
+
+With that leaf updated, time to move back to to the root of the tree:
+{% codeblock lang:fsharp %}
+it.back ();;
+
+//val it : TreeZipper<int> =
+//  TreeZipper
+//    (2,Branch (3,Empty,Empty),Branch (-4,Empty,Empty),
+//     [Right (1,Branch (5,Branch (6,Empty,Empty),Branch (7,Empty,Empty)))])
+{% endcodeblock %}
+The back operation is pretty straight forward.  Take the head of the history list, in this case `Left (2,Branch (3,Empty,Empty))`,
+This is the Left branch, so the cursor is now pointed to `2` the branch from the history is put in the left Branch slot
+and the branch that the zipper was pointing to, `Branch (-4,Empty,Empty)`, is put in the right Branch slot.
+
+The process is repeated when we move back again to get to the tree's root.  Only this time, we are pulling the Left branch
+from the history list:
+{% codeblock lang:fsharp %}
+it.back();;
+
+//val it : TreeZipper<int> =
+//  TreeZipper
+//    (1,Branch (2,Branch (3,Empty,Empty),Branch (-4,Empty,Empty)),
+//     Branch (5,Branch (6,Empty,Empty),Branch (7,Empty,Empty)),[])
+{% endcodeblock %}
+
+Now this update function only allows the updating of the value of a node.  It wouldn't be much work to add an update
+function which allows replacing the cursor with a whole new subtree.
+
+#### Flexibility
+There's a lot of room for how the algebraic representation of a type is converted to it's concrete F# equivalent.
+
+For example, the `Branch` type from the binary that is used in the Zipper history list:
+{% codeblock lang:fsharp %}
+type Branch<'a> =
+    | Left of 'a * Tree<'a>
+    | Right of 'a * Tree<'a>
+    
+type TreeZipper<'a> = 'a * Tree<'a> * Tree<'a> * Branch<'a> list
+{% endcodeblock %}
+
+Could also be written as:
+{% codeblock lang:fsharp %}
+type Branch<'a> =
+    | Left of Tree<'a>
+    | Right of Tree<'a>
+    
+type TreeZipper<'a> = 'a * Tree<'a> * Tree<'a> * ('a * Branch<'a>) list
+{% endcodeblock %}
+In algebraic terms, we could think of this being equivalent to $$a \cdot (2 \cdot T(a))$$.  The two interpretations of the
+algebraic type are equivalent, mathematically, but the second interpretation may be the superior.  It clearly separates
+the parent node from the branch: it's the value `'a` with it's left or right branch.  Whereas the previous interpretation
+is read as: the right or left branch and it's parent value is `'a`.
 
 ## Further Reading
 
