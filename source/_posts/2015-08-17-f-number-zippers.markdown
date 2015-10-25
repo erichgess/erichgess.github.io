@@ -198,6 +198,105 @@ type Tree<'a> =
     | Empty
 {% endcodeblock %}
 
+We can take this type in represent it mathematically as:
+
+$$T(a) = 1 + a \cdot T^2(a)$$
+
+And taking the derivative we get:
+
+$$\partial_aT(a) = T^2(a) + a \cdot (2 \cdot T(a) \partial_aT(a))$$
+
+$$\partial_aT(a) - 2 \cdot a \cdot T(a) \partial_aT(a) = T^2(a)$$
+
+$$\partial_aT(a) \cdot (1 - 2 \cdot a \cdot T(a)) = T^2(a)$$
+
+$$\partial_aT(a) = \frac{T^2(a)}{1 - 2 \cdot a \cdot T(a)} $$
+
+If we take this result and factor out the $$T^2$$ to get two terms, we get the following:
+
+$$T^2(a) \cdot frac{1}{1 - 2 \cdot a \cdot T(a)}$$
+
+The second term looks remarkably similar to $$\frac{1}{1-a}$$ which, we saw in the section about Lists, becomes $$L(a)$$.
+So the derivative of the tree becomes:
+
+$$\partial_aT(a) = T^2(a) \cdot L(2 \cdot a \cdot T(a))$$
+
+Now, we know that the Zipper is equal to the derivative of the type times $$a$$, which represents the possible values of
+the focus, this means that our Tree Zipper type will looke like this:
+
+$$a \cdot T^2 \cdot L(2 \cdot a \cdot T)$$
+
+Translating the $$a \cdot T^2$$ to F# is easy, but what does the type in the list, $$2 \cdot a \cdot T$$, represent?
+{% codeblock lang:fsharp %}
+type TreeZipper<'a> = 'a * Tree<'a> * Tree<'a> * XXX list
+{% endcodeblock %}
+
+We can take $$2 \cdot a \cdot T$$ and expand it to $$a \cdot T + a \cdot T$$, which tells us that $$XXX$$ is a union
+of a tuple:
+{% codeblock lang:fsharp %}
+type XXX<'a> =
+    | A of 'a * Tree<'a>
+    | B of 'a * Tree<'a>
+{% endcodeblock %}
+
+But what the hell does the list of $$XXX$$ represent and what purpose does it play in the Zipper?  Remember, the Zipper
+has to have a focus, which tells you the value the cursor points to, a way to move through the type, and a way to go
+back.  With the List Zipper we can think of `right` as moving down the list and `left` as reversing, or undoing, the
+move.  So, with the Tree Zipper, the focus is on a node in the tree and the cursor can be moved down the left or right
+branch.  When you traverse down several levels in a tree, how do you go back?  There must be some record of the branches
+of the tree which were skipped.  When the cursor is at the root of the tree and moves down the left branch, the zipper
+must record the value the cursor pointed to and the right branch.  If the cursor moves down a branch again, it must
+record the next skipped branch.  This is where the $$2 \cdot a \cdot T$$ comes from:  $$a \cdot T$$ is the node value
+and the skipped branch the branch can be either the left branch or the right branch which makes to possible values
+giving us $$2 \cdot a \cdot T$$.  It's a list of $$2 \cdot a \cdot T$$ because each move records the branch which was
+skipped.
+
+Using this new understanding we can define the type `XXX` and the TreeZipper as:
+{% codeblock lang:fsharp %}
+type Branch<'a> =
+    | Left of 'a * Tree<'a>
+    | Right of 'a * Tree<'a>
+    
+type TreeZipper<'a> = 'a * Tree<'a> * Tree<'a> * Branch<'a> list
+{% endcodeblock %}
+
+Now we need the functions to satisfy: creating the Tree Zipper, moving down the right branch, moving down the left
+branch, moving back up the tree, and updating the focus.
+{% codeblock lang:fsharp %}
+type Tree<'a> =
+    | Branch of Tree<'a> * 'a * Tree<'a>
+    | Empty
+
+type Branch<'a> =
+    | Left of 'a * Tree<'a>
+    | Right of 'a * Tree<'a>
+
+type TreeZipper<'a> = TreeZipper of Tree<'a> * 'a * Tree<'a> * Branch<'a> list with
+    static member create t =
+        match t with
+        | Empty -> failwith "oops"
+        | Branch(l, x, r) -> TreeZipper(l, x, r, [])
+
+    member tz.moveLeft () =
+        match tz with
+        | TreeZipper(Empty, x, r, history) -> tz
+        | TreeZipper(Branch(ll, lx, lr), x, r, history) -> TreeZipper(ll, lx, lr, Left( x, r)::history)
+
+    member tz.moveRight () =
+        match tz with
+        | TreeZipper(l, x, Empty, history) -> tz
+        | TreeZipper(l, x, Branch(rl, rx, rr), history) -> TreeZipper(rl, rx, rr, Right( x, l)::history)
+
+    member tz.moveBack () =
+        match tz with
+        | TreeZipper(l, x, r, []) -> tz
+        | TreeZipper(l, x, r, Left( hx, hr)::history) -> TreeZipper(Branch(l, x, r), hx, hr, history)
+        | TreeZipper(l, x, r, Right( hx, hl)::history) -> TreeZipper(hl, hx, Branch(l, x, r), history)
+
+    member tz.updateValue x =
+        let (TreeZipper(l, _, r, history)) = tz in TreeZipper(l, x, r, history)
+{% endcodeblock %}
+
 # Old Post
 
 A few blog posts about ADTs and calculus (in particular, this article
