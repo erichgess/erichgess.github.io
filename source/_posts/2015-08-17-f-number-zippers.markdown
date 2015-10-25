@@ -14,6 +14,18 @@ Seconary: To teach how to create a Zipper for an ADT by differentiating the ADT.
 using mathematical tools.
 Tertiary: How cool is it that you can differentiate an ADT????? :D
 
+Flow:
+- Reader needs to know what the topic of the blog post will be. 
+- Reader needs to know what the structure of the post will be.  --> introduction
+
+- What's the easiest way to explain what and why of a Zipper?  --> Demonstrate the List zipper
+
+- Now that the mechanics of a Zipper are explained, dive into the math behind a zipper.  The reader will understand
+how the Zipper works and can focus on understanding the theoretical part of a zipper and why it's worth learning
+how to derive new Zippers.
+
+- Show an applicative demonstration of the math behind the Zipper.  Derive a Zipper for a binary tree.
+
 Outline
 - Introduction:  This blog post will cover the Zipper type structure.  The Zipper is analogous to the derivative of an
 ADT.
@@ -27,9 +39,8 @@ Zipper and return a new Zipper with the cursor moved.
 - The Zipper of a Tree with variable numbers of branches.
 - Deriving the Zipper
 -- the Zipper ADT compared to the parent type
--- The derivative of an ADT
--- 
-
+-- The derivative of an ADT - Holes!
+-- Filling the hole
 -->
 
 One of the coolest things about working with F# (and other ML languages) is the
