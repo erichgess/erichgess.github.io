@@ -182,10 +182,10 @@ $$
 
 If we take this result and factor out the $$T^2$$ to get two terms, we get the following:
 
-$$T^2(a) \cdot frac{1}{1 - 2 \cdot a \cdot T(a)}$$
+$$T^2(a) \cdot \left( \frac{1}{1 - 2 \cdot a \cdot T(a)} \right)$$
 
-The second term looks remarkably similar to $$\frac{1}{1-a}$$ which, we saw in the section about Lists, becomes $$L(a)$$.
-So the derivative of the tree becomes:
+The second term, $\frac{1}{1 - 2 \cdot a \cdot T(a)}$, looks remarkably similar to $\frac{1}{1-a}$ which, as
+we saw in the section about Lists, becomes $$L(a)$$.  So the derivative of the tree becomes:
 
 $$\partial_aT(a) = T^2(a) \cdot L(2 \cdot a \cdot T(a))$$
 
@@ -245,24 +245,65 @@ type TreeZipper<'a> = TreeZipper of Tree<'a> * 'a * Tree<'a> * Branch<'a> list w
         | Empty -> failwith "oops"
         | Branch(l, x, r) -> TreeZipper(l, x, r, [])
 
-    member tz.moveLeft () =
+    member tz.left () =
         match tz with
         | TreeZipper(Empty, x, r, history) -> tz
-        | TreeZipper(Branch(ll, lx, lr), x, r, history) -> TreeZipper(ll, lx, lr, Left( x, r)::history)
+        | TreeZipper(Branch(ll, lx, lr), x, r, history) -> TreeZipper(ll, lx, lr, Right( x, r)::history)
 
-    member tz.moveRight () =
+    member tz.right () =
         match tz with
         | TreeZipper(l, x, Empty, history) -> tz
-        | TreeZipper(l, x, Branch(rl, rx, rr), history) -> TreeZipper(rl, rx, rr, Right( x, l)::history)
+        | TreeZipper(l, x, Branch(rl, rx, rr), history) -> TreeZipper(rl, rx, rr, Left( x, l)::history)
 
-    member tz.moveBack () =
+    member tz.back () =
         match tz with
         | TreeZipper(l, x, r, []) -> tz
-        | TreeZipper(l, x, r, Left( hx, hr)::history) -> TreeZipper(Branch(l, x, r), hx, hr, history)
-        | TreeZipper(l, x, r, Right( hx, hl)::history) -> TreeZipper(hl, hx, Branch(l, x, r), history)
+        | TreeZipper(l, x, r, Right( hx, hr)::history) -> TreeZipper(Branch(l, x, r), hx, hr, history)
+        | TreeZipper(l, x, r, Left( hx, hl)::history) -> TreeZipper(hl, hx, Branch(l, x, r), history)
+{% endcodeblock %}
 
-    member tz.updateValue x =
-        let (TreeZipper(l, _, r, history)) = tz in TreeZipper(l, x, r, history)
+### Tree Zipper Demonstration
+
+{% codeblock lang:fsharp %}
+let t = Branch(
+            Branch(
+                Branch(Empty, 1, Empty), 
+                2, 
+                Branch(Empty, 3, Empty)), 
+            4, 
+            Branch(
+                Branch(Empty, 5, Empty), 
+                6, 
+                Branch(Empty, 7, Empty)));;
+//val t : Tree<int> =
+//  Branch
+//    (Branch (Branch (Empty,1,Empty),2,Branch (Empty,3,Empty)),4,
+//     Branch (Branch (Empty,5,Empty),6,Branch (Empty,7,Empty)))
+
+let tz = TreeZipper.create t;;
+//val tz : TreeZipper<int> =
+//  TreeZipper
+//    (Branch (Branch (Empty,1,Empty),2,Branch (Empty,3,Empty)),4,
+//     Branch (Branch (Empty,5,Empty),6,Branch (Empty,7,Empty)),[])
+// Note how in the TreeZipper, the list is empty `[]`.  When we start moving through the tree, this list will get
+// populated with the paths which were skipped.  That is what will allow us to backtrack.
+
+tz.left ();;
+//val it : TreeZipper<int> =
+//  TreeZipper
+//    (Branch (Empty,1,Empty),2,Branch (Empty,3,Empty),
+//     [Right (4,Branch (Branch (Empty,5,Empty),6,Branch (Empty,7,Empty)))])
+// We moved down the left branch and the node `4` is now the parent of the cursor.  The list is now populated with the
+// stop in the traversal history:  the parent node value 4 is saved along with the contents of the right child of `4`.
+
+it.right();;
+//val it : TreeZipper<int> =
+//  TreeZipper
+//    (Empty,3,Empty,
+//     [Left (2,Branch (Empty,1,Empty));
+//      Right (4,Branch (Branch (Empty,5,Empty),6,Branch (Empty,7,Empty)))])
+// Now we move down the right branch of the node `2` which puts the cursor at the left `3`.  The history list as been
+// prepended with the cursor's previous position the node `2` and the left branch of that node.
 {% endcodeblock %}
 
 ## Further Reading
