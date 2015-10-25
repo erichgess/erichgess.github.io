@@ -126,13 +126,14 @@ $$L = 1 + a\cdot L$$
 
 The derivative of which is:
 
-$$\partial_aL = L + a\partial_aL$$
-
-$$\partial_aL(1 - a) = L$$
-
-$$\partial_aL = \frac{L}{1 - a}$$
-
-$$\partial_aL = \frac{1 + a + a^2 + a^3...}{1-a} = \frac{(1 + 2a + 3a^2 + ...)(1-a)}{1-a} = L^2$$
+$$
+\begin{eqnarray} 
+\partial_aL &=& L + a\partial_aL \\
+\partial_aL(1 - a) &=& L \\
+\partial_aL &=& \frac{L}{1 - a} \\
+\partial_aL &=& \frac{1 + a + a^2 + a^3...}{1-a} = \frac{(1 + 2a + 3a^2 + ...)(1-a)}{1-a} = L^2 \\
+\end{eqnarray}
+$$
 
 If we take $$L^2$$ and convert it to a type we get:
 {% codeblock lang:fsharp %}
@@ -167,13 +168,17 @@ $$T(a) = 1 + a \cdot T^2(a)$$
 
 And taking the derivative we get:
 
-$$\partial_aT(a) = T^2(a) + a \cdot (2 \cdot T(a) \partial_aT(a))$$
+$$
+\begin{eqnarray}
+\partial_aT(a) &=& T^2(a) + a \cdot (2 \cdot T(a) \cdot \partial_aT(a)) \\
 
-$$\partial_aT(a) - 2 \cdot a \cdot T(a) \partial_aT(a) = T^2(a)$$
+\partial_aT(a) - 2 \cdot a \cdot T(a) \cdot \partial_aT(a) &=& T^2(a) \\
 
-$$\partial_aT(a) \cdot (1 - 2 \cdot a \cdot T(a)) = T^2(a)$$
+\partial_aT(a) \cdot (1 - 2 \cdot a \cdot T(a)) &=& T^2(a) \\
 
-$$\partial_aT(a) = \frac{T^2(a)}{1 - 2 \cdot a \cdot T(a)} $$
+\partial_aT(a) &=& \frac{T^2(a)}{1 - 2 \cdot a \cdot T(a)} \\
+\end{eqnarray}
+$$
 
 If we take this result and factor out the $$T^2$$ to get two terms, we get the following:
 
@@ -260,7 +265,7 @@ type TreeZipper<'a> = TreeZipper of Tree<'a> * 'a * Tree<'a> * Branch<'a> list w
         let (TreeZipper(l, _, r, history)) = tz in TreeZipper(l, x, r, history)
 {% endcodeblock %}
 
-# Further Reading
+## Further Reading
 
 A few blog posts about ADTs and calculus (in particular, this article
 from [Joel Burget](https://codewords.recurse.com/issues/three/algebra-and-calculus-of-algebraic-data-types)
