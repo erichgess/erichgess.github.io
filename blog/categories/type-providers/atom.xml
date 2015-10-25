@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Type Providers | Elegant Architecture]]></title>
   <link href="http://erichgess.github.io/blog/categories/type-providers/atom.xml" rel="self"/>
   <link href="http://erichgess.github.io/"/>
-  <updated>2015-07-19T17:09:36-05:00</updated>
+  <updated>2015-10-25T11:37:15-04:00</updated>
   <id>http://erichgess.github.io/</id>
   <author>
     <name><![CDATA[Erich G. Ess]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Type Providers Tutorial Part 4 - Base Types]]></title>
     <link href="http://erichgess.github.io/blog/2014/04/17/type-providers-tutorial-part-4/"/>
-    <updated>2014-04-17T00:09:16-05:00</updated>
+    <updated>2014-04-17T01:09:16-04:00</updated>
     <id>http://erichgess.github.io/blog/2014/04/17/type-providers-tutorial-part-4</id>
     <content type="html"><![CDATA[<p>In Part 3 of this Tutorial, I talked a little about erased types and how the types we generate are actually built on top of a <code>obj</code>.  Previously, I just used a plan <code>obj</code> type and cast an integer to and from the <code>obj</code> types.</p>
 
@@ -222,7 +222,7 @@ Build and send the project output to the FSI.  You should get an output that loo
   <entry>
     <title type="html"><![CDATA[Type Providers - Tutorial Part 3 - Instantiables]]></title>
     <link href="http://erichgess.github.io/blog/2014/04/05/type-providers-tutorial-part-3-instantiables/"/>
-    <updated>2014-04-05T15:42:52-05:00</updated>
+    <updated>2014-04-05T16:42:52-04:00</updated>
     <id>http://erichgess.github.io/blog/2014/04/05/type-providers-tutorial-part-3-instantiables</id>
     <content type="html"><![CDATA[<p>In the last tutorial, we built a simple type named <code>Hello</code> which had some static members.  In this tutorial, we’ll expand our <code>Hello</code> type to include a constructor, an instance property, and an instance method.  Adding these will allow us to create instances of <code>Hello</code> using the <code>new</code> operator:</p>
 
@@ -571,7 +571,7 @@ What’s important here is the <code>(%%(args.[0]) : obj)</code>.  More specific
   <entry>
     <title type="html"><![CDATA[Type Providers - Tutorial Part 2]]></title>
     <link href="http://erichgess.github.io/blog/2014/04/04/type-providers-tutorial-part-2/"/>
-    <updated>2014-04-04T19:51:36-05:00</updated>
+    <updated>2014-04-04T20:51:36-04:00</updated>
     <id>http://erichgess.github.io/blog/2014/04/04/type-providers-tutorial-part-2</id>
     <content type="html"><![CDATA[<p>In Part 1 of this series, I briefly explained what a Type Provider was and some of the main concepts which you would need to know.  In Part 2, I am going to build a very simple Type Provider.  The purpose of Part 2 is to cover the basics of developing Type Providers, how to test them with F# Interactive, and the support tools which make developing Type Providers easy.</p>
 
@@ -789,7 +789,7 @@ Do this by right clicking on the FSI window and choosing the reset option.</p>
   <entry>
     <title type="html"><![CDATA[Type Providers - Tutorial Part 1 - Concepts]]></title>
     <link href="http://erichgess.github.io/blog/2014/04/03/type-providers-tutorial-part-1/"/>
-    <updated>2014-04-03T22:36:12-05:00</updated>
+    <updated>2014-04-03T23:36:12-04:00</updated>
     <id>http://erichgess.github.io/blog/2014/04/03/type-providers-tutorial-part-1</id>
     <content type="html"><![CDATA[<p>I’ve only been working with the F# language for the last year.  Which means that all of my learning has been with version 3.x of the F# language.  One of the biggest features of 3.x, and something which I have yet to work with, is the Type Provider.  Type Providers dynamically generate new types, usually from some data source (e.g. databases, XML documents, web services), which a developer can use in their code.  For C# developers this is analogous to the Entity Framework or the “Add Service Reference” in VS, both of which take a database or WSDL, respectively, and generate classes and functions that can be used in code.  For Java this would be similar to Hibernate or wsdl2java.  Just to be clear, when you create a Type Provider, what you’ve built is an Entity Framework or a wsdl2java.  What F# provides is a framework for building your own Type Providers as easily as possible.
 <!-- more -->
