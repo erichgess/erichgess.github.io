@@ -6,43 +6,6 @@ comments: true
 categories: [F#, Functional Programming, Type Theory]
 ---
 
-<!--
-Purpose:
-Primary: To teach what the Zipper type pattern is and what it can do.  Start with the Zipper of a List.  Explain how
-to use the List Zipper.  Explain how it derives from the List ADT.  Then...
-Seconary: To teach how to create a Zipper for an ADT by differentiating the ADT.  Derive the Zipper for a binary tree
-using mathematical tools.
-Tertiary: How cool is it that you can differentiate an ADT????? :D
-
-Flow:
-- Reader needs to know what the topic of the blog post will be. 
-- Reader needs to know what the structure of the post will be.  --> introduction
-
-- What's the easiest way to explain what and why of a Zipper?  --> Demonstrate the List zipper
-
-- Now that the mechanics of a Zipper are explained, dive into the math behind a zipper.  The reader will understand
-how the Zipper works and can focus on understanding the theoretical part of a zipper and why it's worth learning
-how to derive new Zippers.
-
-- Show an applicative demonstration of the math behind the Zipper.  Derive a Zipper for a binary tree.
-
-Outline
-- Introduction:  This blog post will cover the Zipper type structure.  The Zipper is analogous to the derivative of an
-ADT.
-- The Zipper of a list
-- Why would I care about the Zipper?  Replacing specific values in a list in O(1).  Moving through the list in O(1).
--- The Zipper is a type which represents a cursor on the parent type.  It includes a set of functions for moving the
-cursor through the data structure or for modifying the value at the cursor's current position; the functions take a
-Zipper and return a new Zipper with the cursor moved.
-- The Zipper of a Binary Tree
-- Using the Tree Zipper
-- The Zipper of a Tree with variable numbers of branches.
-- Deriving the Zipper
--- the Zipper ADT compared to the parent type
--- The derivative of an ADT - Holes!
--- Filling the hole
--->
-
 One of the coolest things about working with F# (and other ML languages) is the
 incredibly elegant way that mathematics intersects with programming, to inform
 powerful tools for our toolbox.  Algebraic Data Types (ADTs) are the source of a
