@@ -67,3 +67,10 @@ The `'a` is the value of the node the cursor used to point at.  The tuple `RoseT
 is all the branches of the node except where the cursor is currently at!  The first `RoseTree<'a> list`
 is the branches to the left of the branch down which the cursor went and the second `RoseTree<'a> list`
 is all the branches to the right!
+
+To help clarify how the rose tree zipper works, here's a visual explanation.
+
+The color green indicates the position of the cursor.
+
+Here we are with a newly created zipper on a rose tree.  The cursor is pointing to the root of the tree
+![My helpful screenshot]({{ site.url }}/assets/zippers/rosetree_1.png)
