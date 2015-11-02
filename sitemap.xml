@@ -2,104 +2,104 @@
 <urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
     <url>
         <loc>http://erichgess.github.io/blog/2014/02/16/my-first-post/</loc>
-        <lastmod>2015-11-01T21:28:17-05:00</lastmod>
+        <lastmod>2015-11-01T21:30:46-05:00</lastmod>
     </url>
     <url>
         <loc>http://erichgess.github.io/blog/2014/03/04/using-rabbitmq-with-f-number/</loc>
-        <lastmod>2015-11-01T21:28:17-05:00</lastmod>
+        <lastmod>2015-11-01T21:30:46-05:00</lastmod>
     </url>
     <url>
         <loc>
             http://erichgess.github.io/blog/2014/03/06/building-a-rabbitmq-library-in-f-number/
         </loc>
-        <lastmod>2015-11-01T21:28:17-05:00</lastmod>
+        <lastmod>2015-11-01T21:30:46-05:00</lastmod>
     </url>
     <url>
         <loc>http://erichgess.github.io/blog/2014/03/08/odin-learning-distributed-computing/</loc>
-        <lastmod>2015-11-01T21:28:17-05:00</lastmod>
+        <lastmod>2015-11-01T21:30:46-05:00</lastmod>
     </url>
     <url>
         <loc>http://erichgess.github.io/blog/2014/03/08/odin-prototype/</loc>
-        <lastmod>2015-11-01T21:28:17-05:00</lastmod>
+        <lastmod>2015-11-01T21:30:46-05:00</lastmod>
     </url>
     <url>
         <loc>http://erichgess.github.io/blog/2014/03/09/rabbitmq-and-f-number-part-2/</loc>
-        <lastmod>2015-11-01T21:28:17-05:00</lastmod>
+        <lastmod>2015-11-01T21:30:46-05:00</lastmod>
     </url>
     <url>
         <loc>http://erichgess.github.io/blog/2014/03/09/rabbitmq-and-f-number-part-3/</loc>
-        <lastmod>2015-11-01T21:28:17-05:00</lastmod>
+        <lastmod>2015-11-01T21:30:46-05:00</lastmod>
     </url>
     <url>
         <loc>http://erichgess.github.io/blog/2014/03/09/rabbitmq-and-f-number-part-4/</loc>
-        <lastmod>2015-11-01T21:28:17-05:00</lastmod>
+        <lastmod>2015-11-01T21:30:46-05:00</lastmod>
     </url>
     <url>
         <loc>http://erichgess.github.io/blog/2014/03/09/rabbitmq-and-f-number-part-5/</loc>
-        <lastmod>2015-11-01T21:28:17-05:00</lastmod>
+        <lastmod>2015-11-01T21:30:46-05:00</lastmod>
     </url>
     <url>
         <loc>http://erichgess.github.io/blog/2014/03/09/rabbitmq-and-f-number-part-6/</loc>
-        <lastmod>2015-11-01T21:28:17-05:00</lastmod>
+        <lastmod>2015-11-01T21:30:46-05:00</lastmod>
     </url>
     <url>
         <loc>http://erichgess.github.io/blog/2014/03/11/ravendb/</loc>
-        <lastmod>2015-11-01T21:28:17-05:00</lastmod>
+        <lastmod>2015-11-01T21:30:46-05:00</lastmod>
     </url>
     <url>
         <loc>http://erichgess.github.io/blog/2014/03/20/first-haskell-meetup/</loc>
-        <lastmod>2015-11-01T21:28:17-05:00</lastmod>
+        <lastmod>2015-11-01T21:30:46-05:00</lastmod>
     </url>
     <url>
         <loc>http://erichgess.github.io/blog/2014/04/03/type-providers-tutorial-part-1/</loc>
-        <lastmod>2015-11-01T21:28:17-05:00</lastmod>
+        <lastmod>2015-11-01T21:30:46-05:00</lastmod>
     </url>
     <url>
         <loc>http://erichgess.github.io/blog/2014/04/04/type-providers-tutorial-part-2/</loc>
-        <lastmod>2015-11-01T21:28:17-05:00</lastmod>
+        <lastmod>2015-11-01T21:30:46-05:00</lastmod>
     </url>
     <url>
         <loc>
             http://erichgess.github.io/blog/2014/04/05/type-providers-tutorial-part-3-instantiables/
         </loc>
-        <lastmod>2015-11-01T21:28:17-05:00</lastmod>
+        <lastmod>2015-11-01T21:30:46-05:00</lastmod>
     </url>
     <url>
         <loc>http://erichgess.github.io/blog/2014/04/17/type-providers-tutorial-part-4/</loc>
-        <lastmod>2015-11-01T21:28:17-05:00</lastmod>
+        <lastmod>2015-11-01T21:30:46-05:00</lastmod>
     </url>
     <url>
         <loc>http://erichgess.github.io/blog/2015/01/10/its-been-8-months/</loc>
-        <lastmod>2015-11-01T21:28:17-05:00</lastmod>
+        <lastmod>2015-11-01T21:30:46-05:00</lastmod>
     </url>
     <url>
         <loc>http://erichgess.github.io/blog/2015/02/13/a-cartoon-map-of-knowledge/</loc>
-        <lastmod>2015-11-01T21:28:17-05:00</lastmod>
+        <lastmod>2015-11-01T21:30:46-05:00</lastmod>
     </url>
     <url>
         <loc>http://erichgess.github.io/blog/2015/07/19/fundamental-theorem-of-prog-rock/</loc>
-        <lastmod>2015-11-01T21:28:17-05:00</lastmod>
+        <lastmod>2015-11-01T21:30:46-05:00</lastmod>
     </url>
     <url>
         <loc>http://erichgess.github.io/blog/2015/08/17/f-number-zippers/</loc>
-        <lastmod>2015-11-01T21:28:17-05:00</lastmod>
+        <lastmod>2015-11-01T21:30:46-05:00</lastmod>
     </url>
     <url>
         <loc>
             http://erichgess.github.io/blog/2015/11/01/zippers-2-building-a-rose-tree-zipper/
         </loc>
-        <lastmod>2015-11-01T21:29:32-05:00</lastmod>
+        <lastmod>2015-11-01T21:31:51-05:00</lastmod>
     </url>
     <url>
         <loc>http://erichgess.github.io/blog/archives/</loc>
-        <lastmod>2015-11-01T21:29:32-05:00</lastmod>
+        <lastmod>2015-11-01T21:31:51-05:00</lastmod>
     </url>
     <url>
         <loc>http://erichgess.github.io/</loc>
-        <lastmod>2015-11-01T21:29:32-05:00</lastmod>
+        <lastmod>2015-11-01T21:31:51-05:00</lastmod>
     </url>
     <url>
         <loc>http://erichgess.github.io/robots.txt</loc>
-        <lastmod>2015-11-01T21:28:17-05:00</lastmod>
+        <lastmod>2015-11-01T21:30:46-05:00</lastmod>
     </url>
 </urlset>
