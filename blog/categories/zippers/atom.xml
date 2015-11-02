@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Zippers | Elegant Architecture]]></title>
   <link href="http://erichgess.github.io/blog/categories/zippers/atom.xml" rel="self"/>
   <link href="http://erichgess.github.io/"/>
-  <updated>2015-11-01T21:09:10-05:00</updated>
+  <updated>2015-11-01T21:28:11-05:00</updated>
   <id>http://erichgess.github.io/</id>
   <author>
     <name><![CDATA[Erich G. Ess]]></name>
@@ -90,6 +90,23 @@ is all the branches to the right!</p>
 
 <p>Here we are with a newly created zipper on a rose tree.  The cursor is pointing to the root of the tree
 <img src="http://erichgess.github.io/assets/zippers/rosetree_1.png" alt="My helpful screenshot" /></p>
+
+<p>We’ll move the cursor down to the middle branch.  The root of the tree and the left and right branches
+are then moved into the history list for the cursor.  The color blue is used to show that all those
+nodes are grouped together as one entry in the history list.
+<img src="http://erichgess.github.io/assets/zippers/rosetree_2.png" alt="Moving the cursor" /></p>
+
+<p>Here’s a visual of the rose tree zipper value after the cursor is moved to the middle node.  The cursor
+points to (C, [G; H]), corresponding to the <code>'a * RoseTree&lt;'a&gt; list</code> in the zipper type.  The previous
+cursor position corresponds to the list of <code>'a * RoseTree&lt;'a&gt; list * RoseTree&lt;'a&gt; list</code>.
+<img src="http://erichgess.github.io/assets/zippers/rosetree_2_note.png" alt="The zipper type" /></p>
+
+<p>Moving the cursor down the left branch, the previous node and the right branch are colored to indicate
+that they are grouped together and prepended to the history list.
+<img src="http://erichgess.github.io/assets/zippers/rosetree_3.png" alt="Move cursor down left branch" /></p>
+
+<p>Visualizing the new rose tree zipper value:
+<img src="http://erichgess.github.io/assets/zippers/rosetree_3_note.png" alt="New rose tree zipper value" /></p>
 ]]></content>
   </entry>
   
