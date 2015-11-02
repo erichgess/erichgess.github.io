@@ -11,8 +11,8 @@
   <meta name="author" content="Erich G. Ess">
 
   
-  <meta name="description" content="One of the coolest things about working with F# (and other ML languages) is the
-incredibly elegant way that mathematics intersects with programming, &hellip;">
+  <meta name="description" content="As a follow up to my post about Zippers for lists and binary trees, I wanted to create a zipper for
+a slightly more complex data structure. The Rose &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -68,6 +68,53 @@ incredibly elegant way that mathematics intersects with programming, &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/11/01/zippers-2-building-a-rose-tree-zipper/">Zippers 2: Building a Rose Tree Zipper</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-11-01T09:38:55-05:00" pubdate data-updated="true">Nov 1<span>st</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>As a follow up to my post about Zippers for lists and binary trees, I wanted to create a zipper for
+a slightly more complex data structure.  The Rose Tree is a tree structure where the number of
+branches a node may have is variable.  An example of a rose tree would be the directory structure
+on your computer:  each directory may contain 0 or more sub directories which, in turn, may contain
+addition subdirectories.  With this example in mind, the zipper is analagous to you moving through
+your computers file system:  starting at the root directory and using <code>cd</code> to move down a branch
+and <code>cd ..</code> to move back.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/11/01/zippers-2-building-a-rose-tree-zipper/">Lay on, MacDuff &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -472,48 +519,6 @@ operation will be usd to create a Zipper for the binary tree.</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/03/11/ravendb/">RavenDB, MapReduce, and Logging</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-03-11T11:38:11-04:00" pubdate data-updated="true">Mar 11<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Working with a system which is distributed and uses messaging for communication presents some interesting challenges.  One frequent challenge I’ve gotten to deal with a few times is:  how to tell what’s happening to a request as the system is processing it.  A request comes into the my system, which wakes one service up and it does some work, then it sends off commands to two other services which both do some work, and then, when both are done, a final service does some work and completes the task.  A little vague, but the scenario should illustrate that when trying to figure out what happened to the initial request, I’ve got to dig through at least 4 services worth of logs.  That’s assuming everything has only one instance; multiple instances on multiple servers and it becomes a huge chore.</p>
-
-<p>The solution to this is fairly simple:  use a log aggregator like splunk or roll your own with ElasticSearch.  However, I want to have some fun and learn something new and this is a perfect situation for learning and experimentation:  the problem isn’t that complex and if I get the solution wrong, no one really cares, so the risk is low.  What I decided to do was build something up using RavenDB and its built in MapReduce index system.
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/03/11/ravendb/">Lay on, MacDuff &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -529,6 +534,10 @@ operation will be usd to create a Zipper for the binary tree.</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/11/01/zippers-2-building-a-rose-tree-zipper/">Zippers 2: Building a Rose Tree Zipper</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/08/17/f-number-zippers/">F# Zippers</a>
       </li>
     
@@ -542,10 +551,6 @@ operation will be usd to create a Zipper for the binary tree.</p>
     
       <li class="post">
         <a href="/blog/2015/01/10/its-been-8-months/">It&#8217;s Been 8 Months</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/04/17/type-providers-tutorial-part-4/">Type Providers Tutorial Part 4 - Base Types</a>
       </li>
     
   </ul>

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: F# | Elegant Architecture]]></title>
   <link href="http://erichgess.github.io/blog/categories/f-number/atom.xml" rel="self"/>
   <link href="http://erichgess.github.io/"/>
-  <updated>2015-10-25T11:47:51-04:00</updated>
+  <updated>2015-11-01T21:03:49-05:00</updated>
   <id>http://erichgess.github.io/</id>
   <author>
     <name><![CDATA[Erich G. Ess]]></name>
@@ -12,6 +12,86 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Zippers 2: Building a Rose Tree Zipper]]></title>
+    <link href="http://erichgess.github.io/blog/2015/11/01/zippers-2-building-a-rose-tree-zipper/"/>
+    <updated>2015-11-01T09:38:55-05:00</updated>
+    <id>http://erichgess.github.io/blog/2015/11/01/zippers-2-building-a-rose-tree-zipper</id>
+    <content type="html"><![CDATA[<p>As a follow up to my post about Zippers for lists and binary trees, I wanted to create a zipper for
+a slightly more complex data structure.  The Rose Tree is a tree structure where the number of
+branches a node may have is variable.  An example of a rose tree would be the directory structure
+on your computer:  each directory may contain 0 or more sub directories which, in turn, may contain
+addition subdirectories.  With this example in mind, the zipper is analagous to you moving through
+your computers file system:  starting at the root directory and using <code>cd</code> to move down a branch
+and <code>cd ..</code> to move back.</p>
+
+<!-- more -->
+
+<h2 id="rose-tree-implementation">Rose Tree Implementation</h2>
+<p>The implementation of a rose tree is pretty simple.  It’s just like a binary tree but, instead of
+each node having two branches, each node has a list of branches:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">type</span> <span class="nc">RoseTree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">=</span>
+</span><span class='line'>  <span class="o">|</span> <span class="nc">Empty</span>
+</span><span class='line'>  <span class="o">|</span> <span class="nc">RoseTree</span> <span class="k">of</span> <span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="o">(</span><span class="nc">RoseTree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="kt">list</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>The zipper of the rose tree, however, is a lot more interesting and fun.  It’s basically a
+combination of the binary tree zipper and the list zipper:  you need a tree zipper to keep track
+of where in the tree you are by level and a list zipper to keep track of where in the each node’s
+list of branches you are.</p>
+
+<p>Algebraicly, the rose tree is:
+<script type="math/tex">R = 1 + a\cdot L(R)</script></p>
+
+<p>Where <script type="math/tex">L(R)</script> is a list of rose trees.</p>
+
+<p>The derivative is:</p>
+
+<script type="math/tex; mode=display">% &lt;![CDATA[
+
+\begin{eqnarray} 
+\partial_aR &=& L(R) + a\partial_aL(R)\partial_aR \\
+\partial_aR - a\partial_aL(R)\partial_aR &=& L(R) \\
+(1 - a\partial_aL(R))\partial_aR &=& L(R) \\
+\partial_aR &=& \frac{L(R)}{1-a\partial_aL(R)} \\
+&=& L(R)\frac{1}{1 - a\partial_aL(R)} \\
+&=& L(R)L(a\partial_aL(R)) \\
+&=& L(R)L(aL^2(R)) \\
+\end{eqnarray}
+ %]]&gt;</script>
+
+<p>The next to last step uses the identity <script type="math/tex">L(a) = \frac{1}{1 - a}</script> to arrive at <script type="math/tex">L(R)L(aL^2(R))</script>.</p>
+
+<p>This translates to the type:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">type</span> <span class="nc">RoseTreeZipper</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">=</span> <span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="nc">RoseTree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="kt">list</span> <span class="o">*</span> <span class="o">((</span><span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="nc">RoseTree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="kt">list</span> <span class="o">*</span> <span class="nc">RoseTree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="kt">list</span><span class="o">)</span> <span class="kt">list</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+and that looks pretty insane.</p>
+
+<p>However, it does make sense.  Here’s the break down.  The first part <code>'a</code> is the value of the current
+node and the <code>RoseTree&lt;'a&gt; list</code> is the list of branches at this node.  So, together
+<code>'a * RoseTree&lt;'a&gt; list</code> is the cursors current position in the rose tree.</p>
+
+<p>Now here’s the break down for <code>('a * RoseTree&lt;'a&gt; list * RoseTree&lt;'a&gt; list) list</code>.  This is a list of
+the previous positions the cursor had in the rose tree, just like we saw with the binary tree zipper.
+The <code>'a</code> is the value of the node the cursor used to point at.  The tuple <code>RoseTree&lt;'a&gt; list * RoseTree&lt;'a&gt; list</code>
+is all the branches of the node except where the cursor is currently at!  The first <code>RoseTree&lt;'a&gt; list</code>
+is the branches to the left of the branch down which the cursor went and the second <code>RoseTree&lt;'a&gt; list</code>
+is all the branches to the right!</p>
+
+<p>To help clarify how the rose tree zipper works, here’s a visual explanation.</p>
+
+<p>The color green indicates the position of the cursor.</p>
+
+<p>Here we are with a newly created zipper on a rose tree.  The cursor is pointing to the root of the tree
+<img src="http://erichgess.github.io/assets/zippers/rosetree_1.png" alt="My helpful screenshot" /></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[F# Zippers]]></title>
@@ -1286,35 +1366,6 @@ Do this by right clicking on the FSI window and choosing the reset option.</p>
 <h5 id="testing-2">Testing</h5>
 
 <p>Try executing <code>Tutorial.Hello.StaticMethod();;</code> and see what you get :).</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Type Providers - Tutorial Part 1 - Concepts]]></title>
-    <link href="http://erichgess.github.io/blog/2014/04/03/type-providers-tutorial-part-1/"/>
-    <updated>2014-04-03T23:36:12-04:00</updated>
-    <id>http://erichgess.github.io/blog/2014/04/03/type-providers-tutorial-part-1</id>
-    <content type="html"><![CDATA[<p>I’ve only been working with the F# language for the last year.  Which means that all of my learning has been with version 3.x of the F# language.  One of the biggest features of 3.x, and something which I have yet to work with, is the Type Provider.  Type Providers dynamically generate new types, usually from some data source (e.g. databases, XML documents, web services), which a developer can use in their code.  For C# developers this is analogous to the Entity Framework or the “Add Service Reference” in VS, both of which take a database or WSDL, respectively, and generate classes and functions that can be used in code.  For Java this would be similar to Hibernate or wsdl2java.  Just to be clear, when you create a Type Provider, what you’ve built is an Entity Framework or a wsdl2java.  What F# provides is a framework for building your own Type Providers as easily as possible.
-<!-- more -->
-In order to learn how to build Type Providers, I decided to try my hand at writing a tutorial.  This will, I think, be the first tutorial I’ve ever written.  I’m going to break this tutorial into several phases.  The first phase will be building a very simple “Hello World” type provider, which just creates a type which can be referenced in code (it won’t do anything).  The next phase will be to add static and instance methods, fields, and properties, but, again, the type will be predefined.  Finally, I want to do a true type provider for a data source (I’m thinking Cassandra) which will take the schema for a database and generate a set of types from that schema.</p>
-
-<h3 id="important-things">Important Things</h3>
-
-<h4 id="providedtypesfs">ProvidedTypes.fs</h4>
-<p>This is an F# source code file provided by the F# team.  It includes a bunch of things for simplifying the construction of Type Providers.  I’ll be making heavy use of this in my tutorial.  If you plan on writing your own Type Provider, you definitely want to get this:  it can be found in the F# 3.0 sample pack (http://fsharp3sample.codeplex.com/).</p>
-
-<h4 id="erased-types">Erased Types</h4>
-<p>Most of the time, when building Type Providers, you’ll be creating erased types:  although this type may have members and functions when compiled it will be convered into an Object type by the compiler.  With the type provider, you are creating a set of methods, fields, properties, and constructors which enable a developer to work with your type, but, when compiled, all of that is “erased” and it just becomes and Object.  There’s a section in the Type Provider MSDN article which explains erased types (http://msdn.microsoft.com/en-us/library/hh361034.aspx#BK_Erased).</p>
-
-<p>What’s important is that this means there will be a lot of casting to and from the <code>obj</code> type in Type Provider code.  This also means that if the Type Provider is going to work with any kind of meaningful data sources, an underlying type (on which the generated types are built) must be defined.  If you look at the MSDN Type Provider Tutorial (http://msdn.microsoft.com/en-us/library/hh361034.aspx), the underlying type is <code>string</code>.</p>
-
-<h4 id="developing-type-providers">Developing Type Providers</h4>
-<p>A Type Provider cannot be defined in anything except a Library project.  This seems like a pain but it does make sense:  if you are going to use a Type Provider in your code it must be fully compiled before you use it.</p>
-
-<h4 id="debugging-type-providers">Debugging Type Providers</h4>
-<p>This is probably the biggest pain point of developing Type Providers, in my humble opinion.  Do not create a console project in your Type Provider solution and try to use that console project to test your Type Providers.  The problem is that when you build the console project, VS will lock the DLLs from the Type Provider library project.  Once the DLLs are locked you won’t be able to build the Type Provider library until you restart VS.</p>
-
-<p>Use the F# Interactive Console.  Build the library project then right click on it in the Solution Explorer and choose “Send to F# Interactive”.  In the interactive console you can test out your type provider.  IMPORTANT:  Before you try building your project again make sure to reset the interactive console, otherwise it will lock the DLLs and your build will fail.</p>
 ]]></content>
   </entry>
   

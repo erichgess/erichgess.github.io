@@ -11,7 +11,7 @@
   <meta name="author" content="Erich G. Ess">
 
   
-  <meta name="description" content="A final round of polish. Now that I have the layout and flow for using my RabbitMQ library defined, it’s time to go through and do a bit of clean up &hellip;">
+  <meta name="description" content="Working with a system which is distributed and uses messaging for communication presents some interesting challenges. One frequent challenge I’ve &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -67,6 +67,48 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/03/11/ravendb/">RavenDB, MapReduce, and Logging</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-11T11:38:11-04:00" pubdate data-updated="true">Mar 11<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Working with a system which is distributed and uses messaging for communication presents some interesting challenges.  One frequent challenge I’ve gotten to deal with a few times is:  how to tell what’s happening to a request as the system is processing it.  A request comes into the my system, which wakes one service up and it does some work, then it sends off commands to two other services which both do some work, and then, when both are done, a final service does some work and completes the task.  A little vague, but the scenario should illustrate that when trying to figure out what happened to the initial request, I’ve got to dig through at least 4 services worth of logs.  That’s assuming everything has only one instance; multiple instances on multiple servers and it becomes a huge chore.</p>
+
+<p>The solution to this is fairly simple:  use a log aggregator like splunk or roll your own with ElasticSearch.  However, I want to have some fun and learn something new and this is a perfect situation for learning and experimentation:  the problem isn’t that complex and if I get the solution wrong, no one really cares, so the risk is low.  What I decided to do was build something up using RavenDB and its built in MapReduce index system.
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/03/11/ravendb/">Lay on, MacDuff &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -540,47 +582,9 @@ https://github.com/erichgess/OdinPrototype</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/02/16/my-first-post/">Experimenting With Quotations</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-02-16T23:37:19-05:00" pubdate data-updated="true">Feb 16<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>One of the more interesting featuers of F# is the Code Quotation.  Though I do find this interesting now, it has taken over a year before I saw any reason I might have even slight interest.  Even now, as I have taken a much greater interest in the topic, it’s been difficult finding anything detailed on the topic.
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/02/16/my-first-post/">Lay on, MacDuff &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
+    
+      <a class="prev" href="/blog/page/3/">&larr; Older</a>
     
     <a href="/blog/archives">Blog Archives</a>
     
@@ -593,6 +597,10 @@ https://github.com/erichgess/OdinPrototype</p>
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/11/01/zippers-2-building-a-rose-tree-zipper/">Zippers 2: Building a Rose Tree Zipper</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2015/08/17/f-number-zippers/">F# Zippers</a>
@@ -608,10 +616,6 @@ https://github.com/erichgess/OdinPrototype</p>
     
       <li class="post">
         <a href="/blog/2015/01/10/its-been-8-months/">It&#8217;s Been 8 Months</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2014/04/17/type-providers-tutorial-part-4/">Type Providers Tutorial Part 4 - Base Types</a>
       </li>
     
   </ul>
