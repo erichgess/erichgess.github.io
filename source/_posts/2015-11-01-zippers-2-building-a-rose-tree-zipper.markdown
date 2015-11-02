@@ -89,5 +89,5 @@ Moving the cursor down the left branch, the previous node and the right branch a
 that they are grouped together and prepended to the history list.
 ![Move cursor down left branch]({{ site.url }}/assets/zippers/rosetree_3.png)
 
-Visualizing the new rose tree zipper value:
+Visualizing the new rose tree zipper value.  `C, H` have been moved to the head of the history list.
 ![New rose tree zipper value]({{ site.url }}/assets/zippers/rosetree_3_note.png)
