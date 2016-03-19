@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Programming Style | Elegant Architecture]]></title>
+  <link href="http://erichgess.github.io/blog/categories/programming-style/atom.xml" rel="self"/>
+  <link href="http://erichgess.github.io/"/>
+  <updated>2016-03-19T12:38:54-04:00</updated>
+  <id>http://erichgess.github.io/</id>
+  <author>
+    <name><![CDATA[Erich G. Ess]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Pattern Matching With Pipes]]></title>
+    <link href="http://erichgess.github.io/blog/2016/03/19/pattern-matching-with-pipes/"/>
+    <updated>2016-03-19T12:09:26-04:00</updated>
+    <id>http://erichgess.github.io/blog/2016/03/19/pattern-matching-with-pipes</id>
+    <content type="html"><![CDATA[<p>One of my favorite things to do in F# is pipe functions together.  I like the elegant flow that the
+semantics visualizes and the fact that it removes the need for intermediate variables.  Given that,
+one of the minor, but consistent, annoyances I’ve had is when piping a DU type which generally need
+to be piped into a pattern match expression.  This is annoying because the <code>match</code> expression doesn’t
+lend itself to piping which has meant that my nice workflow needs to be broken up with an intermediate
+variable that can be used in the <code>match</code> expression.</p>
+
+<p>Looking at some old code I wrote, I just realized something that is probably pretty obvious to every
+experienced F# programmer out there.  The <code>function</code> expression actually does exactly what <code>match</code> does
+but it creates a function and that’s exactly what I’ve been wanting this whole time!</p>
+
+<!-- more -->
+
+<p>Here is a quick and dirty example of using a function which takes a value and returns  a discriminated
+union.  The type of function which almost always means that pattern matching will have to be done with
+its result:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">type</span> <span class="nc">DU</span> <span class="o">=</span>
+</span><span class='line'><span class="o">|</span> <span class="nc">A</span> <span class="k">of</span> <span class="kt">int</span>
+</span><span class='line'><span class="o">|</span> <span class="nc">B</span> <span class="k">of</span> <span class="kt">string</span>
+</span><span class='line'><span class="o">|</span> <span class="nc">C</span> <span class="k">of</span> <span class="kt">bool</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">let</span> <span class="n">doSomething</span> <span class="n">x</span> <span class="o">=</span>
+</span><span class='line'>  <span class="k">match</span> <span class="n">x</span> <span class="k">with</span>
+</span><span class='line'>  <span class="o">|</span> <span class="n">x</span> <span class="k">when</span> <span class="n">x</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span> <span class="mi">0</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="nc">A</span><span class="o">(</span><span class="n">x</span><span class="o">)</span>
+</span><span class='line'>  <span class="o">|</span> <span class="n">x</span> <span class="k">when</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="nc">B</span><span class="o">(</span><span class="err">“</span><span class="n">zero</span><span class="err">”</span><span class="o">)</span>
+</span><span class='line'>  <span class="o">|</span> <span class="o">_</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="nc">C</span><span class="o">(</span><span class="bp">true</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Previously, I always used one of the two following styles (<code>style_1</code> and <code>style_2</code>):</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">style_1</span> <span class="n">x</span> <span class="o">=</span>
+</span><span class='line'>  <span class="k">let</span> <span class="n">du</span> <span class="o">=</span> <span class="n">doSomething</span> <span class="n">x</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">match</span> <span class="n">du</span> <span class="k">with</span>
+</span><span class='line'>  <span class="o">|</span> <span class="nc">A</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">printfn</span> <span class="err">“</span><span class="o">%</span><span class="n">d</span><span class="err">”</span> <span class="n">i</span>
+</span><span class='line'>  <span class="o">|</span> <span class="nc">B</span><span class="o">(</span><span class="n">s</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">printfn</span> <span class="err">“</span><span class="o">%</span><span class="n">s</span><span class="err">”</span> <span class="n">s</span>
+</span><span class='line'>  <span class="o">|</span> <span class="nc">C</span><span class="o">(</span><span class="n">b</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">printfn</span> <span class="err">“</span><span class="o">%</span><span class="n">b</span><span class="err">”</span> <span class="n">b</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">style_2</span> <span class="n">x</span> <span class="o">=</span>
+</span><span class='line'>  <span class="n">x</span>
+</span><span class='line'>  <span class="o">|&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">doSomething</span>
+</span><span class='line'>  <span class="o">|&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="k">fun</span> <span class="n">a</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="k">match</span> <span class="n">a</span> <span class="k">with</span>
+</span><span class='line'>              <span class="o">|</span> <span class="nc">A</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">printfn</span> <span class="err">“</span><span class="o">%</span><span class="n">d</span><span class="err">”</span> <span class="n">i</span>
+</span><span class='line'>              <span class="o">|</span> <span class="nc">B</span><span class="o">(</span><span class="n">s</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">printfn</span> <span class="err">“</span><span class="o">%</span><span class="n">s</span><span class="err">”</span> <span class="n">s</span>
+</span><span class='line'>              <span class="o">|</span> <span class="nc">C</span><span class="o">(</span><span class="n">b</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">printfn</span> <span class="err">“</span><span class="o">%</span><span class="n">b</span><span class="err">”</span> <span class="n">b</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Both <code>style_1</code> and <code>style_2</code> leave a lot to be desired.  Both <code>style_1</code> and <code>style_2</code> require the use of an intermediate variable and 
+<code>style_2</code> needs the clunky <code>fun a -&gt;</code> rigging.  The choice between two types of clunkiness always frustrated me,
+because I felt that there must be some easy way to pipe the result of a function into a pattern match.</p>
+
+<p>The pattern matching <code>function</code> makes it possible to elegantly integrate a pattern match into a <code>|&gt;</code> flow.
+Here’s my new style implementation of the above code:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">style_3</span> <span class="n">x</span> <span class="o">=</span>
+</span><span class='line'>  <span class="n">x</span>
+</span><span class='line'>  <span class="o">|&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">doSomething</span>
+</span><span class='line'>  <span class="o">|&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="k">function</span>
+</span><span class='line'>     <span class="o">|</span> <span class="nc">A</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">printfn</span> <span class="err">“</span><span class="o">%</span><span class="n">d</span><span class="err">”</span> <span class="n">i</span>
+</span><span class='line'>     <span class="o">|</span> <span class="nc">B</span><span class="o">(</span><span class="n">s</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">printfn</span> <span class="err">“</span><span class="o">%</span><span class="n">s</span><span class="err">”</span> <span class="n">s</span>
+</span><span class='line'>     <span class="o">|</span> <span class="nc">C</span><span class="o">(</span><span class="n">b</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">printfn</span> <span class="err">“</span><span class="o">%</span><span class="n">b</span><span class="err">”</span> <span class="n">b</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>This is no profound revelation or anything, but it’s a tiny step closer to producing truly
+elegant F# code.  That makes me supremely happy.</p>
+]]></content>
+  </entry>
+  
+</feed>

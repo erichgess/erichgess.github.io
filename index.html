@@ -11,8 +11,8 @@
   <meta name="author" content="Erich G. Ess">
 
   
-  <meta name="description" content="As a follow up to my post about Zippers for lists and binary trees, I wanted to create a zipper for
-a slightly more complex data structure. The Rose &hellip;">
+  <meta name="description" content="One of my favorite things to do in F# is pipe functions together. I like the elegant flow that the
+semantics visualizes and the fact that it removes &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -68,6 +68,56 @@ a slightly more complex data structure. The Rose &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/03/19/pattern-matching-with-pipes/">Pattern Matching With Pipes</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-03-19T12:09:26-04:00" pubdate data-updated="true">Mar 19<span>th</span>, 2016</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>One of my favorite things to do in F# is pipe functions together.  I like the elegant flow that the
+semantics visualizes and the fact that it removes the need for intermediate variables.  Given that,
+one of the minor, but consistent, annoyances I’ve had is when piping a DU type which generally need
+to be piped into a pattern match expression.  This is annoying because the <code>match</code> expression doesn’t
+lend itself to piping which has meant that my nice workflow needs to be broken up with an intermediate
+variable that can be used in the <code>match</code> expression.</p>
+
+<p>Looking at some old code I wrote, I just realized something that is probably pretty obvious to every
+experienced F# programmer out there.  The <code>function</code> expression actually does exactly what <code>match</code> does
+but it creates a function and that’s exactly what I’ve been wanting this whole time!</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2016/03/19/pattern-matching-with-pipes/">Lay on, MacDuff &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -476,49 +526,6 @@ operation will be usd to create a Zipper for the binary tree.</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/03/20/first-haskell-meetup/">First Haskell Meetup</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-03-20T11:47:44-04:00" pubdate data-updated="true">Mar 20<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Last night was the first meet up for the San Diego Haskell Users Group.  I have to say that it was a lot of fun and probably the most interesting dev meet up I’ve been to so far in San Diego.  I have barely done any Haskell, beyond get the compiler setup on my computer and make “Hello, World”.  As such, I learned a lot.</p>
-
-<ol>
-  <li>I reallly love how Haskell allows you to build “pipelines of data”:  when you chain together several functions, put data into the top function and get the output of the bottom.  This is one of my favorite things to get in F# code and Haskell just seems to make it even easier.</li>
-  <li>Generic Algebraic Data Types:  something which was mentioned to me when I made a comment about doing a presentation on “Algebraic Data Types”.  I have no clue what the difference between ADT and GADT is but now I have to find out.</li>
-  <li>Cabal might be the simplest project management/build management tool I’ve yet seen.  Though I’ve only looked a little at Leiningen, I think, Cabal fills the same role.  However, I found it much easier to read.</li>
-  <li>Having a meetup be a 15 minute walk from my apartment is the best.</li>
-</ol>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -532,6 +539,10 @@ operation will be usd to create a Zipper for the binary tree.</p>
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/03/19/pattern-matching-with-pipes/">Pattern Matching With Pipes</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2015/11/01/zippers-2-building-a-rose-tree-zipper/">Zippers 2: Building a Rose Tree Zipper</a>
@@ -549,10 +560,6 @@ operation will be usd to create a Zipper for the binary tree.</p>
         <a href="/blog/2015/02/13/a-cartoon-map-of-knowledge/">A Cartoon Map of Knowledge</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2015/01/10/its-been-8-months/">It&#8217;s Been 8 Months</a>
-      </li>
-    
   </ul>
 </section>
 
@@ -566,7 +573,7 @@ operation will be usd to create a Zipper for the binary tree.</p>
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2015 - Erich G. Ess -
+  Copyright &copy; 2016 - Erich G. Ess -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 

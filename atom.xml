@@ -4,7 +4,7 @@
   <title><![CDATA[Elegant Architecture]]></title>
   <link href="http://erichgess.github.io/atom.xml" rel="self"/>
   <link href="http://erichgess.github.io/"/>
-  <updated>2015-11-01T22:14:34-05:00</updated>
+  <updated>2016-03-19T12:38:54-04:00</updated>
   <id>http://erichgess.github.io/</id>
   <author>
     <name><![CDATA[Erich G. Ess]]></name>
@@ -12,6 +12,112 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Pattern Matching With Pipes]]></title>
+    <link href="http://erichgess.github.io/blog/2016/03/19/pattern-matching-with-pipes/"/>
+    <updated>2016-03-19T12:09:26-04:00</updated>
+    <id>http://erichgess.github.io/blog/2016/03/19/pattern-matching-with-pipes</id>
+    <content type="html"><![CDATA[<p>One of my favorite things to do in F# is pipe functions together.  I like the elegant flow that the
+semantics visualizes and the fact that it removes the need for intermediate variables.  Given that,
+one of the minor, but consistent, annoyances I’ve had is when piping a DU type which generally need
+to be piped into a pattern match expression.  This is annoying because the <code>match</code> expression doesn’t
+lend itself to piping which has meant that my nice workflow needs to be broken up with an intermediate
+variable that can be used in the <code>match</code> expression.</p>
+
+<p>Looking at some old code I wrote, I just realized something that is probably pretty obvious to every
+experienced F# programmer out there.  The <code>function</code> expression actually does exactly what <code>match</code> does
+but it creates a function and that’s exactly what I’ve been wanting this whole time!</p>
+
+<!-- more -->
+
+<p>Here is a quick and dirty example of using a function which takes a value and returns  a discriminated
+union.  The type of function which almost always means that pattern matching will have to be done with
+its result:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">type</span> <span class="nc">DU</span> <span class="o">=</span>
+</span><span class="line"><span class="o">|</span> <span class="nc">A</span> <span class="k">of</span> <span class="kt">int</span>
+</span><span class="line"><span class="o">|</span> <span class="nc">B</span> <span class="k">of</span> <span class="kt">string</span>
+</span><span class="line"><span class="o">|</span> <span class="nc">C</span> <span class="k">of</span> <span class="kt">bool</span>
+</span><span class="line">
+</span><span class="line"><span class="k">let</span> <span class="n">doSomething</span> <span class="n">x</span> <span class="o">=</span>
+</span><span class="line">  <span class="k">match</span> <span class="n">x</span> <span class="k">with</span>
+</span><span class="line">  <span class="o">|</span> <span class="n">x</span> <span class="k">when</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="o">-&gt;</span> <span class="nc">A</span><span class="o">(</span><span class="n">x</span><span class="o">)</span>
+</span><span class="line">  <span class="o">|</span> <span class="n">x</span> <span class="k">when</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span> <span class="o">-&gt;</span> <span class="nc">B</span><span class="o">(</span><span class="s2">&quot;zero&quot;</span><span class="o">)</span>
+</span><span class="line">  <span class="o">|</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="nc">C</span><span class="o">(</span><span class="bp">true</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Previously, I always used one of the two following styles (<code>style_1</code> and <code>style_2</code>):</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="n">style_1</span> <span class="n">x</span> <span class="o">=</span>
+</span><span class="line">  <span class="k">let</span> <span class="n">du</span> <span class="o">=</span> <span class="n">doSomething</span> <span class="n">x</span>
+</span><span class="line">
+</span><span class="line">  <span class="k">match</span> <span class="n">du</span> <span class="k">with</span>
+</span><span class="line">  <span class="o">|</span> <span class="nc">A</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">printfn</span> <span class="s2">&quot;%d&quot;</span> <span class="n">i</span>
+</span><span class="line">  <span class="o">|</span> <span class="nc">B</span><span class="o">(</span><span class="n">s</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">printfn</span> <span class="s2">&quot;%s&quot;</span> <span class="n">s</span>
+</span><span class="line">  <span class="o">|</span> <span class="nc">C</span><span class="o">(</span><span class="n">b</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">printfn</span> <span class="s2">&quot;%b&quot;</span> <span class="n">b</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="n">style_2</span> <span class="n">x</span> <span class="o">=</span>
+</span><span class="line">  <span class="n">x</span>
+</span><span class="line">  <span class="o">|&gt;</span> <span class="n">doSomething</span>
+</span><span class="line">  <span class="o">|&gt;</span> <span class="k">fun</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="k">match</span> <span class="n">a</span> <span class="k">with</span>
+</span><span class="line">              <span class="o">|</span> <span class="nc">A</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">printfn</span> <span class="s2">&quot;%d&quot;</span> <span class="n">i</span>
+</span><span class="line">              <span class="o">|</span> <span class="nc">B</span><span class="o">(</span><span class="n">s</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">printfn</span> <span class="s2">&quot;%s&quot;</span> <span class="n">s</span>
+</span><span class="line">              <span class="o">|</span> <span class="nc">C</span><span class="o">(</span><span class="n">b</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">printfn</span> <span class="s2">&quot;%b&quot;</span> <span class="n">b</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Both <code>style_1</code> and <code>style_2</code> leave a lot to be desired.  Both <code>style_1</code> and <code>style_2</code> require the use of an intermediate variable and 
+<code>style_2</code> needs the clunky <code>fun a -&gt;</code> rigging.  The choice between two types of clunkiness always frustrated me,
+because I felt that there must be some easy way to pipe the result of a function into a pattern match.</p>
+
+<p>The pattern matching <code>function</code> makes it possible to elegantly integrate a pattern match into a <code>|&gt;</code> flow.
+Here’s my new style implementation of the above code:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="n">style_3</span> <span class="n">x</span> <span class="o">=</span>
+</span><span class="line">  <span class="n">x</span>
+</span><span class="line">  <span class="o">|&gt;</span> <span class="n">doSomething</span>
+</span><span class="line">  <span class="o">|&gt;</span> <span class="k">function</span>
+</span><span class="line">     <span class="o">|</span> <span class="nc">A</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">printfn</span> <span class="s2">&quot;%d&quot;</span> <span class="n">i</span>
+</span><span class="line">     <span class="o">|</span> <span class="nc">B</span><span class="o">(</span><span class="n">s</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">printfn</span> <span class="s2">&quot;%s&quot;</span> <span class="n">s</span>
+</span><span class="line">     <span class="o">|</span> <span class="nc">C</span><span class="o">(</span><span class="n">b</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">printfn</span> <span class="s2">&quot;%b&quot;</span> <span class="n">b</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>This is no profound revelation or anything, but it’s a tiny step closer to producing truly
+elegant F# code.  That makes me supremely happy.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Zippers 2: Building a Rose Tree Zipper]]></title>
@@ -2555,142 +2661,6 @@ The goal here is, first and foremost, educational.  To gain experience with F#. 
 </ul>
 
 <p>In my next post, I’ll start the actual implementation of my library.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Using RabbitMQ With F#]]></title>
-    <link href="http://erichgess.github.io/blog/2014/03/04/using-rabbitmq-with-f-number/"/>
-    <updated>2014-03-04T22:56:20-05:00</updated>
-    <id>http://erichgess.github.io/blog/2014/03/04/using-rabbitmq-with-f-number</id>
-    <content type="html"><![CDATA[<p>Over the last few years, one of the topics on which I have done much of my work has been distributed computing using message queues.  Recently, I’ve been playing around with RabbitMQ, not for any reason other than that I wanted a simple, easy to setup, and easy to use messaging framework, which I could use for little experiments at home.</p>
-
-<p>I’m not going to talk much about using RabbitMQ.  What I am going to talk about is one of the many ways in which F# makes programming just an absolute blast.
-<!-- more --></p>
-
-<p>Outside of work, most of my programming has been with F# (with a tiny bit of Clojure).  Naturally, I’ve done some experiments with using F# and RabbitMQ.  I’ll cover that, but that’s not really what this post is about.</p>
-
-<p>My first attempt at this was to just follow the basic C# tutorial from www.rabbitmq.com, twisting it here and there for F#.  The tutorial you build a simple sender/receiver system:  one app sends messages to another app, which prints them to the console.  Which got me with some good workable boring code:</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="n">factory</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ConnectionFactory</span><span class="o">(</span><span class="nc">HostName</span> <span class="o">=</span> <span class="s2">&quot;localhost&quot;</span><span class="o">)</span>
-</span><span class="line"><span class="k">use</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="nc">CreateConnection</span><span class="bp">()</span>
-</span><span class="line"><span class="k">use</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="nc">CreateModel</span><span class="bp">()</span>
-</span><span class="line">
-</span><span class="line"><span class="n">channel</span><span class="o">.</span><span class="nc">QueueDeclare</span><span class="o">(</span> <span class="s2">&quot;hello&quot;</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="k">null</span> <span class="o">)</span>
-</span><span class="line"><span class="k">let</span> <span class="n">consumer</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">QueueingBasicConsumer</span><span class="o">(</span><span class="n">channel</span><span class="o">)</span>
-</span><span class="line"><span class="n">channel</span><span class="o">.</span><span class="nc">BasicConsume</span><span class="o">(</span><span class="s2">&quot;hello&quot;</span><span class="o">,</span> <span class="bp">true</span><span class="o">,</span> <span class="n">consumer</span><span class="o">)</span>
-</span><span class="line">
-</span><span class="line"><span class="k">while</span> <span class="bp">true</span> <span class="k">do</span>
-</span><span class="line">    <span class="k">let</span> <span class="n">ea</span> <span class="o">=</span> <span class="n">consumer</span><span class="o">.</span><span class="nn">Queue</span><span class="p">.</span><span class="nc">Dequeue</span><span class="bp">()</span> <span class="o">:&gt;</span> <span class="nc">BasicDeliverEventArgs</span>
-</span><span class="line">    <span class="k">let</span> <span class="n">body</span> <span class="o">=</span> <span class="n">ea</span><span class="o">.</span><span class="nc">Body</span>
-</span><span class="line">    <span class="k">let</span> <span class="n">message</span> <span class="o">=</span> <span class="nn">Encoding</span><span class="p">.</span><span class="nn">UTF8</span><span class="p">.</span><span class="nc">GetString</span><span class="o">(</span><span class="n">body</span><span class="o">)</span>
-</span><span class="line">    <span class="n">printfn</span> <span class="s2">&quot;%s&quot;</span> <span class="n">message</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>This will do its job.  Listening on the queue and writing the messages as they come in.  It’s not spectaculor and it doesn’t use any of the Consumer class framework which comes with RabbitMQ.  But again, this post isn’t about using RabbitMQ, it’s about using <em>sequence expressions</em>.</p>
-
-<p>The Sequence Expression is a fun little construct in F# that lets you write programmatic enumerables.  For example, I want an enumerable with the numbers from 1 to 100, I would just write</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="n">example</span> <span class="o">=</span> <span class="n">seq</span><span class="o">{</span> <span class="mi">1</span> <span class="o">..</span> <span class="mi">100</span> <span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>Or, what if I want a sequence of data, where everytime I ask for an element it gives me the current time:</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="n">example2</span> <span class="o">=</span> <span class="n">seq</span> <span class="o">{</span>
-</span><span class="line">						<span class="k">while</span> <span class="bp">true</span> <span class="k">do</span>
-</span><span class="line">							<span class="k">yield</span> <span class="nn">DateTime</span><span class="p">.</span><span class="nc">Now</span>
-</span><span class="line">				   <span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>The sequence expression got me to thinking about trying that out with the message queues.  So, I changed my receiver code to look like this:</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-<span class="line-number">16</span>
-</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="n">factory</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ConnectionFactory</span><span class="o">(</span><span class="nc">HostName</span> <span class="o">=</span> <span class="s2">&quot;localhost&quot;</span><span class="o">)</span>
-</span><span class="line"><span class="k">use</span> <span class="n">connection</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="nc">CreateConnection</span><span class="bp">()</span>
-</span><span class="line"><span class="k">use</span> <span class="n">channel</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="nc">CreateModel</span><span class="bp">()</span>
-</span><span class="line">
-</span><span class="line"><span class="n">channel</span><span class="o">.</span><span class="nc">QueueDeclare</span><span class="o">(</span> <span class="s2">&quot;hello&quot;</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="bp">false</span><span class="o">,</span> <span class="k">null</span> <span class="o">)</span>
-</span><span class="line"><span class="k">let</span> <span class="n">consumer</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">QueueingBasicConsumer</span><span class="o">(</span><span class="n">channel</span><span class="o">)</span>
-</span><span class="line"><span class="n">channel</span><span class="o">.</span><span class="nc">BasicConsume</span><span class="o">(</span><span class="s2">&quot;hello&quot;</span><span class="o">,</span> <span class="bp">true</span><span class="o">,</span> <span class="n">consumer</span><span class="o">)</span>
-</span><span class="line">
-</span><span class="line"><span class="c1">// I wrap the queue in a sequence expression</span>
-</span><span class="line"><span class="k">let</span> <span class="n">queue</span> <span class="o">=</span> <span class="n">seq</span><span class="o">{</span>
-</span><span class="line">                <span class="k">while</span> <span class="bp">true</span> <span class="k">do</span>
-</span><span class="line">                    <span class="k">let</span> <span class="n">ea</span> <span class="o">=</span> <span class="n">consumer</span><span class="o">.</span><span class="nn">Queue</span><span class="p">.</span><span class="nc">Dequeue</span><span class="bp">()</span> <span class="o">:&gt;</span> <span class="nc">BasicDeliverEventArgs</span>
-</span><span class="line">                    <span class="k">let</span> <span class="n">body</span> <span class="o">=</span> <span class="n">ea</span><span class="o">.</span><span class="nc">Body</span>
-</span><span class="line">                    <span class="k">let</span> <span class="n">message</span> <span class="o">=</span> <span class="nn">Encoding</span><span class="p">.</span><span class="nn">UTF8</span><span class="p">.</span><span class="nc">GetString</span><span class="o">(</span><span class="n">body</span><span class="o">)</span>
-</span><span class="line">                    <span class="k">yield</span> <span class="n">message</span>
-</span><span class="line">            <span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>This creates an enumerable data structure called <code>queue</code>.  And this is where things get awesome, because I can now write <em>queries</em> to my queue of messages, exactly as I would to a database or list:</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="n">qQuery</span> <span class="o">=</span> <span class="n">query</span><span class="o">{</span>
-</span><span class="line">                <span class="k">for</span> <span class="n">message</span> <span class="k">in</span> <span class="n">queue</span> <span class="k">do</span>
-</span><span class="line">                <span class="n">select</span> <span class="n">i</span><span class="o">.</span><span class="nc">ToUpper</span><span class="bp">()</span>
-</span><span class="line">             <span class="o">}</span>
-</span><span class="line"><span class="n">qQuery</span> <span class="o">|&gt;</span> <span class="nn">Seq</span><span class="p">.</span><span class="n">iter</span> <span class="o">(</span><span class="n">printfn</span> <span class="s2">&quot;%d&quot;</span><span class="o">)</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>This query will select each message from the queue and convert it to all capital letters.  The Seq.iter will then pull each message from the query result and print it to the screen.  Do note that the <code>seq{...}</code> I bound to <code>queue</code> is an infinite loop, so <code>qQuery |&gt; Seq.iter (printfn "%d")</code> will run forever, printing out each message as it arrives in the queue.</p>
-
-<p>If you take a look at the <a href="http://msdn.microsoft.com/en-us/library/hh225374.aspx">MSDN</a> article on F#’s Query Expressions, you’ll see that there is a lot that can be done.  For example, if we had two different queues:</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="n">doubleQuery</span> <span class="o">=</span> <span class="n">query</span><span class="o">{</span>
-</span><span class="line">                    <span class="k">for</span> <span class="n">m1</span> <span class="k">in</span> <span class="n">queue</span> <span class="k">do</span>
-</span><span class="line">                    <span class="n">join</span> <span class="n">m2</span> <span class="k">in</span> <span class="n">queue2</span> <span class="n">on</span>
-</span><span class="line">                        <span class="o">(</span><span class="n">m1</span> <span class="o">=</span> <span class="n">m2</span><span class="o">)</span>
-</span><span class="line">                    <span class="n">select</span> <span class="o">(</span><span class="n">m1</span><span class="o">,</span> <span class="n">m2</span><span class="o">)</span>
-</span><span class="line">                  <span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>Or maybe even a join between the message queue and a database query.</p>
-
-<p>The long and short of all this is that I keep falling more in love with F#.  I get to spend so much time not writing boilerplate code and squiggly braces and so much time just doing.</p>
 ]]></content>
   </entry>
   
