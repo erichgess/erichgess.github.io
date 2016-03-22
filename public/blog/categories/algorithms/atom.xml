@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Algorithms | Elegant Architecture]]></title>
+  <link href="http://erichgess.github.io/blog/categories/algorithms/atom.xml" rel="self"/>
+  <link href="http://erichgess.github.io/"/>
+  <updated>2016-03-21T22:33:49-04:00</updated>
+  <id>http://erichgess.github.io/</id>
+  <author>
+    <name><![CDATA[Erich G. Ess]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Purely Functional Data Structures: Chapter 2 - Lists]]></title>
+    <link href="http://erichgess.github.io/blog/2016/03/21/purely-functional-data-structures-chapter-2-lists/"/>
+    <updated>2016-03-21T21:40:30-04:00</updated>
+    <id>http://erichgess.github.io/blog/2016/03/21/purely-functional-data-structures-chapter-2-lists</id>
+    <content type="html"><![CDATA[<p>Chapter 2 covers the efficient implementation of stack and binary search 
+trees when your data structures
+must be immutable.  This chapter wound up being a lot of fun to work on because
+it helped me focus a lot on how to approach structuring my F# code and start
+laying the foundation for how to approach building elegant F# code.</p>
+
+<!-- more -->
+
+<h2 id="stacks">Stacks</h2>
+<p>There are two implementations of the stack in this chapter.  The first is
+rather uninteresting and the second is significantly more educational.  This
+section on Lists appeared to be more focused on using lists to represent
+other data structures in this case to build a stack data structure.</p>
+
+<h3 id="using-lists">Using Lists</h3>
+<p>The first implementation is merely built on top of the existing list
+data structure.  Below is the direct conversion into F#:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">module</span> <span class="nc">Lists</span> <span class="o">=</span>
+</span><span class='line'>  <span class="k">type</span> <span class="nc">ListStack</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">=</span>
+</span><span class='line'>    <span class="err">‘</span><span class="n">a</span> <span class="kt">list</span>
+</span><span class='line'>  <span class="k">let</span> <span class="nc">Empty</span><span class="o">:</span><span class="nc">ListStack</span><span class="o">&lt;_&gt;</span> <span class="o">=</span> <span class="bp">[]</span>
+</span><span class='line'>  <span class="k">let</span> <span class="n">isEmpty</span> <span class="n">s</span> <span class="o">=</span> <span class="nn">List</span><span class="p">.</span><span class="n">isEmpty</span> <span class="n">s</span>
+</span><span class='line'>  <span class="k">let</span> <span class="n">cons</span> <span class="n">a</span> <span class="n">s</span><span class="o">:</span><span class="nc">ListStack</span><span class="o">&lt;_&gt;</span> <span class="o">=</span> <span class="n">a</span> <span class="o">::</span> <span class="n">s</span>
+</span><span class='line'>  <span class="k">let</span> <span class="n">hd</span> <span class="n">s</span> <span class="o">=</span> <span class="nn">List</span><span class="p">.</span><span class="n">head</span> <span class="n">s</span>
+</span><span class='line'>  <span class="k">let</span> <span class="n">tl</span> <span class="n">s</span> <span class="o">=</span> <span class="nn">List</span><span class="p">.</span><span class="n">tail</span> <span class="n">s</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></_></_></p>
+
+<p>There really wasn’t a whole lot of interesting stuff in this first example.</p>
+
+<h3 id="custom-stack">Custom Stack</h3>
+<p>The second section is much more fun:  a custom data structure is built to
+represent the stack.  Built as a recursively nested tuple.  Which is
+actually identical to the traditional way of representing a regular list.
+This provides a nice way of building up an immutable list from primitives
+(tuples) in order to build a more complex data structure (a stack).</p>
+
+<p>This was also the first part where I had an opportunity to experiment
+with how to write this well in F# and reason through the pros and cons
+of a specific approach.  My first attempt was to get as close to the 
+book as possible and I used a <code>type</code> with member methods to group the
+<code>CustomStack</code> with its associated functions.  The second approach uses
+<code>module CustomStack</code> to group the type with the associated functions.</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">type</span> <span class="nc">CustomStack</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">=</span>
+</span><span class='line'>  <span class="o">|</span> <span class="nc">Empty</span>
+</span><span class='line'>  <span class="o">|</span> <span class="nc">Cons</span> <span class="k">of</span> <span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="nc">CustomStack</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'><span class="k">with</span>
+</span><span class='line'>  <span class="k">static</span> <span class="k">member</span> <span class="n">empty</span> <span class="o">=</span> <span class="nc">Empty</span>
+</span><span class='line'>  <span class="c1">// Note:</span>
+</span><span class='line'>  <span class="c1">// I tried naming this IsEmpty but it won’t compile</span>
+</span><span class='line'>  <span class="c1">// F# auto generates Is* functions for each element of a DU.</span>
+</span><span class='line'>  <span class="k">static</span> <span class="k">member</span> <span class="nc">CheckEmpty</span> <span class="o">=</span> <span class="k">function</span>
+</span><span class='line'>                          <span class="o">|</span> <span class="nc">Empty</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="bp">true</span>
+</span><span class='line'>                          <span class="o">|</span> <span class="o">_</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="bp">false</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">static</span> <span class="k">member</span> <span class="n">cons</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">s</span><span class="o">)</span> <span class="o">=</span>
+</span><span class='line'>    <span class="nc">Cons</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">s</span><span class="o">)&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">static</span> <span class="k">member</span> <span class="n">head</span> <span class="o">=</span> <span class="k">function</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">Empty</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">failwith</span> <span class="err">“</span><span class="n">empty</span><span class="err">”</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">Cons</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="o">_)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">x</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">static</span> <span class="k">member</span> <span class="n">tail</span> <span class="n">s</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">match</span> <span class="n">s</span> <span class="k">with</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">Empty</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">failwith</span> <span class="err">“</span><span class="n">empty</span><span class="err">”</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">Cons</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="nc">Empty</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">x</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">Cons</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">s</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="nc">CustomStack</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;.</span><span class="n">tail</span> <span class="n">s</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>The first thing I learned was that the F# compiler autogenerates a function
+called <code>IsEmpty</code>.  Despite working with the language for several months,
+I’d somehow never noticed that when you create a discriminated union type
+F# automatically adds member methods for check if a value is a specific
+element in the discriminated union.</p>
+
+<p>Using static member methods to group the related functions to the type didn’t
+feel particularly elegant:  you’d always have to prepend all calls to functions
+with <code>CustomStack.</code>.  So I tried using another approach:  using a 
+module named <code>CustomStack</code> to group the functions with the type.  This would
+provide the option of just calling the functions or prepending the module
+name (<code>CustomStack.</code>).</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">module</span> <span class="nc">CustomStack</span> <span class="o">=</span>
+</span><span class='line'>  <span class="k">type</span> <span class="nc">CustomStack</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">=</span> <span class="nc">Empty</span> <span class="o">|</span> <span class="nc">Cons</span> <span class="k">of</span> <span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="nc">CustomStack</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'>  <span class="k">let</span> <span class="n">empty</span> <span class="o">=</span> <span class="nc">Empty</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">table</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">tbody</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="n">tr</span><span class="o">&gt;</span>
+</span><span class='line'>      <span class="o">&lt;</span><span class="n">td</span><span class="o">&gt;</span><span class="k">let</span> <span class="n">isEmpty</span> <span class="o">=</span> <span class="k">function</span> <span class="nc">Empty</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="bp">true</span><span class="o">&lt;/</span><span class="n">td</span><span class="o">&gt;</span>
+</span><span class='line'>      <span class="o">&lt;</span><span class="n">td</span><span class="o">&gt;_</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="bp">false</span><span class="o">&lt;/</span><span class="n">td</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;/</span><span class="n">tr</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;/</span><span class="n">tbody</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">table</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">let</span> <span class="n">cons</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span><span class="n">s</span><span class="o">)</span> <span class="o">=</span> <span class="nc">Cons</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">s</span><span class="o">)&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">let</span> <span class="n">head</span> <span class="o">=</span> <span class="k">function</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">Empty</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">failwith</span> <span class="err">“</span><span class="n">empty</span><span class="err">”</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">Cons</span><span class="o">(</span><span class="n">x</span><span class="o">,_)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">x</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">let</span> <span class="n">tail</span> <span class="o">=</span> <span class="k">function</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">Empty</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">failwith</span> <span class="err">“</span><span class="n">empty</span><span class="err">”</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">Cons</span><span class="o">(_,</span> <span class="n">s</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">s</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">let</span> <span class="k">rec</span> <span class="o">(++)</span> <span class="n">a</span> <span class="n">b</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">match</span> <span class="n">a</span> <span class="k">with</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">Empty</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">b</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">Cons</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">s</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="nc">Cons</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">s</span> <span class="o">++</span> <span class="n">b</span><span class="o">)&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">let</span> <span class="k">rec</span> <span class="n">update</span> <span class="o">=</span> <span class="k">function</span>
+</span><span class='line'>    <span class="o">|</span> <span class="o">(</span><span class="nc">Empty</span><span class="o">,</span> <span class="o">&lt;</span><span class="n">em</span><span class="o">&gt;,</span> <span class="o">_)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">failwith</span> <span class="err">“</span><span class="n">subscript</span> <span class="n">is</span> <span class="n">invalid</span><span class="err">”</span>
+</span><span class='line'>    <span class="o">|</span> <span class="o">(</span><span class="nc">Cons</span><span class="o">(&lt;/</span><span class="n">em</span><span class="o">&gt;,</span> <span class="n">s</span><span class="o">),</span> <span class="mi">0</span><span class="o">,</span> <span class="n">x</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="nc">Cons</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">s</span><span class="o">)</span>
+</span><span class='line'>    <span class="o">|</span> <span class="o">(</span><span class="nc">Cons</span><span class="o">(_,</span> <span class="n">s</span><span class="o">),</span> <span class="n">i</span><span class="o">,</span> <span class="n">x</span><span class="o">)</span> <span class="k">when</span> <span class="n">i</span> <span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="mi">0</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">update</span> <span class="o">(</span><span class="n">s</span><span class="o">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="o">,</span> <span class="n">x</span><span class="o">)</span>
+</span><span class='line'>    <span class="o">|</span> <span class="o">_</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">failwith</span> <span class="err">“</span><span class="n">subscript</span> <span class="n">is</span> <span class="n">invalid</span><span class="err">”</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>This version felt much better to me, I also took the opportunity to create
+an operator <code>++</code> for appends.  There is an interesting consequence that
+this approach creates by disconnecting the type parameter restrictions
+that functions require from the type definition; this will come up
+explicitly in the binary search trees section.</p>
+
+<p>I tried a slightly different format for <code>type CustomStack</code> and <code>isEmpty</code>:
+placing the patterns on one line.  I’m not sure how I feel about
+this approach.  It seems very easy to miss the <code>|</code> and not properly
+see the pattern definitions.  Having everything on one line also
+implies that everything is part of the same operation and that is
+decidely not the case with pattern matching and DU definitions.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Purely Functional Data Structures: Intro]]></title>
+    <link href="http://erichgess.github.io/blog/2016/03/21/purely-functional-data-structures-intro/"/>
+    <updated>2016-03-21T21:36:59-04:00</updated>
+    <id>http://erichgess.github.io/blog/2016/03/21/purely-functional-data-structures-intro</id>
+    <content type="html"><![CDATA[<p>In order to improve my functional programming skills and refresh my memory
+re algorithms, I’m reading <em>Purely Functional Data Structures</em> by Chris
+Okasaki.  To help me beef up my skills, particularly with F#, I’m also
+converting all of the data structures into F#.  I’ll be recording all of this
+in a series of blog posts.</p>
+
+<p>This series will begin with Chapter 2, since Chapter 1 is just an introduction.</p>
+]]></content>
+  </entry>
+  
+</feed>

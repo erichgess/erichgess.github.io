@@ -4,7 +4,7 @@
   <title><![CDATA[Elegant Architecture]]></title>
   <link href="http://erichgess.github.io/atom.xml" rel="self"/>
   <link href="http://erichgess.github.io/"/>
-  <updated>2016-03-19T12:38:54-04:00</updated>
+  <updated>2016-03-21T22:33:49-04:00</updated>
   <id>http://erichgess.github.io/</id>
   <author>
     <name><![CDATA[Erich G. Ess]]></name>
@@ -12,6 +12,210 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Purely Functional Data Structures: Chapter 2 - Lists]]></title>
+    <link href="http://erichgess.github.io/blog/2016/03/21/purely-functional-data-structures-chapter-2-lists/"/>
+    <updated>2016-03-21T21:40:30-04:00</updated>
+    <id>http://erichgess.github.io/blog/2016/03/21/purely-functional-data-structures-chapter-2-lists</id>
+    <content type="html"><![CDATA[<p>Chapter 2 covers the efficient implementation of stack and binary search 
+trees when your data structures
+must be immutable.  This chapter wound up being a lot of fun to work on because
+it helped me focus a lot on how to approach structuring my F# code and start
+laying the foundation for how to approach building elegant F# code.</p>
+
+<!-- more -->
+
+<h2 id="stacks">Stacks</h2>
+<p>There are two implementations of the stack in this chapter.  The first is
+rather uninteresting and the second is significantly more educational.  This
+section on Lists appeared to be more focused on using lists to represent
+other data structures in this case to build a stack data structure.</p>
+
+<h3 id="using-lists">Using Lists</h3>
+<p>The first implementation is merely built on top of the existing list
+data structure.  Below is the direct conversion into F#:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">module</span> <span class="nc">Lists</span> <span class="o">=</span>
+</span><span class="line">  <span class="k">type</span> <span class="nc">ListStack</span><span class="o">&lt;</span><span class="k">&#39;</span><span class="n">a</span><span class="o">&gt;</span> <span class="o">=</span>
+</span><span class="line">    <span class="k">&#39;</span><span class="n">a</span> <span class="kt">list</span>
+</span><span class="line">  <span class="k">let</span> <span class="nc">Empty</span><span class="o">:</span><span class="nc">ListStack</span><span class="o">&lt;_&gt;</span> <span class="o">=</span> <span class="bp">[]</span>
+</span><span class="line">  <span class="k">let</span> <span class="n">isEmpty</span> <span class="n">s</span> <span class="o">=</span> <span class="nn">List</span><span class="p">.</span><span class="n">isEmpty</span> <span class="n">s</span>
+</span><span class="line">  <span class="k">let</span> <span class="n">cons</span> <span class="n">a</span> <span class="n">s</span><span class="o">:</span><span class="nc">ListStack</span><span class="o">&lt;_&gt;</span> <span class="o">=</span> <span class="n">a</span> <span class="o">::</span> <span class="n">s</span>
+</span><span class="line">  <span class="k">let</span> <span class="n">hd</span> <span class="n">s</span> <span class="o">=</span> <span class="nn">List</span><span class="p">.</span><span class="n">head</span> <span class="n">s</span>
+</span><span class="line">  <span class="k">let</span> <span class="n">tl</span> <span class="n">s</span> <span class="o">=</span> <span class="nn">List</span><span class="p">.</span><span class="n">tail</span> <span class="n">s</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>There really wasn’t a whole lot of interesting stuff in this first example.</p>
+
+<h3 id="custom-stack">Custom Stack</h3>
+<p>The second section is much more fun:  a custom data structure is built to
+represent the stack.  Built as a recursively nested tuple.  Which is
+actually identical to the traditional way of representing a regular list.
+This provides a nice way of building up an immutable list from primitives
+(tuples) in order to build a more complex data structure (a stack).</p>
+
+<p>This was also the first part where I had an opportunity to experiment
+with how to write this well in F# and reason through the pros and cons
+of a specific approach.  My first attempt was to get as close to the 
+book as possible and I used a <code>type</code> with member methods to group the
+<code>CustomStack</code> with its associated functions.  The second approach uses
+<code>module CustomStack</code> to group the type with the associated functions.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">type</span> <span class="nc">CustomStack</span><span class="o">&lt;</span><span class="k">&#39;</span><span class="n">a</span><span class="o">&gt;</span> <span class="o">=</span>
+</span><span class="line">  <span class="o">|</span> <span class="nc">Empty</span>
+</span><span class="line">  <span class="o">|</span> <span class="nc">Cons</span> <span class="k">of</span> <span class="k">&#39;</span><span class="n">a</span> <span class="o">*</span> <span class="nc">CustomStack</span><span class="o">&lt;</span><span class="k">&#39;</span><span class="n">a</span><span class="o">&gt;</span>
+</span><span class="line"><span class="k">with</span>
+</span><span class="line">  <span class="k">static</span> <span class="k">member</span> <span class="n">empty</span> <span class="o">=</span> <span class="nc">Empty</span>
+</span><span class="line">  <span class="c1">// Note:</span>
+</span><span class="line">  <span class="c1">// I tried naming this IsEmpty but it won&#39;t compile</span>
+</span><span class="line">  <span class="c1">// F# auto generates Is* functions for each element of a DU.</span>
+</span><span class="line">  <span class="k">static</span> <span class="k">member</span> <span class="nc">CheckEmpty</span> <span class="o">=</span> <span class="k">function</span>
+</span><span class="line">                          <span class="o">|</span> <span class="nc">Empty</span> <span class="o">-&gt;</span> <span class="bp">true</span>
+</span><span class="line">                          <span class="o">|</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="bp">false</span>
+</span><span class="line">
+</span><span class="line">  <span class="k">static</span> <span class="k">member</span> <span class="n">cons</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">s</span><span class="o">)</span> <span class="o">=</span>
+</span><span class="line">    <span class="nc">Cons</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">s</span><span class="o">)</span>
+</span><span class="line">
+</span><span class="line">  <span class="k">static</span> <span class="k">member</span> <span class="n">head</span> <span class="o">=</span> <span class="k">function</span>
+</span><span class="line">    <span class="o">|</span> <span class="nc">Empty</span> <span class="o">-&gt;</span> <span class="n">failwith</span> <span class="s2">&quot;empty&quot;</span>
+</span><span class="line">    <span class="o">|</span> <span class="nc">Cons</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="o">_)</span> <span class="o">-&gt;</span> <span class="n">x</span>
+</span><span class="line">
+</span><span class="line">  <span class="k">static</span> <span class="k">member</span> <span class="n">tail</span> <span class="n">s</span> <span class="o">=</span>
+</span><span class="line">    <span class="k">match</span> <span class="n">s</span> <span class="k">with</span>
+</span><span class="line">    <span class="o">|</span> <span class="nc">Empty</span> <span class="o">-&gt;</span> <span class="n">failwith</span> <span class="s2">&quot;empty&quot;</span>
+</span><span class="line">    <span class="o">|</span> <span class="nc">Cons</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="nc">Empty</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">x</span>
+</span><span class="line">    <span class="o">|</span> <span class="nc">Cons</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">s</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">CustomStack</span><span class="o">&lt;</span><span class="k">&#39;</span><span class="n">a</span><span class="o">&gt;.</span><span class="n">tail</span> <span class="n">s</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>The first thing I learned was that the F# compiler autogenerates a function
+called <code>IsEmpty</code>.  Despite working with the language for several months,
+I’d somehow never noticed that when you create a discriminated union type
+F# automatically adds member methods for check if a value is a specific
+element in the discriminated union.</p>
+
+<p>Using static member methods to group the related functions to the type didn’t
+feel particularly elegant:  you’d always have to prepend all calls to functions
+with <code>CustomStack.</code>.  So I tried using another approach:  using a 
+module named <code>CustomStack</code> to group the functions with the type.  This would
+provide the option of just calling the functions or prepending the module
+name (<code>CustomStack.</code>).</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">module</span> <span class="nc">CustomStack</span> <span class="o">=</span>
+</span><span class="line">  <span class="k">type</span> <span class="nc">CustomStack</span><span class="o">&lt;</span><span class="k">&#39;</span><span class="n">a</span><span class="o">&gt;</span> <span class="o">=</span> <span class="nc">Empty</span> <span class="o">|</span> <span class="nc">Cons</span> <span class="k">of</span> <span class="k">&#39;</span><span class="n">a</span> <span class="o">*</span> <span class="nc">CustomStack</span><span class="o">&lt;</span><span class="k">&#39;</span><span class="n">a</span><span class="o">&gt;</span>
+</span><span class="line">  <span class="k">let</span> <span class="n">empty</span> <span class="o">=</span> <span class="nc">Empty</span>
+</span><span class="line">
+</span><span class="line">  <span class="k">let</span> <span class="n">isEmpty</span> <span class="o">=</span> <span class="k">function</span> <span class="nc">Empty</span> <span class="o">-&gt;</span> <span class="bp">true</span> <span class="o">|</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="bp">false</span>
+</span><span class="line">
+</span><span class="line">  <span class="k">let</span> <span class="n">cons</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span><span class="n">s</span><span class="o">)</span> <span class="o">=</span> <span class="nc">Cons</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">s</span><span class="o">)</span>
+</span><span class="line">
+</span><span class="line">  <span class="k">let</span> <span class="n">head</span> <span class="o">=</span> <span class="k">function</span>
+</span><span class="line">    <span class="o">|</span> <span class="nc">Empty</span> <span class="o">-&gt;</span> <span class="n">failwith</span> <span class="s2">&quot;empty&quot;</span>
+</span><span class="line">    <span class="o">|</span> <span class="nc">Cons</span><span class="o">(</span><span class="n">x</span><span class="o">,_)</span> <span class="o">-&gt;</span> <span class="n">x</span>
+</span><span class="line">
+</span><span class="line">  <span class="k">let</span> <span class="n">tail</span> <span class="o">=</span> <span class="k">function</span>
+</span><span class="line">    <span class="o">|</span> <span class="nc">Empty</span> <span class="o">-&gt;</span> <span class="n">failwith</span> <span class="s2">&quot;empty&quot;</span>
+</span><span class="line">    <span class="o">|</span> <span class="nc">Cons</span><span class="o">(_,</span> <span class="n">s</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">s</span>
+</span><span class="line">
+</span><span class="line">  <span class="k">let</span> <span class="k">rec</span> <span class="o">(++)</span> <span class="n">a</span> <span class="n">b</span> <span class="o">=</span>
+</span><span class="line">    <span class="k">match</span> <span class="n">a</span> <span class="k">with</span>
+</span><span class="line">    <span class="o">|</span> <span class="nc">Empty</span> <span class="o">-&gt;</span> <span class="n">b</span>
+</span><span class="line">    <span class="o">|</span> <span class="nc">Cons</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">s</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Cons</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">s</span> <span class="o">++</span> <span class="n">b</span><span class="o">)</span>
+</span><span class="line">
+</span><span class="line">  <span class="k">let</span> <span class="k">rec</span> <span class="n">update</span> <span class="o">=</span> <span class="k">function</span>
+</span><span class="line">    <span class="o">|</span> <span class="o">(</span><span class="nc">Empty</span><span class="o">,</span> <span class="o">_,</span> <span class="o">_)</span> <span class="o">-&gt;</span> <span class="n">failwith</span> <span class="s2">&quot;subscript is invalid&quot;</span>
+</span><span class="line">    <span class="o">|</span> <span class="o">(</span><span class="nc">Cons</span><span class="o">(_,</span> <span class="n">s</span><span class="o">),</span> <span class="mi">0</span><span class="o">,</span> <span class="n">x</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Cons</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">s</span><span class="o">)</span>
+</span><span class="line">    <span class="o">|</span> <span class="o">(</span><span class="nc">Cons</span><span class="o">(_,</span> <span class="n">s</span><span class="o">),</span> <span class="n">i</span><span class="o">,</span> <span class="n">x</span><span class="o">)</span> <span class="k">when</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">-&gt;</span> <span class="n">update</span> <span class="o">(</span><span class="n">s</span><span class="o">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="o">,</span> <span class="n">x</span><span class="o">)</span>
+</span><span class="line">    <span class="o">|</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="n">failwith</span> <span class="s2">&quot;subscript is invalid&quot;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>This version felt much better to me, I also took the opportunity to create
+an operator <code>++</code> for appends.  There is an interesting consequence that
+this approach creates by disconnecting the type parameter restrictions
+that functions require from the type definition; this will come up
+explicitly in the binary search trees section.</p>
+
+<p>I tried a slightly different format for <code>type CustomStack</code> and <code>isEmpty</code>:
+placing the patterns on one line.  I’m not sure how I feel about
+this approach.  It seems very easy to miss the <code>|</code> and not properly
+see the pattern definitions.  Having everything on one line also
+implies that everything is part of the same operation and that is
+decidely not the case with pattern matching and DU definitions.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Purely Functional Data Structures: Intro]]></title>
+    <link href="http://erichgess.github.io/blog/2016/03/21/purely-functional-data-structures-intro/"/>
+    <updated>2016-03-21T21:36:59-04:00</updated>
+    <id>http://erichgess.github.io/blog/2016/03/21/purely-functional-data-structures-intro</id>
+    <content type="html"><![CDATA[<p>In order to improve my functional programming skills and refresh my memory
+re algorithms, I’m reading <em>Purely Functional Data Structures</em> by Chris
+Okasaki.  To help me beef up my skills, particularly with F#, I’m also
+converting all of the data structures into F#.  I’ll be recording all of this
+in a series of blog posts.</p>
+
+<p>This series will begin with Chapter 2, since Chapter 1 is just an introduction.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Pattern Matching With Pipes]]></title>
@@ -2543,124 +2747,6 @@ https://github.com/erichgess/OdinPrototype</p>
 <p>This prototype is some hacking I did over a few, very spread out days, to try out some concepts.  It has a very simple agent, which reads %CPU used and sends a message to a receiver.  That receiver this publishes that message as an IObservable.  Multiple mailbox processors subscribe to the Observable and use Reactive to do some queries on the incoming messages.</p>
 
 <p>This is very very little.  However, it served as a way for me to try out a few different concepts: RabbitMQ, Mailbox Processors, and Reactive.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Odin - Learning Distributed Computing]]></title>
-    <link href="http://erichgess.github.io/blog/2014/03/08/odin-learning-distributed-computing/"/>
-    <updated>2014-03-08T01:39:00-05:00</updated>
-    <id>http://erichgess.github.io/blog/2014/03/08/odin-learning-distributed-computing</id>
-    <content type="html"><![CDATA[<p>Over the last two years, I’ve really become interested in distributed computing and things like big data.  My interest in these topics grew in coincidence with my falling in love with F#.  I do a lot of different projects at work and not all of them involve any of those three topics.  So, to provide a motive for learning more about distributed computing and sharpening my F# skills I have decided to start working on a small side project (currently, by myself but several friends are interested).  This is called Odin, inspired by the Riemann project, it’s a distributed monitoring system.  It will consist of lightweight agents and heavyweight monitoring engines.  The agents will run on servers collecting data and sending it to the monitors.  The monitors will read the stream of events coming from all the servers then process, analyze, and act.
-<!-- more -->
-The goal here is, first and foremost, educational.  To gain experience with F#.  To gain experience with distributed computing.  To play with complex algorithms and designs and new technology.</p>
-
-<h5 id="components">Components</h5>
-<p>The foundation of Odin is the event stream.  These area  stream of messages.  Each message containing information about an event or state of a server, application, data source, etc.  It’s like a Twitter feed.  This feed is currently being built using RabbitMQ.</p>
-
-<p>The next component is the Agent (called Muninn).  The agent is a small service collects data about a server and sends that data to the event stream.  This is the piece which runs on the servers so it needs to be as light and resource spare as possible.  It will just periodically run data collection funcctions and write the results to the event stream.</p>
-
-<p>Finally, the heavy hitter:  Odin.  Odin is the service which receives all the events and analyzes the events to determine if any action should be taken.  For example, if an agent is sending the percent of CPU being used by Server A, then Odin would monitor that stream of events and, if it went above 90% for 5 minutes, send out an email alert.  Odin is meant to be an easily configured platform.  It will handle receiving the event stream, deserializing messages, doing an parsing, and running monitoring scripts.  The monitoring scripts are what will do the actual logic and analysis.  My goal is to make it easy to write these scripts, then publish them to an Odin node which will handle the execution.</p>
-
-<p>Ultimately, I will make Odin be capapble of running in a cluster.  Where the processing load is distributed across nodes and monitor scripts are distributed so as to keep performance even.  For example, a very complex, resource heavy monitor which is flagged as not-critical might get moved to a low performance server where no other monitor is running.</p>
-
-<h5 id="what-im-exploring">What I’m Exploring</h5>
-
-<p>Right now, Odin has provided me with opportunity to explore many things, including:</p>
-
-<ul>
-  <li>The Actor model of concurrency and the F# MailBox Processor</li>
-  <li>RabbitMQ</li>
-  <li>Reactive Extensions</li>
-  <li>F# - this is helping me learn a lot about functional programming</li>
-  <li>ZeroMQ - a possible alternative to RabbitMQ</li>
-  <li>Mono/Crossplatform - This needs to be capable of handling a heterogenous system (many different OS’s), so I’ll mess around running F# in Linux/OSX using Mono &amp; Xamarin.</li>
-</ul>
-
-<h6 id="actors-and-mailbox-processors">Actors and Mailbox Processors</h6>
-<p>Right now, I’m using F#’s Mailbox processors to handle running concurrent tasks in Odin (e.g. the monitors each run in their own Mailbox Processor).  The Mailbox Processor is an implementation of the Actor Model of concurrency: briefly, each process runs in its own isolated world and if two processes want to communicate they send messages back and forth.  I’m using this for a couple reasons.  One it’s built into F# so is easy to use and setup.  Two, it provides a very easy way to think about concurrent systems and helps to minimize the early complexity of Odin.  These two things will let me focus on the overall design and the more high level distributed algorithms (e.g. how to split load across a cluster of Odins).</p>
-
-<h6 id="rabbitmq">RabbitMQ</h6>
-<p>I chose RabbitMQ to handle communication between services because it has a reputation for being fast, it’s simple to use, and it’s open source.  The nice administration page which lets me see what’s happening in the queues is a nice bonus.  I want to make it easy to switch over to a different communication system (like ZeroMQ) if needed, so the design of Odin should make sure that the actual implementation of the event stream is fairly decoupled from what developers actually code against.</p>
-
-<h6 id="reactive-extensions">Reactive Extensions</h6>
-<p>The Reactive Extensions will be a big part of Odin.  I chose this because I want to learn the tools, it provides an elegant way for monitors to interact with the event stream, and it provides a simple way to couple the Mailbox processors running the monitors to the queue of messages that contains the events.  Reactive will allow monitors to subscribe to the event stream and then apply queries (LINQ) to the incoming stream of events.  These could be maps, filters, aggregators, you name it, if it can be done on a database table it can be done on an event stream.</p>
-
-<h6 id="f">F</h6>
-<p>Simply the most fun language to program I have ever seen.</p>
-
-<h6 id="zeromq">ZeroMQ</h6>
-<p>A possible alternative to RabbitMQ.  It’s written by some of the same people who made the ActiveMQ Protocol.  It differs from RabbitMQ primarily by not having any message brokers.  Its also written in C rather than Erlang.  The goal with ZeroMQ is to make an incredibly simple, incredibly fast messaging system.</p>
-
-<h6 id="monoxamarin">Mono/Xamarin</h6>
-<p>In order for this to support Linux and OSX I’ll need to be able to build and run this using Mono and Xamarin.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Building a RabbitMQ Library in F#]]></title>
-    <link href="http://erichgess.github.io/blog/2014/03/06/building-a-rabbitmq-library-in-f-number/"/>
-    <updated>2014-03-06T10:44:30-05:00</updated>
-    <id>http://erichgess.github.io/blog/2014/03/06/building-a-rabbitmq-library-in-f-number</id>
-    <content type="html"><![CDATA[<p>I’ve been doing a lot of experimenting with F# and distributed computing via messaging.  As evidenced by my previous, I’m using RabbitMQ as my messaging platform, for a couple of reasons: it’s easy to use, it’s free and open source, and I might decide to switch to RabbitMQ at work.  I’ve been having a lot of fun experimenting with RabbitMQ and F#.  However, I spend a lot of my time just writing and copy/pasting the boilerplate code needed to configure the RabbitMQ client libraries, add the fact that the .Net client library is written for C#, and you get a constant block of boring work.  So, purely for fun and profit, I’m going to write a quick F# wrapper.  The purpose of it being to let me very quickly setup RabbitMQ and, just as importantly, work with RabbitMQ in a manner that better fits F#.</p>
-
-<!-- more -->
-
-<h2 id="design">Design</h2>
-<p>I want to use this as an opportuntity to practice all of my engineering skills.  So, I’m going to start by defining the problem I want to solve, the scope of work, and then the design itself.  For the problem: I will try to understand what my needs are, right now, and predict what they will be in the future.  For the scope of work:  RabbitMQ has a lot of stuff, so I will use the definition of the problem to decide how much of the RabbitMQ framework I will expose with my wrapper.  The design:  this is when I will figure out how I want to use this library and how to make it fit the F#/functional paradigm.  I will do all of this, before I start writing any code!</p>
-
-<h4 id="the-problems">The Problem(s)</h4>
-<p>Right now, I have two problems when I’m trying to do a messaging experiment in F#:</p>
-
-<ol>
-  <li>I have to rewrite the RabbitMQ setup code every time I make a new endpoint.</li>
-  <li>It’s OO/C# focused design doesn’t fit very well with F#.  It works, but, I think, it will be better if it’s functional.</li>
-  <li>Long term, I’d like to make up a simple RabbitMQ F# Client library which anyone could use.</li>
-</ol>
-
-<p>I threw number 3 on there, not because it is a problem I am trying to solve right now, but because this something which could contribute to the F# community.  By keeping this in mind as a long term goal, it will help me write my solution so that it is easy to expand.</p>
-
-<h4 id="the-scope">The Scope</h4>
-<p>For scope, I’ll look at the first two problems and ignore the third.  Problem 2 shouldn’t impact the scope very much, as it’s really a restriction on my design:  make the design fit the functional paradigm.  Problem 1 definitely can impact the scope of work:  there is a lot to RabbitMQ and doing a full client implementation in F# would be a LOT of work.  To define the scope of work I am going to do, I’ll focus on explicitly writing out my needs and then only do the amount of work necessary to meet those needs.</p>
-
-<h5 id="problem-1-needs">Problem 1 Needs</h5>
-<p>I am doing very little with RabbitMQ in my experiments.  I am not using subjects, or fan-out exchanges, or anything; except making queues, publishing messages to the queue, and reading from the queue.  The messages, for this post, will also just be simple text messages, so no serialization/deserialization.  So this is all I need (in version 1 :) ):</p>
-
-<ol>
-  <li>Create a queue on a RabbitMQ server</li>
-  <li>Publish a message to a specific queue</li>
-  <li>Read messages from a specific queue</li>
-  <li>Messages are just text messages</li>
-</ol>
-
-<p>Easy Enough!  My first version of the RabbitMQ F# client will only do those 3 things.</p>
-
-<h5 id="problem-2-needs">Problem 2 Needs</h5>
-<p>This is purely aesthetic.  The more I worke in F#, the more I find writing up classes and implementing interfaces to feel a bit “ehhh”.  So I want to make the way a developer uses and interacts with RabbitMQ to be more functional.  This is a bit more vague than I’d like, because this will require a bit more learning on my part; which is why I put it here!</p>
-
-<h5 id="scope">Scope</h5>
-<p>At the end of all of this, my library will do just provide these three features:</p>
-
-<ol>
-  <li>Connect to or create a specified queue on a RabbitMQ server</li>
-  <li>Provide a way to publish messages to the queue</li>
-  <li>Provide a way to read messages from the queue</li>
-</ol>
-
-<p>Behind the scenes it will do whatever setup/teardown is needed to get those 3 features to work.</p>
-
-<h4 id="the-design">The Design</h4>
-<p>The design needs to be more functional than OO, so that it fits better with the general aesthetic flow of writing F#.  Being new to functional design, I’ll start with the <a href="http://simontcousins.azurewebsites.net/manifesto/">NOOO Manifesto</a> as my guide:</p>
-
-<ul>
-  <li>Functions and Types over classes</li>
-  <li>Purity over mutability</li>
-  <li>Composition over inheritance</li>
-  <li>Higher-order functions over method dispatch</li>
-  <li>Options over nulls</li>
-</ul>
-
-<p>In my next post, I’ll start the actual implementation of my library.</p>
 ]]></content>
   </entry>
   

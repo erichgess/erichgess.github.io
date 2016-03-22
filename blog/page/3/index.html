@@ -11,7 +11,7 @@
   <meta name="author" content="Erich G. Ess">
 
   
-  <meta name="description" content="Over the last few years, one of the topics on which I have done much of my work has been distributed computing using message queues. Recently, I’ve &hellip;">
+  <meta name="description" content="Over the last two years, I’ve really become interested in distributed computing and things like big data. My interest in these topics grew in &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -67,6 +67,87 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/03/08/odin-learning-distributed-computing/">Odin - Learning Distributed Computing</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-08T01:39:00-05:00" pubdate data-updated="true">Mar 8<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Over the last two years, I’ve really become interested in distributed computing and things like big data.  My interest in these topics grew in coincidence with my falling in love with F#.  I do a lot of different projects at work and not all of them involve any of those three topics.  So, to provide a motive for learning more about distributed computing and sharpening my F# skills I have decided to start working on a small side project (currently, by myself but several friends are interested).  This is called Odin, inspired by the Riemann project, it’s a distributed monitoring system.  It will consist of lightweight agents and heavyweight monitoring engines.  The agents will run on servers collecting data and sending it to the monitors.  The monitors will read the stream of events coming from all the servers then process, analyze, and act.
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/03/08/odin-learning-distributed-computing/">Lay on, MacDuff &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/03/06/building-a-rabbitmq-library-in-f-number/">Building a RabbitMQ Library in F#</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-06T10:44:30-05:00" pubdate data-updated="true">Mar 6<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>I’ve been doing a lot of experimenting with F# and distributed computing via messaging.  As evidenced by my previous, I’m using RabbitMQ as my messaging platform, for a couple of reasons: it’s easy to use, it’s free and open source, and I might decide to switch to RabbitMQ at work.  I’ve been having a lot of fun experimenting with RabbitMQ and F#.  However, I spend a lot of my time just writing and copy/pasting the boilerplate code needed to configure the RabbitMQ client libraries, add the fact that the .Net client library is written for C#, and you get a constant block of boring work.  So, purely for fun and profit, I’m going to write a quick F# wrapper.  The purpose of it being to let me very quickly setup RabbitMQ and, just as importantly, work with RabbitMQ in a manner that better fits F#.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/03/06/building-a-rabbitmq-library-in-f-number/">Lay on, MacDuff &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -165,6 +246,14 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/03/21/purely-functional-data-structures-chapter-2-lists/">Purely Functional Data Structures: Chapter 2 - Lists</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/03/21/purely-functional-data-structures-intro/">Purely Functional Data Structures: Intro</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/03/19/pattern-matching-with-pipes/">Pattern Matching With Pipes</a>
       </li>
     
@@ -174,14 +263,6 @@
     
       <li class="post">
         <a href="/blog/2015/08/17/f-number-zippers/">F# Zippers</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/07/19/fundamental-theorem-of-prog-rock/">Fundamental Theorem of Prog Rock</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/02/13/a-cartoon-map-of-knowledge/">A Cartoon Map of Knowledge</a>
       </li>
     
   </ul>
