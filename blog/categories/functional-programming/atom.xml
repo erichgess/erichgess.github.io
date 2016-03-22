@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Functional Programming | Elegant Architecture]]></title>
   <link href="http://erichgess.github.io/blog/categories/functional-programming/atom.xml" rel="self"/>
   <link href="http://erichgess.github.io/"/>
-  <updated>2016-03-21T22:39:50-04:00</updated>
+  <updated>2016-03-21T22:49:51-04:00</updated>
   <id>http://erichgess.github.io/</id>
   <author>
     <name><![CDATA[Erich G. Ess]]></name>
@@ -12,6 +12,15 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Purely Functional Data Structures: Chapter 2 - Binary Search Trees]]></title>
+    <link href="http://erichgess.github.io/blog/2016/03/21/purely-functional-data-structures-chapter-2-binary-search-trees/"/>
+    <updated>2016-03-21T22:41:37-04:00</updated>
+    <id>http://erichgess.github.io/blog/2016/03/21/purely-functional-data-structures-chapter-2-binary-search-trees</id>
+    <content type="html"><![CDATA[
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Zippers 2: Building a Rose Tree Zipper]]></title>

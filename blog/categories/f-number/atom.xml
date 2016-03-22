@@ -4,7 +4,7 @@
   <title><![CDATA[Category: F# | Elegant Architecture]]></title>
   <link href="http://erichgess.github.io/blog/categories/f-number/atom.xml" rel="self"/>
   <link href="http://erichgess.github.io/"/>
-  <updated>2016-03-21T22:39:50-04:00</updated>
+  <updated>2016-03-21T22:49:51-04:00</updated>
   <id>http://erichgess.github.io/</id>
   <author>
     <name><![CDATA[Erich G. Ess]]></name>
@@ -12,6 +12,15 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Purely Functional Data Structures: Chapter 2 - Binary Search Trees]]></title>
+    <link href="http://erichgess.github.io/blog/2016/03/21/purely-functional-data-structures-chapter-2-binary-search-trees/"/>
+    <updated>2016-03-21T22:41:37-04:00</updated>
+    <id>http://erichgess.github.io/blog/2016/03/21/purely-functional-data-structures-chapter-2-binary-search-trees</id>
+    <content type="html"><![CDATA[
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Purely Functional Data Structures: Chapter 2 - Lists]]></title>
@@ -36,23 +45,16 @@ other data structures in this case to build a stack data structure.</p>
 <p>The first implementation is merely built on top of the existing list
 data structure.  Below is the direct conversion into F#:</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">module</span> <span class="nc">Lists</span> <span class="o">=</span>
-</span><span class='line'>  <span class="k">type</span> <span class="nc">ListStack</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">=</span>
-</span><span class='line'>    <span class="err">‘</span><span class="n">a</span> <span class="kt">list</span>
-</span><span class='line'>  <span class="k">let</span> <span class="nc">Empty</span><span class="o">:</span><span class="nc">ListStack</span><span class="o">&lt;_&gt;</span> <span class="o">=</span> <span class="bp">[]</span>
-</span><span class='line'>  <span class="k">let</span> <span class="n">isEmpty</span> <span class="n">s</span> <span class="o">=</span> <span class="nn">List</span><span class="p">.</span><span class="n">isEmpty</span> <span class="n">s</span>
-</span><span class='line'>  <span class="k">let</span> <span class="n">cons</span> <span class="n">a</span> <span class="n">s</span><span class="o">:</span><span class="nc">ListStack</span><span class="o">&lt;_&gt;</span> <span class="o">=</span> <span class="n">a</span> <span class="o">::</span> <span class="n">s</span>
-</span><span class='line'>  <span class="k">let</span> <span class="n">hd</span> <span class="n">s</span> <span class="o">=</span> <span class="nn">List</span><span class="p">.</span><span class="n">head</span> <span class="n">s</span>
-</span><span class='line'>  <span class="k">let</span> <span class="n">tl</span> <span class="n">s</span> <span class="o">=</span> <span class="nn">List</span><span class="p">.</span><span class="n">tail</span> <span class="n">s</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></_></_></p>
+<p><code>fsharp
+module Lists =
+  type ListStack&lt;'a&gt; =
+    'a list
+  let Empty:ListStack&lt;_&gt; = []
+  let isEmpty s = List.isEmpty s
+  let cons a s:ListStack&lt;_&gt; = a :: s
+  let hd s = List.head s
+  let tl s = List.tail s
+</code></p>
 
 <p>There really wasn’t a whole lot of interesting stuff in this first example.</p>
 
@@ -70,55 +72,32 @@ book as possible and I used a <code>type</code> with member methods to group the
 <code>CustomStack</code> with its associated functions.  The second approach uses
 <code>module CustomStack</code> to group the type with the associated functions.</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">type</span> <span class="nc">CustomStack</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">=</span>
-</span><span class='line'>  <span class="o">|</span> <span class="nc">Empty</span>
-</span><span class='line'>  <span class="o">|</span> <span class="nc">Cons</span> <span class="k">of</span> <span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="nc">CustomStack</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span>
-</span><span class='line'><span class="k">with</span>
-</span><span class='line'>  <span class="k">static</span> <span class="k">member</span> <span class="n">empty</span> <span class="o">=</span> <span class="nc">Empty</span>
-</span><span class='line'>  <span class="c1">// Note:</span>
-</span><span class='line'>  <span class="c1">// I tried naming this IsEmpty but it won’t compile</span>
-</span><span class='line'>  <span class="c1">// F# auto generates Is* functions for each element of a DU.</span>
-</span><span class='line'>  <span class="k">static</span> <span class="k">member</span> <span class="nc">CheckEmpty</span> <span class="o">=</span> <span class="k">function</span>
-</span><span class='line'>                          <span class="o">|</span> <span class="nc">Empty</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="bp">true</span>
-</span><span class='line'>                          <span class="o">|</span> <span class="o">_</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="bp">false</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">static</span> <span class="k">member</span> <span class="n">cons</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">s</span><span class="o">)</span> <span class="o">=</span>
-</span><span class='line'>    <span class="nc">Cons</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">s</span><span class="o">)&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">static</span> <span class="k">member</span> <span class="n">head</span> <span class="o">=</span> <span class="k">function</span>
-</span><span class='line'>    <span class="o">|</span> <span class="nc">Empty</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">failwith</span> <span class="err">“</span><span class="n">empty</span><span class="err">”</span>
-</span><span class='line'>    <span class="o">|</span> <span class="nc">Cons</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="o">_)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">x</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">static</span> <span class="k">member</span> <span class="n">tail</span> <span class="n">s</span> <span class="o">=</span>
-</span><span class='line'>    <span class="k">match</span> <span class="n">s</span> <span class="k">with</span>
-</span><span class='line'>    <span class="o">|</span> <span class="nc">Empty</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">failwith</span> <span class="err">“</span><span class="n">empty</span><span class="err">”</span>
-</span><span class='line'>    <span class="o">|</span> <span class="nc">Cons</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="nc">Empty</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">x</span>
-</span><span class='line'>    <span class="o">|</span> <span class="nc">Cons</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">s</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="nc">CustomStack</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;.</span><span class="n">tail</span> <span class="n">s</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>```fsharp
+type CustomStack&lt;’a&gt; =
+  | Empty
+  | Cons of ‘a * CustomStack&lt;’a&gt;
+with
+  static member empty = Empty
+  // Note:
+  // I tried naming this IsEmpty but it won’t compile
+  // F# auto generates Is* functions for each element of a DU.
+  static member CheckEmpty = function
+                          | Empty -&gt; true
+                          | _ -&gt; false</p>
+
+<p>static member cons (x, s) =
+    Cons(x, s)</p>
+
+<p>static member head = function
+    | Empty -&gt; failwith “empty”
+    | Cons(x, _) -&gt; x</p>
+
+<p>static member tail s =
+    match s with
+    | Empty -&gt; failwith “empty”
+    | Cons(x, Empty) -&gt; x
+    | Cons(x, s) -&gt; CustomStack&lt;’a&gt;.tail s
+```</p>
 
 <p>The first thing I learned was that the F# compiler autogenerates a function
 called <code>IsEmpty</code>.  Despite working with the language for several months,
@@ -133,73 +112,41 @@ module named <code>CustomStack</code> to group the functions with the type.  Thi
 provide the option of just calling the functions or prepending the module
 name (<code>CustomStack.</code>).</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">module</span> <span class="nc">CustomStack</span> <span class="o">=</span>
-</span><span class='line'>  <span class="k">type</span> <span class="nc">CustomStack</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">=</span> <span class="nc">Empty</span> <span class="o">|</span> <span class="nc">Cons</span> <span class="k">of</span> <span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="nc">CustomStack</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span>
-</span><span class='line'>  <span class="k">let</span> <span class="n">empty</span> <span class="o">=</span> <span class="nc">Empty</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">table</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="n">tbody</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;</span><span class="n">tr</span><span class="o">&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="n">td</span><span class="o">&gt;</span><span class="k">let</span> <span class="n">isEmpty</span> <span class="o">=</span> <span class="k">function</span> <span class="nc">Empty</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="bp">true</span><span class="o">&lt;/</span><span class="n">td</span><span class="o">&gt;</span>
-</span><span class='line'>      <span class="o">&lt;</span><span class="n">td</span><span class="o">&gt;_</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="bp">false</span><span class="o">&lt;/</span><span class="n">td</span><span class="o">&gt;</span>
-</span><span class='line'>    <span class="o">&lt;/</span><span class="n">tr</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;/</span><span class="n">tbody</span><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&lt;/</span><span class="n">table</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">let</span> <span class="n">cons</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span><span class="n">s</span><span class="o">)</span> <span class="o">=</span> <span class="nc">Cons</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">s</span><span class="o">)&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">let</span> <span class="n">head</span> <span class="o">=</span> <span class="k">function</span>
-</span><span class='line'>    <span class="o">|</span> <span class="nc">Empty</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">failwith</span> <span class="err">“</span><span class="n">empty</span><span class="err">”</span>
-</span><span class='line'>    <span class="o">|</span> <span class="nc">Cons</span><span class="o">(</span><span class="n">x</span><span class="o">,_)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">x</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">let</span> <span class="n">tail</span> <span class="o">=</span> <span class="k">function</span>
-</span><span class='line'>    <span class="o">|</span> <span class="nc">Empty</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">failwith</span> <span class="err">“</span><span class="n">empty</span><span class="err">”</span>
-</span><span class='line'>    <span class="o">|</span> <span class="nc">Cons</span><span class="o">(_,</span> <span class="n">s</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">s</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">let</span> <span class="k">rec</span> <span class="o">(++)</span> <span class="n">a</span> <span class="n">b</span> <span class="o">=</span>
-</span><span class='line'>    <span class="k">match</span> <span class="n">a</span> <span class="k">with</span>
-</span><span class='line'>    <span class="o">|</span> <span class="nc">Empty</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">b</span>
-</span><span class='line'>    <span class="o">|</span> <span class="nc">Cons</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">s</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="nc">Cons</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">s</span> <span class="o">++</span> <span class="n">b</span><span class="o">)&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">let</span> <span class="k">rec</span> <span class="n">update</span> <span class="o">=</span> <span class="k">function</span>
-</span><span class='line'>    <span class="o">|</span> <span class="o">(</span><span class="nc">Empty</span><span class="o">,</span> <span class="o">&lt;</span><span class="n">em</span><span class="o">&gt;,</span> <span class="o">_)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">failwith</span> <span class="err">“</span><span class="n">subscript</span> <span class="n">is</span> <span class="n">invalid</span><span class="err">”</span>
-</span><span class='line'>    <span class="o">|</span> <span class="o">(</span><span class="nc">Cons</span><span class="o">(&lt;/</span><span class="n">em</span><span class="o">&gt;,</span> <span class="n">s</span><span class="o">),</span> <span class="mi">0</span><span class="o">,</span> <span class="n">x</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="nc">Cons</span><span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">s</span><span class="o">)</span>
-</span><span class='line'>    <span class="o">|</span> <span class="o">(</span><span class="nc">Cons</span><span class="o">(_,</span> <span class="n">s</span><span class="o">),</span> <span class="n">i</span><span class="o">,</span> <span class="n">x</span><span class="o">)</span> <span class="k">when</span> <span class="n">i</span> <span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="mi">0</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">update</span> <span class="o">(</span><span class="n">s</span><span class="o">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="o">,</span> <span class="n">x</span><span class="o">)</span>
-</span><span class='line'>    <span class="o">|</span> <span class="o">_</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">failwith</span> <span class="err">“</span><span class="n">subscript</span> <span class="n">is</span> <span class="n">invalid</span><span class="err">”</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>```fsharp
+module CustomStack =
+  type CustomStack&lt;’a&gt; = Empty | Cons of ‘a * CustomStack&lt;’a&gt;
+  let empty = Empty</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td>let isEmpty = function Empty -&gt; true</td>
+      <td>_ -&gt; false</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>let cons (x,s) = Cons(x, s)</p>
+
+<p>let head = function
+    | Empty -&gt; failwith “empty”
+    | Cons(x,_) -&gt; x</p>
+
+<p>let tail = function
+    | Empty -&gt; failwith “empty”
+    | Cons(_, s) -&gt; s</p>
+
+<p>let rec (++) a b =
+    match a with
+    | Empty -&gt; b
+    | Cons(x, s) -&gt; Cons(x, s ++ b)</p>
+
+<p>let rec update = function
+    | (Empty, <em>, _) -&gt; failwith “subscript is invalid”
+    | (Cons(</em>, s), 0, x) -&gt; Cons(x, s)
+    | (Cons(_, s), i, x) when i &gt; 0 -&gt; update (s, i-1, x)
+    | _ -&gt; failwith “subscript is invalid”
+```</p>
 
 <p>This version felt much better to me, I also took the opportunity to create
 an operator <code>++</code> for appends.  There is an interesting consequence that
@@ -919,212 +866,6 @@ is read as: the right or left branch and it’s parent value is <code>'a</code>.
 from <a href="https://codewords.recurse.com/issues/three/algebra-and-calculus-of-algebraic-data-types">Joel Burget</a>
 and this series from <a href="https://chris-taylor.github.io/blog/2013/02/13/the-algebra-of-algebraic-data-types-part-iii/">Chris Taylor</a>)
 helped clarify how the zipper works.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Type Providers Tutorial Part 4 - Base Types]]></title>
-    <link href="http://erichgess.github.io/blog/2014/04/17/type-providers-tutorial-part-4/"/>
-    <updated>2014-04-17T01:09:16-04:00</updated>
-    <id>http://erichgess.github.io/blog/2014/04/17/type-providers-tutorial-part-4</id>
-    <content type="html"><![CDATA[<p>In Part 3 of this Tutorial, I talked a little about erased types and how the types we generate are actually built on top of a <code>obj</code>.  Previously, I just used a plan <code>obj</code> type and cast an integer to and from the <code>obj</code> types.</p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="nc">InvokeCode</span><span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;@@</span> <span class="mi">0</span> <span class="o">:&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">obj</span> <span class="o">@@&amp;</span><span class="n">gt</span><span class="o">;))</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>Using just the basic <code>obj</code> works well enough for a very simple generated type (like the simple integer from part 3).  However, it becomes a bit of a mess when you want to make anything complicated.</p>
-
-<p>In this part, we will update our Type Provider to use a more advanced type as our base type.
-<!-- more -->
-The ultimate goal of this tutorial is to build a type provider, which takes a schema for a data source and generates a type which matches that schema.  For example, suppose our data source is a table with 3 columns labeled “Tom”, “Dick”, and “Harry”, all three of integer type.  Then the type provider shall generate a type with 3 fields labeled “Tom”, “Dick”, and “Harry” of type <code>int</code>.  To make coding this managable, we will need an base type which can keep track of the names of our fields and the values each of each of those fields.</p>
-
-<h3 id="spring-cleaning">Spring Cleaning</h3>
-<p>Tutorials Parts 1 through 3 were all about building up the basic skills and, most importantly, understanding needed to work with Type Providers.  Learning how to generate a type, how to add methods, properties, constructors, etc.  Through practice and application, hopefully, you get comfortable with erased types and how generated types are built on top of an base type.</p>
-
-<p>Looking back at the <code>Hello</code> generated type we built in this tutorial; we’ve got something which is a bit slapdash.  That’s fine for tinkering and learning the basics, but now that we have that under our belt it’s time to build an actual (though still only practice) type provider.</p>
-
-<p>All this adds up to: starting our code over.  Below is the fresh foundation from which we will build our Type Provider.  Note, that this does NOT include any constructor.
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">namespace</span> <span class="nn">Samples</span><span class="p">.</span><span class="nn">FSharp</span><span class="p">.</span><span class="nc">TutorialTypeProvider</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">open</span> <span class="nc">System</span>
-</span><span class='line'><span class="k">open</span> <span class="nn">System</span><span class="p">.</span><span class="nc">Reflection</span>
-</span><span class='line'><span class="k">open</span> <span class="nn">Samples</span><span class="p">.</span><span class="nn">FSharp</span><span class="p">.</span><span class="nc">ProvidedTypes</span>
-</span><span class='line'><span class="k">open</span> <span class="nn">Microsoft</span><span class="p">.</span><span class="nn">FSharp</span><span class="p">.</span><span class="nn">Core</span><span class="p">.</span><span class="nc">CompilerServices</span>
-</span><span class='line'><span class="k">open</span> <span class="nn">Microsoft</span><span class="p">.</span><span class="nn">FSharp</span><span class="p">.</span><span class="nc">Quotations</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="c1">// This defines the type provider. When compiled to a DLL it can be added as a reference to an F#</span>
-</span><span class='line'><span class="c1">// command-line compilation, script or project.</span>
-</span><span class='line'><span class="o">[&lt;</span><span class="n">typeprovider</span><span class="o">&gt;]</span>
-</span><span class='line'><span class="k">type</span> <span class="nc">TutorialTypeProvider</span><span class="o">(</span><span class="n">config</span><span class="o">:</span> <span class="nc">TypeProviderConfig</span><span class="o">)</span> <span class="k">as</span> <span class="n">this</span> <span class="o">=</span> <span class="o">&lt;/</span><span class="n">typeprovider</span><span class="o">&gt;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="c1">// Inheriting from this type provides implementations of ITypeProvider in terms of the</span>
-</span><span class='line'><span class="c1">// provided types below.</span>
-</span><span class='line'><span class="k">inherit</span> <span class="nc">TypeProviderForNamespaces</span><span class="bp">()</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">let</span> <span class="n">namespaceName</span> <span class="o">=</span> <span class="s2">&quot;Tutorial&quot;</span>
-</span><span class='line'><span class="k">let</span> <span class="n">thisAssembly</span> <span class="o">=</span> <span class="nn">Assembly</span><span class="p">.</span><span class="nc">GetExecutingAssembly</span><span class="bp">()</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">let</span> <span class="nc">CreateType</span> <span class="bp">()</span> <span class="o">=</span>
-</span><span class='line'>    <span class="k">let</span> <span class="n">t</span> <span class="o">=</span> <span class="nc">ProvidedTypeDefinition</span><span class="o">(</span><span class="n">thisAssembly</span><span class="o">,</span><span class="n">namespaceName</span><span class="o">,</span>
-</span><span class='line'>                                    <span class="s2">&quot;TutorialType&quot;</span><span class="o">,</span>
-</span><span class='line'>                                    <span class="n">baseType</span> <span class="o">=</span> <span class="nc">Some</span> <span class="n">typeof</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="nc">TutorialType</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;)</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">t</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">let</span> <span class="n">types</span> <span class="o">=</span> <span class="o">[</span> <span class="nc">CreateType</span><span class="bp">()</span> <span class="o">]</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// And add them to the namespace</span>
-</span><span class='line'><span class="k">do</span> <span class="n">this</span><span class="o">.</span><span class="nc">AddNamespace</span><span class="o">(</span><span class="n">namespaceName</span><span class="o">,</span> <span class="n">types</span><span class="o">)</span>
-</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;[&lt;</span><span class="n">assembly</span><span class="o">:</span><span class="n">typeproviderassembly</span><span class="o">&gt;]</span>
-</span><span class='line'><span class="k">do</span><span class="bp">()</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></assembly:typeproviderassembly></p>
-
-<h3 id="data-source-and-schema">Data Source and Schema</h3>
-
-<p>The first thing we need is a data source and schema off of which we work.  Let’s start with a simple data source: just a table with some number of columns.  To keep things simple, we will start with all the columns be integer values.  Our schema, then, would just be a list of the names of the columns.</p>
-
-<p>For example, if we had a table with columns “Tom”, “Dick”, and “Harry”; then our schema would be <code>["Tom"; "Dick"; "Harry"]</code>. That would get passed to our type provider and a type with 3 integer fields named “Tom”, “Dick”, and “Harry” would be generated.</p>
-
-<p>Our schema, then, will be a very simple list of column names.</p>
-
-<h3 id="base-type">Base Type</h3>
-<p>Now that we know how to define what the data source looks like, it’s time to make a type which can represent datum which matches our schema.  In our case, this would need to be able to store an integer for each column.  We also know how the generated type will look: a field named for each column defined in our schema.  This means that our base type will be randomly accessed.  So, we should use an array to store the value of each column.</p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">type</span> <span class="nc">TutorialType</span> <span class="o">=</span> <span class="kt">int</span> <span class="kt">array</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>I am using a type alias here, because in the future we will probably build this up in to a more complex type than just an integer array.</p>
-
-<p>We must now configure our Type Provider to use our new base type rather than <code>obj</code>.  So we update the <code>ProvidedTypeDefinition</code> (in the function ‘CreateType’) and make the <code>baseType</code> be of type <code>TutorialType</code>:</p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">t</span> <span class="o">=</span> <span class="nc">ProvidedTypeDefinition</span><span class="o">(</span><span class="n">thisAssembly</span><span class="o">,</span><span class="n">namespaceName</span><span class="o">,</span>
-</span><span class='line'>                                <span class="err">“</span><span class="nc">Hello</span><span class="err">”</span><span class="o">,</span>
-</span><span class='line'>                                <span class="n">baseType</span> <span class="o">=</span> <span class="nc">Some</span> <span class="n">typeof</span><span class="o">&lt;</span><span class="n">tutorialtype</span><span class="o">&gt;)</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></tutorialtype></p>
-
-<h3 id="schema-to-type">Schema To Type</h3>
-<p>Above in “Data Source and Schema”, the schema was defined as just a list of column names.  This schema will need to be passsed to <code>CreateType</code> so that it will have the data needed to generate our type.  So, update <code>CreateType</code> to take a list of strings:
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'>    <span class="k">let</span> <span class="nc">CreateType</span> <span class="o">(</span><span class="n">columns</span><span class="o">:</span> <span class="kt">string</span> <span class="kt">list</span><span class="o">)</span> <span class="o">=</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>And also update the call to <code>CreateType</code> to pass in some simple test data:
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'>    <span class="k">let</span> <span class="n">types</span> <span class="o">=</span> <span class="o">[</span> <span class="nc">CreateType</span><span class="o">([</span><span class="err">“</span><span class="nc">Tom</span><span class="err">”</span><span class="o">;</span> <span class="err">“</span><span class="nc">Dick</span><span class="err">”</span><span class="o">;</span> <span class="err">“</span><span class="nc">Harry</span><span class="err">”</span><span class="o">])</span> <span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>Now that <code>CreateType</code> has the schema for our data source, it’s time to build up our type provider.</p>
-
-<h4 id="constructor-i-barely-know-her">Constructor I barely know her</h4>
-<p>The first thing to add is the missing constructor.  This will be simple, based upon the number of column names passed to <code>CreateType</code> we want to create an array of integers, all initialized to 1.</p>
-
-<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'>        <span class="k">let</span> <span class="n">ctor</span> <span class="o">=</span> <span class="nc">ProvidedConstructor</span><span class="o">(</span><span class="n">parameters</span> <span class="o">=</span> <span class="o">[</span> <span class="o">],</span>
-</span><span class='line'>                                       <span class="nc">InvokeCode</span><span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;@@</span> <span class="nn">Array</span><span class="p">.</span><span class="n">init</span> <span class="n">columns</span><span class="o">.</span><span class="nc">Length</span> <span class="o">(</span><span class="k">fun</span> <span class="n">i</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="mi">0</span><span class="o">)</span> <span class="o">@@&amp;</span><span class="n">gt</span><span class="o">;))&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span>    <span class="c1">// Add documentation to the provided constructor.</span>
-</span><span class='line'>    <span class="n">ctor</span><span class="o">.</span><span class="nc">AddXmlDocDelayed</span><span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="s2">&quot;This is the default constructor.  It sets the value of TutorialType to 0.&quot;</span><span class="o">)</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-</code></pre>
-
-<h4 id="properties---insert-uncle-pennybags-joke">Properties - Insert Uncle Pennybags Joke</h4>
-<p>The constructor will initialize the base data upon which our type is built.  Now we can add a field for each column, which will get and set the value of that field.  To do this, we will iterate the list of columns and create a property with the corresponding name.  The Getter and Setter functions will be defined as lambdas which store an index to the appropriate location in the array.
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'>        <span class="n">columns</span> <span class="o">|&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="nn">List</span><span class="p">.</span><span class="n">mapi</span> <span class="o">(</span> <span class="k">fun</span> <span class="n">i</span> <span class="n">col</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="nc">ProvidedProperty</span><span class="o">(</span><span class="n">col</span><span class="o">,</span>
-</span><span class='line'>                                                <span class="n">typeof</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;,</span>
-</span><span class='line'>                                                <span class="nc">GetterCode</span> <span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;@@</span> <span class="o">(%%</span><span class="n">args</span><span class="o">.[</span><span class="mi">0</span><span class="o">]</span> <span class="o">:</span> <span class="nc">TutorialType</span><span class="o">).[</span><span class="n">i</span><span class="o">]</span> <span class="o">@@&amp;</span><span class="n">gt</span><span class="o">;),</span>
-</span><span class='line'>                                                <span class="nc">SetterCode</span> <span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">args</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;@@</span> <span class="o">(%%</span><span class="n">args</span><span class="o">.[</span><span class="mi">0</span><span class="o">]</span> <span class="o">:</span> <span class="nc">TutorialType</span><span class="o">).[</span><span class="n">i</span><span class="o">]</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;-</span> <span class="o">(%%</span><span class="n">args</span><span class="o">.[</span><span class="mi">1</span><span class="o">]</span> <span class="o">:</span> <span class="kt">int</span><span class="o">)</span> <span class="o">@@&amp;</span><span class="n">gt</span><span class="o">;)))</span>
-</span><span class='line'>                <span class="o">|&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="nn">List</span><span class="p">.</span><span class="n">iter</span> <span class="n">t</span><span class="o">.</span><span class="nc">AddMember</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></int></p>
-
-<p>Note in both <code>GetterCode</code> and <code>SetterCode</code> the lambda functions have <code>%%args.[0] : TutorialType)</code> instead of <code>%%args.[0] : obj</code>.  This is because we defined our <code>baseType</code> to be <code>TutorialType</code>.</p>
-
-<h3 id="validation---a-short-tangent">Validation - A Short Tangent</h3>
-<p>Something which is obviously missing is logic to make sure that a valid schema is passed in.  For example, what if a column name is “2”, our code would try to create a property named “2” which is illegal.  Other cases would be: an empty list of columns, an empty or null string for a column name, illegal characters, and duplicate names.</p>
-
-<p>Now, if you’re like me, the next question you have is: what the fuck happens when a Type Provider throws an exception?  To find out, let’s add some simple validation to our TypeProvider and run a test where we fail the validation.</p>
-
-<p>We’ll add some code to check if the list of columns is empty.  In the below codeblock, I added a new function <code>ValidateColumnSchema</code> and called that function at the beginning of <code>CreateType</code>.
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'>    <span class="k">let</span> <span class="nc">ValidateColumnSchema</span> <span class="o">(</span><span class="n">columns</span><span class="o">:</span> <span class="kt">string</span> <span class="kt">list</span><span class="o">)</span> <span class="o">=</span>
-</span><span class='line'>        <span class="k">if</span> <span class="n">columns</span><span class="o">.</span><span class="nc">Length</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">then</span>
-</span><span class='line'>            <span class="n">failwith</span> <span class="err">“</span><span class="nc">The</span> <span class="n">column</span> <span class="kt">list</span> <span class="n">is</span> <span class="n">empty</span><span class="err">”</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="k">let</span> <span class="nc">CreateType</span> <span class="o">(</span><span class="n">columns</span><span class="o">:</span> <span class="kt">string</span> <span class="kt">list</span><span class="o">)</span> <span class="o">=</span>
-</span><span class='line'>    <span class="nc">ValidateColumnSchema</span> <span class="n">columns</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-</code></pre>
-
-<p>Now, just for this test, update the call to create type to look like this:
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'>    <span class="k">let</span> <span class="n">types</span> <span class="o">=</span> <span class="o">[</span> <span class="nc">CreateType</span><span class="o">(</span><span class="bp">[]</span><span class="o">)</span> <span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-Build and send the project output to the FSI.  You should get an output that looks like:
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>stdin(2,1): error FS3053: The type provider ‘Samples.FSharp.TutorialTypeProvider.TutorialTypeProvider’ reported an error: The type provider constructor has thrown an exception: The column list is empty</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<p>Make sure to change the call to <code>CreateType</code> back to:
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'>    <span class="k">let</span> <span class="n">types</span> <span class="o">=</span> <span class="o">[</span> <span class="nc">CreateType</span><span class="o">([</span><span class="err">“</span><span class="nc">Tom</span><span class="err">”</span><span class="o">;</span> <span class="err">“</span><span class="nc">Dick</span><span class="err">”</span><span class="o">;</span> <span class="err">“</span><span class="nc">Harry</span><span class="err">”</span><span class="o">])</span> <span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
-
-<h3 id="summary">Summary</h3>
-<p>In this tutorial, we examined the base type which our Type Provider uses as the base for generated types.  We updated the function which generates our type, so that it will take a list of field names and generate a type which has the corresponding fields.</p>
 ]]></content>
   </entry>
   
