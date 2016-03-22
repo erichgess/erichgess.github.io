@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Algorithms | Elegant Architecture]]></title>
   <link href="http://erichgess.github.io/blog/categories/algorithms/atom.xml" rel="self"/>
   <link href="http://erichgess.github.io/"/>
-  <updated>2016-03-21T22:33:49-04:00</updated>
+  <updated>2016-03-21T22:39:50-04:00</updated>
   <id>http://erichgess.github.io/</id>
   <author>
     <name><![CDATA[Erich G. Ess]]></name>
@@ -213,21 +213,6 @@ this approach.  It seems very easy to miss the <code>|</code> and not properly
 see the pattern definitions.  Having everything on one line also
 implies that everything is part of the same operation and that is
 decidely not the case with pattern matching and DU definitions.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Purely Functional Data Structures: Intro]]></title>
-    <link href="http://erichgess.github.io/blog/2016/03/21/purely-functional-data-structures-intro/"/>
-    <updated>2016-03-21T21:36:59-04:00</updated>
-    <id>http://erichgess.github.io/blog/2016/03/21/purely-functional-data-structures-intro</id>
-    <content type="html"><![CDATA[<p>In order to improve my functional programming skills and refresh my memory
-re algorithms, I’m reading <em>Purely Functional Data Structures</em> by Chris
-Okasaki.  To help me beef up my skills, particularly with F#, I’m also
-converting all of the data structures into F#.  I’ll be recording all of this
-in a series of blog posts.</p>
-
-<p>This series will begin with Chapter 2, since Chapter 1 is just an introduction.</p>
 ]]></content>
   </entry>
   
