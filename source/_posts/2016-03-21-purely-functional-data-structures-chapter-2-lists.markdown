@@ -24,7 +24,7 @@ other data structures in this case to build a stack data structure.
 The first implementation is merely built on top of the existing list
 data structure.  Below is the direct conversion into F#:
 
-{% codeblock lang:fsharp %}
+```fsharp
 module Lists =
   type ListStack<'a> =
     'a list
@@ -33,7 +33,7 @@ module Lists =
   let cons a s:ListStack<_> = a :: s
   let hd s = List.head s
   let tl s = List.tail s
-{% endcodeblock %}
+```
 
 There really wasn't a whole lot of interesting stuff in this first example.
 
@@ -51,7 +51,7 @@ book as possible and I used a `type` with member methods to group the
 `CustomStack` with its associated functions.  The second approach uses
 `module CustomStack` to group the type with the associated functions.
 
-{% codeblock lang:fsharp %}
+```fsharp
 type CustomStack<'a> =
   | Empty
   | Cons of 'a * CustomStack<'a>
@@ -76,7 +76,7 @@ with
     | Empty -> failwith "empty"
     | Cons(x, Empty) -> x
     | Cons(x, s) -> CustomStack<'a>.tail s
-{% endcodeblock %}
+```
 
 The first thing I learned was that the F# compiler autogenerates a function
 called `IsEmpty`.  Despite working with the language for several months,
@@ -91,7 +91,7 @@ module named `CustomStack` to group the functions with the type.  This would
 provide the option of just calling the functions or prepending the module
 name (`CustomStack.`).
 
-{% codeblock lang:fsharp %}
+```fsharp
 module CustomStack =
   type CustomStack<'a> = Empty | Cons of 'a * CustomStack<'a>
   let empty = Empty
@@ -118,7 +118,7 @@ module CustomStack =
     | (Cons(_, s), 0, x) -> Cons(x, s)
     | (Cons(_, s), i, x) when i > 0 -> update (s, i-1, x)
     | _ -> failwith "subscript is invalid"
-{% endcodeblock %}
+```
 
 This version felt much better to me, I also took the opportunity to create
 an operator `++` for appends.  There is an interesting consequence that
