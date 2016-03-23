@@ -11,8 +11,9 @@
   <meta name="author" content="Erich G. Ess">
 
   
-  <meta name="description" content="
-">
+  <meta name="description" content="The second section of Chapter 2 deals focuses on binary search trees (BST) and uses BSTs to
+implement a set data structure. Like the section
+on lists &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -94,7 +95,73 @@
   </header>
 
 
-<div class="entry-content">
+<div class="entry-content"><p>The second section of Chapter 2 deals focuses on binary search trees (BST) and uses BSTs to
+implement a set data structure.  Like the section
+on lists, this gives a nice little explanation on how to deal with inserts to a tree data
+structure when the data is immutable in as efficient a way as possible.  The most brute
+force solution to this would be to create a complete duplicate of the tree save for the
+newly added value, this section shows that, while copying is necessary, only the search
+path from the root to the new element needs to be copied.  The new tree will then reference
+as much of the old tree as possible; minimizing both copies and memory used.</p>
+
+<p>What this post will cover:  how to represent a binary search tree (BST) in F#, how to efficiently
+update the BST while using immutable data structures, and some discussion on design and style.</p>
+
+<!-- more -->
+
+<p>First thing:  how to represent the binary search tree in F#.  A BST has two possible values:
+it’s either Empty or it’s a some value with 2 children.  So a discriminated union captures
+this set and a tuple can store the value and 2 children.  Leading, as with the list, to
+a recursive type:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">type</span> <span class="nc">Tree</span><span class="o">&lt;</span><span class="k">&#39;</span><span class="n">a</span><span class="o">&gt;</span> <span class="o">=</span> <span class="nc">Empty</span> <span class="o">|</span> <span class="nc">Tree</span> <span class="k">of</span> <span class="nc">Tree</span><span class="o">&lt;</span><span class="k">&#39;</span><span class="n">a</span><span class="o">&gt;</span> <span class="o">*</span> <span class="k">&#39;</span><span class="n">a</span> <span class="o">*</span> <span class="nc">Tree</span><span class="o">&lt;</span><span class="k">&#39;</span><span class="n">a</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>The Tree on the left of <code>Tree&lt;'a&gt; * 'a * Tree&lt;'a&gt;</code> stores the left branch and the right
+<code>Tree</code> stores the right branch.</p>
+
+<p>A requirement for a BST is that <code>'a</code> must have a total ordering:  you must be able to take
+any two values of type <code>'a</code> and check if one is less than the other.  The above definition
+does not capture this requirement and so we can make a <code>Tree</code> of any type.  In Purely
+Functional Data Structure this is solved by using ML’s <em>functor</em> feature, which F# doesn’t
+have.  In F# this can be captured using a <em>constraint</em> on the type:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">type</span> <span class="nc">BinarySearchTree</span><span class="o">&lt;</span><span class="k">&#39;</span><span class="n">a</span> <span class="k">when</span> <span class="k">&#39;</span><span class="n">a</span><span class="o">:</span> <span class="n">comparison</span><span class="o">&gt;</span> <span class="o">=</span>
+</span><span class="line">  <span class="o">|</span> <span class="nc">Empty</span>
+</span><span class="line">  <span class="o">|</span> <span class="nc">Tree</span> <span class="k">of</span> <span class="nc">BinarySearchTree</span><span class="o">&lt;</span><span class="k">&#39;</span><span class="n">a</span><span class="o">&gt;</span> <span class="o">*</span> <span class="k">&#39;</span><span class="n">a</span> <span class="o">*</span> <span class="nc">BinarySearchTree</span><span class="o">&lt;</span><span class="k">&#39;</span><span class="n">a</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p><code>'a when 'a: comparison</code> tells the F# compiler that <code>'a</code> must implement the IComparable
+interface which guarantees that the <code>&lt;</code> operator can be used on two values of type <code>'a</code>.</p>
+
+<p>I changed the name of the type from <code>Tree</code> to <code>BinarySearchTree</code> to capture the more focused
+nature of the type when a constraint is added.  The <code>Tree</code> can be use to create any type of
+binary tree structure, with the constraint the type becomes focused specifically on ordering
+and searching.  The updated name helps to reflect this focus.  This type could also be put
+into a <code>module</code> named <em>BinarySearchTree</em> to capture that information and then keep the type
+named simply <em>Tree</em>.  However, I am not yet sure which is superior, though I feel that
+capturing the nature of the type, intrinsically, in the name so that it can’t be seperated
+is the better path to follow.</p>
+
+<p>As a note, there is another option with F# for capturing the comparability requirement. We
+don’t have to put the constraint in the type definition.  When we write our <code>insert</code> and
+<code>search</code> functions, the F# compiler with infer that, for <em>those</em> functions, <code>'a</code> must
+have the <code>comparison</code> constraint.  This decouples the use of the tree from the type definition.
+If we want the type to capture only the structure of a binary tree, then this approach makes
+sense.  However, if we want the type to capture both the structure and the purpose (searching)
+then this approach seems like it will be fragile and confusing.</p>
+
+<p>I initially thought that there was a third option:  add the search and insert functions as
+member methods to the definition of <code>Tree</code>.  It seemed likely that the F# compiler would
+infer that <code>'a</code> must have the <code>comparison</code> constraint.  Testing proved that this is not the
+case and, in fact, the compiler throws an error because <code>Tree</code> must explicitly have the
+<code>comparison</code> constraint in order for the member methods to work.</p>
+
+<p><img src="/images/posts/purefds_ch2/bst_insert.png" /></p>
 </div>
 
 

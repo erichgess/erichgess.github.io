@@ -11,8 +11,9 @@
   <meta name="author" content="Erich G. Ess">
 
   
-  <meta name="description" content="
-">
+  <meta name="description" content="The second section of Chapter 2 deals focuses on binary search trees (BST) and uses BSTs to
+implement a set data structure. Like the section
+on lists &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -97,9 +98,24 @@
   </header>
 
 
-  <div class="entry-content">
+  <div class="entry-content"><p>The second section of Chapter 2 deals focuses on binary search trees (BST) and uses BSTs to
+implement a set data structure.  Like the section
+on lists, this gives a nice little explanation on how to deal with inserts to a tree data
+structure when the data is immutable in as efficient a way as possible.  The most brute
+force solution to this would be to create a complete duplicate of the tree save for the
+newly added value, this section shows that, while copying is necessary, only the search
+path from the root to the new element needs to be copied.  The new tree will then reference
+as much of the old tree as possible; minimizing both copies and memory used.</p>
+
+<p>What this post will cover:  how to represent a binary search tree (BST) in F#, how to efficiently
+update the BST while using immutable data structures, and some discussion on design and style.</p>
+
 </div>
   
+  
+    <footer>
+      <a rel="full-article" href="/blog/2016/03/21/purely-functional-data-structures-chapter-2-binary-search-trees/">Lay on, MacDuff &rarr;</a>
+    </footer>
   
 
 
