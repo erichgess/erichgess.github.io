@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Type Theory | Elegant Architecture]]></title>
   <link href="http://erichgess.github.io/blog/categories/type-theory/atom.xml" rel="self"/>
   <link href="http://erichgess.github.io/"/>
-  <updated>2015-10-25T11:37:15-04:00</updated>
+  <updated>2016-03-23T14:02:47-04:00</updated>
   <id>http://erichgess.github.io/</id>
   <author>
     <name><![CDATA[Erich G. Ess]]></name>
@@ -12,6 +12,103 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Zippers 2: Building a Rose Tree Zipper]]></title>
+    <link href="http://erichgess.github.io/blog/2015/11/01/zippers-2-building-a-rose-tree-zipper/"/>
+    <updated>2015-11-01T09:38:55-05:00</updated>
+    <id>http://erichgess.github.io/blog/2015/11/01/zippers-2-building-a-rose-tree-zipper</id>
+    <content type="html"><![CDATA[<p>As a follow up to my post about Zippers for lists and binary trees, I wanted to create a zipper for
+a slightly more complex data structure.  The Rose Tree is a tree structure where the number of
+branches a node may have is variable.  An example of a rose tree would be the directory structure
+on your computer:  each directory may contain 0 or more sub directories which, in turn, may contain
+addition subdirectories.  With this example in mind, the zipper is analagous to you moving through
+your computers file system:  starting at the root directory and using <code>cd</code> to move down a branch
+and <code>cd ..</code> to move back.</p>
+
+<!-- more -->
+
+<h2 id="rose-tree-implementation">Rose Tree Implementation</h2>
+<p>The implementation of a rose tree is pretty simple.  It’s just like a binary tree but, instead of
+each node having two branches, each node has a list of branches:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">type</span> <span class="nc">RoseTree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">=</span>
+</span><span class='line'>  <span class="o">|</span> <span class="nc">Empty</span>
+</span><span class='line'>  <span class="o">|</span> <span class="nc">RoseTree</span> <span class="k">of</span> <span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="o">(</span><span class="nc">RoseTree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="kt">list</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>The zipper of the rose tree, however, is a lot more interesting and fun.  It’s basically a
+combination of the binary tree zipper and the list zipper:  you need a tree zipper to keep track
+of where in the tree you are by level and a list zipper to keep track of where in the each node’s
+list of branches you are.</p>
+
+<p>Algebraicly, the rose tree is:
+<script type="math/tex">R = 1 + a\cdot L(R)</script></p>
+
+<p>Where <script type="math/tex">L(R)</script> is a list of rose trees.</p>
+
+<p>The derivative is:</p>
+
+<script type="math/tex; mode=display">% &lt;![CDATA[
+
+\begin{eqnarray} 
+\partial_aR &=& L(R) + a\partial_aL(R)\partial_aR \\
+\partial_aR - a\partial_aL(R)\partial_aR &=& L(R) \\
+(1 - a\partial_aL(R))\partial_aR &=& L(R) \\
+\partial_aR &=& \frac{L(R)}{1-a\partial_aL(R)} \\
+&=& L(R)\frac{1}{1 - a\partial_aL(R)} \\
+&=& L(R)L(a\partial_aL(R)) \\
+&=& L(R)L(aL^2(R)) \\
+\end{eqnarray}
+ %]]&gt;</script>
+
+<p>The next to last step uses the identity <script type="math/tex">L(a) = \frac{1}{1 - a}</script> to arrive at <script type="math/tex">L(R)L(aL^2(R))</script>.</p>
+
+<p>This translates to the type:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">type</span> <span class="nc">RoseTreeZipper</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">=</span> <span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="nc">RoseTree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="kt">list</span> <span class="o">*</span> <span class="o">((</span><span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="nc">RoseTree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="kt">list</span> <span class="o">*</span> <span class="nc">RoseTree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="kt">list</span><span class="o">)</span> <span class="kt">list</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+and that looks pretty insane.</p>
+
+<p>However, it does make sense.  Here’s the break down.  The first part <code>'a</code> is the value of the current
+node and the <code>RoseTree&lt;'a&gt; list</code> is the list of branches at this node.  So, together
+<code>'a * RoseTree&lt;'a&gt; list</code> is the cursors current position in the rose tree.</p>
+
+<p>Now here’s the break down for <code>('a * RoseTree&lt;'a&gt; list * RoseTree&lt;'a&gt; list) list</code>.  This is a list of
+the previous positions the cursor had in the rose tree, just like we saw with the binary tree zipper.
+The <code>'a</code> is the value of the node the cursor used to point at.  The tuple <code>RoseTree&lt;'a&gt; list * RoseTree&lt;'a&gt; list</code>
+is all the branches of the node except where the cursor is currently at!  The first <code>RoseTree&lt;'a&gt; list</code>
+is the branches to the left of the branch down which the cursor went and the second <code>RoseTree&lt;'a&gt; list</code>
+is all the branches to the right!</p>
+
+<p>To help clarify how the rose tree zipper works, here’s a visual explanation.</p>
+
+<p>The color green indicates the position of the cursor.</p>
+
+<p>Here we are with a newly created zipper on a rose tree.  The cursor is pointing to the root of the tree
+<img src="http://erichgess.github.io/assets/zippers/rosetree_1.png" alt="My helpful screenshot" /></p>
+
+<p>We’ll move the cursor down to the middle branch.  The root of the tree and the left and right branches
+are then moved into the history list for the cursor.  The color blue is used to show that all those
+nodes are grouped together as one entry in the history list.
+<img src="http://erichgess.github.io/assets/zippers/rosetree_2.png" alt="Moving the cursor" /></p>
+
+<p>Here’s a visual of the rose tree zipper value after the cursor is moved to the middle node.  The cursor
+points to (C, [G; H]), corresponding to the <code>'a * RoseTree&lt;'a&gt; list</code> in the zipper type.  The previous
+cursor position corresponds to the list of <code>'a * RoseTree&lt;'a&gt; list * RoseTree&lt;'a&gt; list</code>.
+<img src="http://erichgess.github.io/assets/zippers/rosetree_2_note.png" alt="The zipper type" /></p>
+
+<p>Moving the cursor down the left branch, the previous node and the right branch are colored to indicate
+that they are grouped together and prepended to the history list.
+<img src="http://erichgess.github.io/assets/zippers/rosetree_3.png" alt="Move cursor down left branch" /></p>
+
+<p>Visualizing the new rose tree zipper value.  <code>C, H</code> have been moved to the head of the history list.
+<img src="http://erichgess.github.io/assets/zippers/rosetree_3_note.png" alt="New rose tree zipper value" /></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[F# Zippers]]></title>

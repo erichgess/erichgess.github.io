@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Functional Programming | Elegant Architecture]]></title>
   <link href="http://erichgess.github.io/blog/categories/functional-programming/atom.xml" rel="self"/>
   <link href="http://erichgess.github.io/"/>
-  <updated>2015-10-25T11:37:15-04:00</updated>
+  <updated>2016-03-23T14:02:47-04:00</updated>
   <id>http://erichgess.github.io/</id>
   <author>
     <name><![CDATA[Erich G. Ess]]></name>
@@ -12,6 +12,180 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Purely Functional Data Structures: Chapter 2 - Binary Search Trees]]></title>
+    <link href="http://erichgess.github.io/blog/2016/03/21/purely-functional-data-structures-chapter-2-binary-search-trees/"/>
+    <updated>2016-03-21T22:41:37-04:00</updated>
+    <id>http://erichgess.github.io/blog/2016/03/21/purely-functional-data-structures-chapter-2-binary-search-trees</id>
+    <content type="html"><![CDATA[<p><em>This post is in progress</em></p>
+
+<p>The second section of Chapter 2 deals focuses on binary search trees (BST) and uses BSTs to
+implement a set data structure.  Like the section
+on lists, this gives a nice little explanation on how to deal with inserts to a tree data
+structure when the data is immutable in as efficient a way as possible.  The most brute
+force solution to this would be to create a complete duplicate of the tree save for the
+newly added value, this section shows that, while copying is necessary, only the search
+path from the root to the new element needs to be copied.  The new tree will then reference
+as much of the old tree as possible; minimizing both copies and memory used.</p>
+
+<p>What this post will cover:  how to represent a binary search tree (BST) in F#, how to efficiently
+update the BST while using immutable data structures, and some discussion on design and style.</p>
+
+<!-- more -->
+
+<p>First thing:  how to represent the binary search tree in F#.  A BST has two possible values:
+it’s either Empty or it’s a some value with 2 children.  So a discriminated union captures
+this set and a tuple can store the value and 2 children.  Leading, as with the list, to
+a recursive type:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">type</span> <span class="nc">Tree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">=</span> <span class="nc">Empty</span> <span class="o">|</span> <span class="nc">Tree</span> <span class="k">of</span> <span class="nc">Tree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">*</span> <span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="nc">Tree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>The Tree on the left of <code>Tree&lt;'a&gt; * 'a * Tree&lt;'a&gt;</code> stores the left branch and the right
+<code>Tree</code> stores the right branch.</p>
+
+<p>A requirement for a BST is that <code>'a</code> must have a total ordering:  you must be able to take
+any two values of type <code>'a</code> and check if one is less than the other.  The above definition
+does not capture this requirement and so we can make a <code>Tree</code> of any type.  In Purely
+Functional Data Structure this is solved by using ML’s <em>functor</em> feature, which F# doesn’t
+have.  In F# this can be captured using a <em>constraint</em> on the type:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">type</span> <span class="nc">BinarySearchTree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span> <span class="k">when</span> <span class="err">‘</span><span class="n">a</span><span class="o">:</span> <span class="n">comparison</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">=</span>
+</span><span class='line'>  <span class="o">|</span> <span class="nc">Empty</span>
+</span><span class='line'>  <span class="o">|</span> <span class="nc">Tree</span> <span class="k">of</span> <span class="nc">BinarySearchTree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">*</span> <span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="nc">BinarySearchTree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><code>'a when 'a: comparison</code> tells the F# compiler that <code>'a</code> must implement the IComparable
+interface which guarantees that the <code>&lt;</code> operator can be used on two values of type <code>'a</code>.</p>
+
+<p>I changed the name of the type from <code>Tree</code> to <code>BinarySearchTree</code> to capture the more focused
+nature of the type when a constraint is added.  The <code>Tree</code> can be use to create any type of
+binary tree structure, with the constraint the type becomes focused specifically on ordering
+and searching.  The updated name helps to reflect this focus.  This type could also be put
+into a <code>module</code> named <em>BinarySearchTree</em> to capture that information and then keep the type
+named simply <em>Tree</em>.  However, I am not yet sure which is superior, though I feel that
+capturing the nature of the type, intrinsically, in the name so that it can’t be seperated
+is the better path to follow.</p>
+
+<p>As a note, there is another option with F# for capturing the comparability requirement. We
+don’t have to put the constraint in the type definition.  When we write our <code>insert</code> and
+<code>search</code> functions, the F# compiler with infer that, for <em>those</em> functions, <code>'a</code> must
+have the <code>comparison</code> constraint.  This decouples the use of the tree from the type definition.
+If we want the type to capture only the structure of a binary tree, then this approach makes
+sense.  However, if we want the type to capture both the structure and the purpose (searching)
+then this approach seems like it will be fragile and confusing.</p>
+
+<p>I initially thought that there was a third option:  add the search and insert functions as
+member methods to the definition of <code>Tree</code>.  It seemed likely that the F# compiler would
+infer that <code>'a</code> must have the <code>comparison</code> constraint.  Testing proved that this is not the
+case and, in fact, the compiler throws an error because <code>Tree</code> must explicitly have the
+<code>comparison</code> constraint in order for the member methods to work.</p>
+
+<p><img src="/images/posts/purefds_ch2/bst_insert.png"></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Zippers 2: Building a Rose Tree Zipper]]></title>
+    <link href="http://erichgess.github.io/blog/2015/11/01/zippers-2-building-a-rose-tree-zipper/"/>
+    <updated>2015-11-01T09:38:55-05:00</updated>
+    <id>http://erichgess.github.io/blog/2015/11/01/zippers-2-building-a-rose-tree-zipper</id>
+    <content type="html"><![CDATA[<p>As a follow up to my post about Zippers for lists and binary trees, I wanted to create a zipper for
+a slightly more complex data structure.  The Rose Tree is a tree structure where the number of
+branches a node may have is variable.  An example of a rose tree would be the directory structure
+on your computer:  each directory may contain 0 or more sub directories which, in turn, may contain
+addition subdirectories.  With this example in mind, the zipper is analagous to you moving through
+your computers file system:  starting at the root directory and using <code>cd</code> to move down a branch
+and <code>cd ..</code> to move back.</p>
+
+<!-- more -->
+
+<h2 id="rose-tree-implementation">Rose Tree Implementation</h2>
+<p>The implementation of a rose tree is pretty simple.  It’s just like a binary tree but, instead of
+each node having two branches, each node has a list of branches:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">type</span> <span class="nc">RoseTree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">=</span>
+</span><span class='line'>  <span class="o">|</span> <span class="nc">Empty</span>
+</span><span class='line'>  <span class="o">|</span> <span class="nc">RoseTree</span> <span class="k">of</span> <span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="o">(</span><span class="nc">RoseTree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="kt">list</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>The zipper of the rose tree, however, is a lot more interesting and fun.  It’s basically a
+combination of the binary tree zipper and the list zipper:  you need a tree zipper to keep track
+of where in the tree you are by level and a list zipper to keep track of where in the each node’s
+list of branches you are.</p>
+
+<p>Algebraicly, the rose tree is:
+<script type="math/tex">R = 1 + a\cdot L(R)</script></p>
+
+<p>Where <script type="math/tex">L(R)</script> is a list of rose trees.</p>
+
+<p>The derivative is:</p>
+
+<script type="math/tex; mode=display">% &lt;![CDATA[
+
+\begin{eqnarray} 
+\partial_aR &=& L(R) + a\partial_aL(R)\partial_aR \\
+\partial_aR - a\partial_aL(R)\partial_aR &=& L(R) \\
+(1 - a\partial_aL(R))\partial_aR &=& L(R) \\
+\partial_aR &=& \frac{L(R)}{1-a\partial_aL(R)} \\
+&=& L(R)\frac{1}{1 - a\partial_aL(R)} \\
+&=& L(R)L(a\partial_aL(R)) \\
+&=& L(R)L(aL^2(R)) \\
+\end{eqnarray}
+ %]]&gt;</script>
+
+<p>The next to last step uses the identity <script type="math/tex">L(a) = \frac{1}{1 - a}</script> to arrive at <script type="math/tex">L(R)L(aL^2(R))</script>.</p>
+
+<p>This translates to the type:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">type</span> <span class="nc">RoseTreeZipper</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">=</span> <span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="nc">RoseTree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="kt">list</span> <span class="o">*</span> <span class="o">((</span><span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="nc">RoseTree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="kt">list</span> <span class="o">*</span> <span class="nc">RoseTree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="kt">list</span><span class="o">)</span> <span class="kt">list</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+and that looks pretty insane.</p>
+
+<p>However, it does make sense.  Here’s the break down.  The first part <code>'a</code> is the value of the current
+node and the <code>RoseTree&lt;'a&gt; list</code> is the list of branches at this node.  So, together
+<code>'a * RoseTree&lt;'a&gt; list</code> is the cursors current position in the rose tree.</p>
+
+<p>Now here’s the break down for <code>('a * RoseTree&lt;'a&gt; list * RoseTree&lt;'a&gt; list) list</code>.  This is a list of
+the previous positions the cursor had in the rose tree, just like we saw with the binary tree zipper.
+The <code>'a</code> is the value of the node the cursor used to point at.  The tuple <code>RoseTree&lt;'a&gt; list * RoseTree&lt;'a&gt; list</code>
+is all the branches of the node except where the cursor is currently at!  The first <code>RoseTree&lt;'a&gt; list</code>
+is the branches to the left of the branch down which the cursor went and the second <code>RoseTree&lt;'a&gt; list</code>
+is all the branches to the right!</p>
+
+<p>To help clarify how the rose tree zipper works, here’s a visual explanation.</p>
+
+<p>The color green indicates the position of the cursor.</p>
+
+<p>Here we are with a newly created zipper on a rose tree.  The cursor is pointing to the root of the tree
+<img src="http://erichgess.github.io/assets/zippers/rosetree_1.png" alt="My helpful screenshot" /></p>
+
+<p>We’ll move the cursor down to the middle branch.  The root of the tree and the left and right branches
+are then moved into the history list for the cursor.  The color blue is used to show that all those
+nodes are grouped together as one entry in the history list.
+<img src="http://erichgess.github.io/assets/zippers/rosetree_2.png" alt="Moving the cursor" /></p>
+
+<p>Here’s a visual of the rose tree zipper value after the cursor is moved to the middle node.  The cursor
+points to (C, [G; H]), corresponding to the <code>'a * RoseTree&lt;'a&gt; list</code> in the zipper type.  The previous
+cursor position corresponds to the list of <code>'a * RoseTree&lt;'a&gt; list * RoseTree&lt;'a&gt; list</code>.
+<img src="http://erichgess.github.io/assets/zippers/rosetree_2_note.png" alt="The zipper type" /></p>
+
+<p>Moving the cursor down the left branch, the previous node and the right branch are colored to indicate
+that they are grouped together and prepended to the history list.
+<img src="http://erichgess.github.io/assets/zippers/rosetree_3.png" alt="Move cursor down left branch" /></p>
+
+<p>Visualizing the new rose tree zipper value.  <code>C, H</code> have been moved to the head of the history list.
+<img src="http://erichgess.github.io/assets/zippers/rosetree_3_note.png" alt="New rose tree zipper value" /></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[F# Zippers]]></title>

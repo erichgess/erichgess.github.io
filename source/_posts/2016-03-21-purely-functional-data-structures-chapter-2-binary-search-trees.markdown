@@ -5,6 +5,8 @@ date: 2016-03-21 22:41:37 -0400
 comments: true
 categories: [F#, Purely Functional Data Structures, Algorithms, Functional Programming]
 ---
+_This post is in progress_
+
 The second section of Chapter 2 deals focuses on binary search trees (BST) and uses BSTs to
 implement a set data structure.  Like the section
 on lists, this gives a nice little explanation on how to deal with inserts to a tree data

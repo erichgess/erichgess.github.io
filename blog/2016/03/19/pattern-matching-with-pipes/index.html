@@ -1,0 +1,319 @@
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Pattern Matching With Pipes - Elegant Architecture</title>
+  <meta name="author" content="Erich G. Ess">
+
+  
+  <meta name="description" content="One of my favorite things to do in F# is pipe functions together. I like the elegant flow that the
+semantics visualizes and the fact that it removes &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://erichgess.github.io/blog/2016/03/19/pattern-matching-with-pipes">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Elegant Architecture" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Elegant Architecture</a></h1>
+  
+    <h2>Architecture, Functional Languages, Style</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:erichgess.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Pattern Matching With Pipes</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-03-19T12:09:26-04:00" pubdate data-updated="true">Mar 19<span>th</span>, 2016</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>One of my favorite things to do in F# is pipe functions together.  I like the elegant flow that the
+semantics visualizes and the fact that it removes the need for intermediate variables.  Given that,
+one of the minor, but consistent, annoyances I’ve had is when piping a DU type which generally need
+to be piped into a pattern match expression.  This is annoying because the <code>match</code> expression doesn’t
+lend itself to piping which has meant that my nice workflow needs to be broken up with an intermediate
+variable that can be used in the <code>match</code> expression.</p>
+
+<p>Looking at some old code I wrote, I just realized something that is probably pretty obvious to every
+experienced F# programmer out there.  The <code>function</code> expression actually does exactly what <code>match</code> does
+but it creates a function and that’s exactly what I’ve been wanting this whole time!</p>
+
+<!-- more -->
+
+<p>Here is a quick and dirty example of using a function which takes a value and returns  a discriminated
+union.  The type of function which almost always means that pattern matching will have to be done with
+its result:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">type</span> <span class="nc">DU</span> <span class="o">=</span>
+</span><span class="line"><span class="o">|</span> <span class="nc">A</span> <span class="k">of</span> <span class="kt">int</span>
+</span><span class="line"><span class="o">|</span> <span class="nc">B</span> <span class="k">of</span> <span class="kt">string</span>
+</span><span class="line"><span class="o">|</span> <span class="nc">C</span> <span class="k">of</span> <span class="kt">bool</span>
+</span><span class="line">
+</span><span class="line"><span class="k">let</span> <span class="n">doSomething</span> <span class="n">x</span> <span class="o">=</span>
+</span><span class="line">  <span class="k">match</span> <span class="n">x</span> <span class="k">with</span>
+</span><span class="line">  <span class="o">|</span> <span class="n">x</span> <span class="k">when</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="o">-&gt;</span> <span class="nc">A</span><span class="o">(</span><span class="n">x</span><span class="o">)</span>
+</span><span class="line">  <span class="o">|</span> <span class="n">x</span> <span class="k">when</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span> <span class="o">-&gt;</span> <span class="nc">B</span><span class="o">(</span><span class="s2">&quot;zero&quot;</span><span class="o">)</span>
+</span><span class="line">  <span class="o">|</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="nc">C</span><span class="o">(</span><span class="bp">true</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Previously, I always used one of the two following styles (<code>style_1</code> and <code>style_2</code>):</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="n">style_1</span> <span class="n">x</span> <span class="o">=</span>
+</span><span class="line">  <span class="k">let</span> <span class="n">du</span> <span class="o">=</span> <span class="n">doSomething</span> <span class="n">x</span>
+</span><span class="line">
+</span><span class="line">  <span class="k">match</span> <span class="n">du</span> <span class="k">with</span>
+</span><span class="line">  <span class="o">|</span> <span class="nc">A</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">printfn</span> <span class="s2">&quot;%d&quot;</span> <span class="n">i</span>
+</span><span class="line">  <span class="o">|</span> <span class="nc">B</span><span class="o">(</span><span class="n">s</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">printfn</span> <span class="s2">&quot;%s&quot;</span> <span class="n">s</span>
+</span><span class="line">  <span class="o">|</span> <span class="nc">C</span><span class="o">(</span><span class="n">b</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">printfn</span> <span class="s2">&quot;%b&quot;</span> <span class="n">b</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="n">style_2</span> <span class="n">x</span> <span class="o">=</span>
+</span><span class="line">  <span class="n">x</span>
+</span><span class="line">  <span class="o">|&gt;</span> <span class="n">doSomething</span>
+</span><span class="line">  <span class="o">|&gt;</span> <span class="k">fun</span> <span class="n">a</span> <span class="o">-&gt;</span> <span class="k">match</span> <span class="n">a</span> <span class="k">with</span>
+</span><span class="line">              <span class="o">|</span> <span class="nc">A</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">printfn</span> <span class="s2">&quot;%d&quot;</span> <span class="n">i</span>
+</span><span class="line">              <span class="o">|</span> <span class="nc">B</span><span class="o">(</span><span class="n">s</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">printfn</span> <span class="s2">&quot;%s&quot;</span> <span class="n">s</span>
+</span><span class="line">              <span class="o">|</span> <span class="nc">C</span><span class="o">(</span><span class="n">b</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">printfn</span> <span class="s2">&quot;%b&quot;</span> <span class="n">b</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Both <code>style_1</code> and <code>style_2</code> leave a lot to be desired.  Both <code>style_1</code> and <code>style_2</code> require the use of an intermediate variable and 
+<code>style_2</code> needs the clunky <code>fun a -&gt;</code> rigging.  The choice between two types of clunkiness always frustrated me,
+because I felt that there must be some easy way to pipe the result of a function into a pattern match.</p>
+
+<p>The pattern matching <code>function</code> makes it possible to elegantly integrate a pattern match into a <code>|&gt;</code> flow.
+Here’s my new style implementation of the above code:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="n">style_3</span> <span class="n">x</span> <span class="o">=</span>
+</span><span class="line">  <span class="n">x</span>
+</span><span class="line">  <span class="o">|&gt;</span> <span class="n">doSomething</span>
+</span><span class="line">  <span class="o">|&gt;</span> <span class="k">function</span>
+</span><span class="line">     <span class="o">|</span> <span class="nc">A</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">printfn</span> <span class="s2">&quot;%d&quot;</span> <span class="n">i</span>
+</span><span class="line">     <span class="o">|</span> <span class="nc">B</span><span class="o">(</span><span class="n">s</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">printfn</span> <span class="s2">&quot;%s&quot;</span> <span class="n">s</span>
+</span><span class="line">     <span class="o">|</span> <span class="nc">C</span><span class="o">(</span><span class="n">b</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">printfn</span> <span class="s2">&quot;%b&quot;</span> <span class="n">b</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>This is no profound revelation or anything, but it’s a tiny step closer to producing truly
+elegant F# code.  That makes me supremely happy.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Erich G. Ess</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-03-19T12:09:26-04:00" pubdate data-updated="true">Mar 19<span>th</span>, 2016</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/f-number/'>F#</a>, <a class='category' href='/blog/categories/programming-style/'>Programming Style</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://erichgess.github.io/blog/2016/03/19/pattern-matching-with-pipes/" data-via="" data-counturl="http://erichgess.github.io/blog/2016/03/19/pattern-matching-with-pipes/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/11/01/zippers-2-building-a-rose-tree-zipper/" title="Previous Post: Zippers 2: Building a Rose Tree Zipper">&laquo; Zippers 2: Building a Rose Tree Zipper</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2016/03/21/purely-functional-data-structures-chapter-2-lists/" title="Next Post: Purely Functional Data Structures: Chapter 2 - Lists">Purely Functional Data Structures: Chapter 2 - Lists &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/03/21/purely-functional-data-structures-chapter-2-binary-search-trees/">Purely Functional Data Structures: Chapter 2 - Binary Search Trees</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/03/21/purely-functional-data-structures-chapter-2-lists/">Purely Functional Data Structures: Chapter 2 - Lists</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/03/19/pattern-matching-with-pipes/">Pattern Matching With Pipes</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/11/01/zippers-2-building-a-rose-tree-zipper/">Zippers 2: Building a Rose Tree Zipper</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/08/17/f-number-zippers/">F# Zippers</a>
+      </li>
+    
+  </ul>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2016 - Erich G. Ess -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

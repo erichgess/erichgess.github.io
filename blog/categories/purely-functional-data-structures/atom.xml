@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Purely Functional Data Structures | Elegant Architecture]]></title>
+  <link href="http://erichgess.github.io/blog/categories/purely-functional-data-structures/atom.xml" rel="self"/>
+  <link href="http://erichgess.github.io/"/>
+  <updated>2016-03-23T14:02:47-04:00</updated>
+  <id>http://erichgess.github.io/</id>
+  <author>
+    <name><![CDATA[Erich G. Ess]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Purely Functional Data Structures: Chapter 2 - Binary Search Trees]]></title>
+    <link href="http://erichgess.github.io/blog/2016/03/21/purely-functional-data-structures-chapter-2-binary-search-trees/"/>
+    <updated>2016-03-21T22:41:37-04:00</updated>
+    <id>http://erichgess.github.io/blog/2016/03/21/purely-functional-data-structures-chapter-2-binary-search-trees</id>
+    <content type="html"><![CDATA[<p><em>This post is in progress</em></p>
+
+<p>The second section of Chapter 2 deals focuses on binary search trees (BST) and uses BSTs to
+implement a set data structure.  Like the section
+on lists, this gives a nice little explanation on how to deal with inserts to a tree data
+structure when the data is immutable in as efficient a way as possible.  The most brute
+force solution to this would be to create a complete duplicate of the tree save for the
+newly added value, this section shows that, while copying is necessary, only the search
+path from the root to the new element needs to be copied.  The new tree will then reference
+as much of the old tree as possible; minimizing both copies and memory used.</p>
+
+<p>What this post will cover:  how to represent a binary search tree (BST) in F#, how to efficiently
+update the BST while using immutable data structures, and some discussion on design and style.</p>
+
+<!-- more -->
+
+<p>First thing:  how to represent the binary search tree in F#.  A BST has two possible values:
+it’s either Empty or it’s a some value with 2 children.  So a discriminated union captures
+this set and a tuple can store the value and 2 children.  Leading, as with the list, to
+a recursive type:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">type</span> <span class="nc">Tree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">=</span> <span class="nc">Empty</span> <span class="o">|</span> <span class="nc">Tree</span> <span class="k">of</span> <span class="nc">Tree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">*</span> <span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="nc">Tree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>The Tree on the left of <code>Tree&lt;'a&gt; * 'a * Tree&lt;'a&gt;</code> stores the left branch and the right
+<code>Tree</code> stores the right branch.</p>
+
+<p>A requirement for a BST is that <code>'a</code> must have a total ordering:  you must be able to take
+any two values of type <code>'a</code> and check if one is less than the other.  The above definition
+does not capture this requirement and so we can make a <code>Tree</code> of any type.  In Purely
+Functional Data Structure this is solved by using ML’s <em>functor</em> feature, which F# doesn’t
+have.  In F# this can be captured using a <em>constraint</em> on the type:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">type</span> <span class="nc">BinarySearchTree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span> <span class="k">when</span> <span class="err">‘</span><span class="n">a</span><span class="o">:</span> <span class="n">comparison</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">=</span>
+</span><span class='line'>  <span class="o">|</span> <span class="nc">Empty</span>
+</span><span class='line'>  <span class="o">|</span> <span class="nc">Tree</span> <span class="k">of</span> <span class="nc">BinarySearchTree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">*</span> <span class="err">‘</span><span class="n">a</span> <span class="o">*</span> <span class="nc">BinarySearchTree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="n">a</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><code>'a when 'a: comparison</code> tells the F# compiler that <code>'a</code> must implement the IComparable
+interface which guarantees that the <code>&lt;</code> operator can be used on two values of type <code>'a</code>.</p>
+
+<p>I changed the name of the type from <code>Tree</code> to <code>BinarySearchTree</code> to capture the more focused
+nature of the type when a constraint is added.  The <code>Tree</code> can be use to create any type of
+binary tree structure, with the constraint the type becomes focused specifically on ordering
+and searching.  The updated name helps to reflect this focus.  This type could also be put
+into a <code>module</code> named <em>BinarySearchTree</em> to capture that information and then keep the type
+named simply <em>Tree</em>.  However, I am not yet sure which is superior, though I feel that
+capturing the nature of the type, intrinsically, in the name so that it can’t be seperated
+is the better path to follow.</p>
+
+<p>As a note, there is another option with F# for capturing the comparability requirement. We
+don’t have to put the constraint in the type definition.  When we write our <code>insert</code> and
+<code>search</code> functions, the F# compiler with infer that, for <em>those</em> functions, <code>'a</code> must
+have the <code>comparison</code> constraint.  This decouples the use of the tree from the type definition.
+If we want the type to capture only the structure of a binary tree, then this approach makes
+sense.  However, if we want the type to capture both the structure and the purpose (searching)
+then this approach seems like it will be fragile and confusing.</p>
+
+<p>I initially thought that there was a third option:  add the search and insert functions as
+member methods to the definition of <code>Tree</code>.  It seemed likely that the F# compiler would
+infer that <code>'a</code> must have the <code>comparison</code> constraint.  Testing proved that this is not the
+case and, in fact, the compiler throws an error because <code>Tree</code> must explicitly have the
+<code>comparison</code> constraint in order for the member methods to work.</p>
+
+<p><img src="/images/posts/purefds_ch2/bst_insert.png"></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Purely Functional Data Structures: Chapter 2 - Lists]]></title>
+    <link href="http://erichgess.github.io/blog/2016/03/21/purely-functional-data-structures-chapter-2-lists/"/>
+    <updated>2016-03-21T21:40:30-04:00</updated>
+    <id>http://erichgess.github.io/blog/2016/03/21/purely-functional-data-structures-chapter-2-lists</id>
+    <content type="html"><![CDATA[<p>Chapter 2 covers the efficient implementation of stack and binary search 
+trees when your data structures
+must be immutable.  This chapter wound up being a lot of fun to work on because
+it helped me focus a lot on how to approach structuring my F# code and start
+laying the foundation for how to approach building elegant F# code.</p>
+
+<!-- more -->
+
+<h2 id="stacks">Stacks</h2>
+<p>There are two implementations of the stack in this chapter.  The first is
+rather uninteresting and the second is significantly more educational.  This
+section on Lists appeared to be more focused on using lists to represent
+other data structures in this case to build a stack data structure.</p>
+
+<h3 id="using-lists">Using Lists</h3>
+<p>The first implementation is merely built on top of the existing list
+data structure.  Below is the direct conversion into F#:</p>
+
+<p><code>fsharp
+module Lists =
+  type ListStack&lt;'a&gt; =
+    'a list
+  let Empty:ListStack&lt;_&gt; = []
+  let isEmpty s = List.isEmpty s
+  let cons a s:ListStack&lt;_&gt; = a :: s
+  let hd s = List.head s
+  let tl s = List.tail s
+</code></p>
+
+<p>There really wasn’t a whole lot of interesting stuff in this first example.</p>
+
+<h3 id="custom-stack">Custom Stack</h3>
+<p>The second section is much more fun:  a custom data structure is built to
+represent the stack.  Built as a recursively nested tuple.  Which is
+actually identical to the traditional way of representing a regular list.
+This provides a nice way of building up an immutable list from primitives
+(tuples) in order to build a more complex data structure (a stack).</p>
+
+<p>This was also the first part where I had an opportunity to experiment
+with how to write this well in F# and reason through the pros and cons
+of a specific approach.  My first attempt was to get as close to the 
+book as possible and I used a <code>type</code> with member methods to group the
+<code>CustomStack</code> with its associated functions.  The second approach uses
+<code>module CustomStack</code> to group the type with the associated functions.</p>
+
+<p>```fsharp
+type CustomStack&lt;’a&gt; =
+  | Empty
+  | Cons of ‘a * CustomStack&lt;’a&gt;
+with
+  static member empty = Empty
+  // Note:
+  // I tried naming this IsEmpty but it won’t compile
+  // F# auto generates Is* functions for each element of a DU.
+  static member CheckEmpty = function
+                          | Empty -&gt; true
+                          | _ -&gt; false</p>
+
+<p>static member cons (x, s) =
+    Cons(x, s)</p>
+
+<p>static member head = function
+    | Empty -&gt; failwith “empty”
+    | Cons(x, _) -&gt; x</p>
+
+<p>static member tail s =
+    match s with
+    | Empty -&gt; failwith “empty”
+    | Cons(x, Empty) -&gt; x
+    | Cons(x, s) -&gt; CustomStack&lt;’a&gt;.tail s
+```</p>
+
+<p>The first thing I learned was that the F# compiler autogenerates a function
+called <code>IsEmpty</code>.  Despite working with the language for several months,
+I’d somehow never noticed that when you create a discriminated union type
+F# automatically adds member methods for check if a value is a specific
+element in the discriminated union.</p>
+
+<p>Using static member methods to group the related functions to the type didn’t
+feel particularly elegant:  you’d always have to prepend all calls to functions
+with <code>CustomStack.</code>.  So I tried using another approach:  using a 
+module named <code>CustomStack</code> to group the functions with the type.  This would
+provide the option of just calling the functions or prepending the module
+name (<code>CustomStack.</code>).</p>
+
+<p>```fsharp
+module CustomStack =
+  type CustomStack&lt;’a&gt; = Empty | Cons of ‘a * CustomStack&lt;’a&gt;
+  let empty = Empty</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td>let isEmpty = function Empty -&gt; true</td>
+      <td>_ -&gt; false</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>let cons (x,s) = Cons(x, s)</p>
+
+<p>let head = function
+    | Empty -&gt; failwith “empty”
+    | Cons(x,_) -&gt; x</p>
+
+<p>let tail = function
+    | Empty -&gt; failwith “empty”
+    | Cons(_, s) -&gt; s</p>
+
+<p>let rec (++) a b =
+    match a with
+    | Empty -&gt; b
+    | Cons(x, s) -&gt; Cons(x, s ++ b)</p>
+
+<p>let rec update = function
+    | (Empty, <em>, _) -&gt; failwith “subscript is invalid”
+    | (Cons(</em>, s), 0, x) -&gt; Cons(x, s)
+    | (Cons(_, s), i, x) when i &gt; 0 -&gt; update (s, i-1, x)
+    | _ -&gt; failwith “subscript is invalid”
+```</p>
+
+<p>This version felt much better to me, I also took the opportunity to create
+an operator <code>++</code> for appends.  There is an interesting consequence that
+this approach creates by disconnecting the type parameter restrictions
+that functions require from the type definition; this will come up
+explicitly in the binary search trees section.</p>
+
+<p>I tried a slightly different format for <code>type CustomStack</code> and <code>isEmpty</code>:
+placing the patterns on one line.  I’m not sure how I feel about
+this approach.  It seems very easy to miss the <code>|</code> and not properly
+see the pattern definitions.  Having everything on one line also
+implies that everything is part of the same operation and that is
+decidely not the case with pattern matching and DU definitions.</p>
+]]></content>
+  </entry>
+  
+</feed>
