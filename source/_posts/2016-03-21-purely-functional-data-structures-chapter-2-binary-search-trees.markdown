@@ -5,8 +5,6 @@ date: 2016-03-21 22:41:37 -0400
 comments: true
 categories: [F#, Purely Functional Data Structures, Algorithms, Functional Programming]
 ---
-_This post is in progress_
-
 The second section of Chapter 2 deals focuses on binary search trees (BST) and uses BSTs to
 implement a set data structure.  Like the section
 on lists, this gives a nice little explanation on how to deal with inserts to a tree data
@@ -71,4 +69,123 @@ infer that `'a` must have the `comparison` constraint.  Testing proved that this
 case and, in fact, the compiler throws an error because `Tree` must explicitly have the
 `comparison` constraint in order for the member methods to work.
 
+### IsMember
+Checking membership in the tree is the first of the two absolutely necessary functions
+for our BST.  The logic is rather simple, but here I've started trying out the `function`
+  structure for when I'm writing a "polymorphic" function and leaving out explicity
+  parameters.  I rarely used the `function` expression in the past so this is helping
+  me to get a feel for this as a part of my toolbox.
+  
+Leaving out the parameters in the 
+function definition is the [point free](https://en.wikipedia.org/wiki/Tacit_programming) 
+style of programming.  Since point free style cuts out one source of self documentation
+in code, I'm not sure I really like it.  However, it fits well with the `function` expression
+since the focus is the _patterns_ that are being matched and that documents the parameters
+well enough.
+
+{% codeblock lang:fsharp %}
+let rec isMember = function
+  | (x,Empty) -> false
+  | (x, Tree(l, n, r)) ->
+    if x < n then isMember (x, l)   // Experimenting with a new format for if/then.  I like having the condition and it's direct conclusion on the same line
+    elif x > n then isMember(x,r)
+    else true
+{% endcodeblock %}
+
+### Insert
+The insert function is a little more complex than `isMember`:  it needs to handle inserting
+a new value into an immutable tree data structure:
+{% codeblock lang:fsharp %}
+let rec insert (x,s) =
+  match s with
+  | Empty -> Tree (Empty, x, Empty)
+  | Tree(l,n,r) ->
+    if x < n then Tree(insert (x,l), n, r)
+    elif x > n then Tree(l, n, insert (x,r))
+    else s
+{% endcodeblock %}
+`insert` travels from the root node, down the tree, visiting only the nodes on the way to
+where the new node will get inserted.  This is called the _search path_.  As it moves, 
+`insert` makes a copy of each node on the search path.  The nodes are copied so that they
+can store the path to the new value, the nodes on the search path are the minimum number
+of nodes that need to be copied.  And of course, because data is immutable, we have to
+copy some nodes in order to make our insert.
+
+This diagram shows what's happening in a nicely visual form.  The brown nodes are the
+copied nodes on the search path, the dashed lines represent the new links in those nodes.
+Note that most of the original tree remains used in the new 'post insert' tree.  A copy of
+`7` was made and it's left child is the new `5` node, then a copy of `4` is made so that
+`4`'s right points to the new `7`.  `4`'s left still points to the old tree.
 {% img /images/posts/purefds_ch2/bst_insert.png %}
+
+### Problem 2.2
+In this problem, we have to update `isMember` to reduce the number of conditions in the
+execution path.  This is done by propagating the last checked value through the traversal
+and removing the `>` check:
+
+{% codeblock lang:fsharp %}
+let isMember2 (x, t) =
+  let rec check = function
+  | (x, None, Empty) -> false  
+  | (x, Some prev, Empty) ->  x = prev
+  | (x, prev, Tree(l,n,r)) ->
+    if x < n then check (x, None, l)
+    else check (x, Some n, r)
+
+  check (x, None, t)
+{% endcodeblock %}
+
+`isMember2` was my first attempt.  While the last pattern matching expression has only
+one conditional rather than two, it also has an additional pattern match check and so
+it seems unlikely that the number of condition checks is actually reduced.  I took a look
+at the IL for this code and verified that it does indeed have just as many conditions
+as `isMember.  The worst part is, that pattern match check must get executed every time.
+
+My second attempt became less idiomatic but it successfully reduces the number of 
+required conditionals:
+
+{% codeblock lang:fsharp %}
+let rec isMember2' (x, prev: 'a option, t) =
+  match (x, prev, t) with
+  | (x, prev, Empty) ->  if prev.IsSome then x = prev.Value else false
+  | (x, prev, Tree(l,n,r)) ->
+    if x < n then isMember2' (x, None, l)
+    else isMember2' (x, Some n, r)
+{% endcodeblock %}
+
+While working on this code, I noticed that in F# I'm much more comfortable writing
+`if` expressions on a single line.  In other languages, I almost never do this (not
+counting the ternary operator in the C family).
+
+### Problem 2.3: improving insert
+If we insert a value that's already in the tree, then the resulting tree will be
+identical to the input tree.  However, the current `insert` function will still
+copy all the nodes on the search path.  This problem Okasaki has us fix that by
+throwing a fault if the value is already in the tree.  This will bubble a break
+up through the recursive path and break the execution path before any copies
+are made:
+
+{% codeblock lang:fsharp %}
+let rec insert2 (x,s) =
+  match s with
+  | Empty -> Tree (Empty, x, Empty)
+  | Tree(l,n,r) ->
+    if x < n then Tree(insert2 (x,l), n, r)
+    elif x > n then Tree(l, n, insert2 (x,r))
+    else failwith "Element already exists
+{% endcodeblock %}
+
+Finally, we combine this update with the update to `isMember` to optimize insertion
+even more:
+
+{% codeblock lang:fsharp %}
+let rec insert3 (x, prev: 'a option, t) =
+  match t with
+  | Empty -> if prev.IsSome && x = prev.Value 
+             then failwith "Element already exists" 
+             else Tree (Empty, x, Empty)
+  | Tree(l, n, r) ->
+    if x < n 
+    then Tree(insert3 (x, prev, l), n, r)
+    else Tree(l, n, insert3 (x, Some n, r)
+{% endcodeblock %}
