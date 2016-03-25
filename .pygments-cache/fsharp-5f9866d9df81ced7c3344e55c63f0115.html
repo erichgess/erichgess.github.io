@@ -1,0 +1,7 @@
+<div class="highlight"><pre><span class="k">let</span> <span class="k">rec</span> <span class="n">isMember</span> <span class="o">=</span> <span class="k">function</span>
+  <span class="o">|</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span><span class="nc">Empty</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="bp">false</span>
+  <span class="o">|</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="nc">Tree</span><span class="o">(</span><span class="n">l</span><span class="o">,</span> <span class="n">n</span><span class="o">,</span> <span class="n">r</span><span class="o">))</span> <span class="o">-&gt;</span>
+    <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">n</span> <span class="k">then</span> <span class="n">isMember</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">l</span><span class="o">)</span>   <span class="c1">// Experimenting with a new format for if/then.  I like having the condition and it&#39;s direct conclusion on the same line</span>
+    <span class="k">elif</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="n">n</span> <span class="k">then</span> <span class="n">isMember</span><span class="o">(</span><span class="n">x</span><span class="o">,</span><span class="n">r</span><span class="o">)</span>
+    <span class="k">else</span> <span class="bp">true</span>
+</pre></div>
