@@ -14,11 +14,12 @@ It's a lot of fun seeing how fundamental and still powerful the data structures 
 _Purely Functional Data Structures_ are and has made reading through this book even more
 satisfying.
 
-<!-- more -->
 
 The first significant data structure in Okasaki is the Set, which is implemented using
 a binary search tree.  It's simple enough to find the F# Core implementation of set in
 the GitHub [repository](https://github.com/fsharp/fsharp/blob/master/src/fsharp/FSharp.Core/set.fs#L17).
+
+<!-- more -->
 
 {% codeblock lang:fsharp %}
 type SetTree<'T> when 'T : comparison = 
