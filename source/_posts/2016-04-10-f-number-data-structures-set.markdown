@@ -139,7 +139,10 @@ in this function:
 `t1`)
 1.  `split` all the elements in `t2` by if they are smaller than the root value of `t1`.
 Call the set of nodes smaller than the `t1` root `lo` and the set of larger nodes `hi`.
-1.  Create a new tree by merging the left branch of `t1` with `lo`
-and by merging the right branch of `t1` with `hi`.
+1.  Use `union` to merge the left subtree of `t1` with `lo` and to merge the right subtree
+of `t1` with `hi`.
+1.  Balance the to newly generated subtrees.  This leaves a set of all the values smaller
+than the `t1` value and a set of all the values larger than `t1`.  These can then be used
+to create a new `TreeSet` representing the fully balanced merging of `t1` and `t2`.
 
 This process will merge the two trees into a new balanced tree.
