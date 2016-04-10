@@ -11,9 +11,8 @@
   <meta name="author" content="Erich G. Ess">
 
   
-  <meta name="description" content="The second section of Chapter 2 deals focuses on binary search trees (BST) and uses BSTs to
-implement a set data structure. Like the section
-on lists &hellip;">
+  <meta name="description" content="As I’ve been going through Okasaki’s book on functional data structures, it occurred to
+me that it’d also be a lot of fun to run through the F# &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -69,6 +68,138 @@ on lists &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/04/10/f-number-data-structures-set/">F# Data Structures: Set</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-04-10T11:15:48-04:00" pubdate data-updated="true">Apr 10<span>th</span>, 2016</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>As I’ve been going through Okasaki’s book on functional data structures, it occurred to
+me that it’d also be a lot of fun to run through the F# implementation of it’s core data
+structures and compare them with the book <em>Purely Functional Data Structures</em>.</p>
+
+<p>It’s a lot of fun seeing how fundamental and still powerful the data structures used in
+<em>Purely Functional Data Structures</em> are and has made reading through this book even more
+satisfying.</p>
+
+<p>The first significant data structure in Okasaki is the Set, which is implemented using
+a binary search tree.  It’s simple enough to find the F# Core implementation of set in
+the GitHub <a href="https://github.com/fsharp/fsharp/blob/master/src/fsharp/FSharp.Core/set.fs#L17">repository</a>.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">type</span> <span class="nc">SetTree</span><span class="o">&lt;</span><span class="k">&#39;</span><span class="nc">T</span><span class="o">&gt;</span> <span class="k">when</span> <span class="k">&#39;</span><span class="nc">T</span> <span class="o">:</span> <span class="n">comparison</span> <span class="o">=</span>
+</span><span class="line">    <span class="o">|</span> <span class="nc">SetEmpty</span>                                          <span class="c1">// height = 0   </span>
+</span><span class="line">    <span class="o">|</span> <span class="nc">SetNode</span> <span class="k">of</span> <span class="k">&#39;</span><span class="nc">T</span> <span class="o">*</span> <span class="nc">SetTree</span><span class="o">&lt;</span><span class="k">&#39;</span><span class="nc">T</span><span class="o">&gt;</span> <span class="o">*</span>  <span class="nc">SetTree</span><span class="o">&lt;</span><span class="k">&#39;</span><span class="nc">T</span><span class="o">&gt;</span> <span class="o">*</span> <span class="kt">int</span>    <span class="c1">// height = int </span>
+</span><span class="line">    <span class="o">|</span> <span class="nc">SetOne</span>  <span class="k">of</span> <span class="k">&#39;</span><span class="nc">T</span>                                     <span class="c1">// height = 1 </span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>and a little further down in the source file we find this definition of <code>Set</code>:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">type</span> <span class="nc">Set</span><span class="o">&lt;[&lt;</span><span class="nc">EqualityConditionalOn</span><span class="o">&gt;]</span><span class="k">&#39;</span><span class="nc">T</span> <span class="k">when</span> <span class="k">&#39;</span><span class="nc">T</span> <span class="o">:</span> <span class="n">comparison</span> <span class="o">&gt;(</span><span class="n">comparer</span><span class="o">:</span><span class="nc">IComparer</span><span class="o">&lt;</span><span class="k">&#39;</span><span class="nc">T</span><span class="o">&gt;,</span> <span class="n">tree</span><span class="o">:</span> <span class="nc">SetTree</span><span class="o">&lt;</span><span class="k">&#39;</span><span class="nc">T</span><span class="o">&gt;)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>So the <code>Set</code> type is definitely built on top of a binary search tree.  Now the question is,
+what type of binary search tree:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="n">rebalance</span> <span class="n">t1</span> <span class="n">k</span> <span class="n">t2</span> <span class="o">=</span>
+</span><span class="line">    <span class="k">let</span> <span class="n">t1h</span> <span class="o">=</span> <span class="n">height</span> <span class="n">t1</span>
+</span><span class="line">    <span class="k">let</span> <span class="n">t2h</span> <span class="o">=</span> <span class="n">height</span> <span class="n">t2</span>
+</span><span class="line">    <span class="k">if</span>  <span class="n">t2h</span> <span class="o">&gt;</span> <span class="n">t1h</span> <span class="o">+</span> <span class="n">tolerance</span> <span class="k">then</span> <span class="c1">// right is heavier than left </span>
+</span><span class="line">        <span class="k">match</span> <span class="n">t2</span> <span class="k">with</span>
+</span><span class="line">        <span class="o">|</span> <span class="nc">SetNode</span><span class="o">(</span><span class="n">t2k</span><span class="o">,</span><span class="n">t2l</span><span class="o">,</span><span class="n">t2r</span><span class="o">,_)</span> <span class="o">-&gt;</span>
+</span><span class="line">            <span class="c1">// one of the nodes must have height &gt; height t1 + 1 </span>
+</span><span class="line">            <span class="k">if</span> <span class="n">height</span> <span class="n">t2l</span> <span class="o">&gt;</span> <span class="n">t1h</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">then</span>  <span class="c1">// balance left: combination </span>
+</span><span class="line">                <span class="k">match</span> <span class="n">t2l</span> <span class="k">with</span>
+</span><span class="line">                <span class="o">|</span> <span class="nc">SetNode</span><span class="o">(</span><span class="n">t2lk</span><span class="o">,</span><span class="n">t2ll</span><span class="o">,</span><span class="n">t2lr</span><span class="o">,_)</span> <span class="o">-&gt;</span>
+</span><span class="line">                    <span class="n">mk</span> <span class="o">(</span><span class="n">mk</span> <span class="n">t1</span> <span class="n">k</span> <span class="n">t2ll</span><span class="o">)</span> <span class="n">t2lk</span> <span class="o">(</span><span class="n">mk</span> <span class="n">t2lr</span> <span class="n">t2k</span> <span class="n">t2r</span><span class="o">)</span>
+</span><span class="line">                <span class="o">|</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="n">failwith</span> <span class="s2">&quot;rebalance&quot;</span>
+</span><span class="line">            <span class="k">else</span> <span class="c1">// rotate left </span>
+</span><span class="line">                <span class="n">mk</span> <span class="o">(</span><span class="n">mk</span> <span class="n">t1</span> <span class="n">k</span> <span class="n">t2l</span><span class="o">)</span> <span class="n">t2k</span> <span class="n">t2r</span>
+</span><span class="line">        <span class="o">|</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="n">failwith</span> <span class="s2">&quot;rebalance&quot;</span>
+</span><span class="line">    <span class="k">else</span>
+</span><span class="line">        <span class="k">if</span>  <span class="n">t1h</span> <span class="o">&gt;</span> <span class="n">t2h</span> <span class="o">+</span> <span class="n">tolerance</span> <span class="k">then</span> <span class="c1">// left is heavier than right </span>
+</span><span class="line">            <span class="k">match</span> <span class="n">t1</span> <span class="k">with</span>
+</span><span class="line">            <span class="o">|</span> <span class="nc">SetNode</span><span class="o">(</span><span class="n">t1k</span><span class="o">,</span><span class="n">t1l</span><span class="o">,</span><span class="n">t1r</span><span class="o">,_)</span> <span class="o">-&gt;</span>
+</span><span class="line">                <span class="c1">// one of the nodes must have height &gt; height t2 + 1 </span>
+</span><span class="line">                <span class="k">if</span> <span class="n">height</span> <span class="n">t1r</span> <span class="o">&gt;</span> <span class="n">t2h</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">then</span>
+</span><span class="line">                    <span class="c1">// balance right: combination </span>
+</span><span class="line">                    <span class="k">match</span> <span class="n">t1r</span> <span class="k">with</span>
+</span><span class="line">                    <span class="o">|</span> <span class="nc">SetNode</span><span class="o">(</span><span class="n">t1rk</span><span class="o">,</span><span class="n">t1rl</span><span class="o">,</span><span class="n">t1rr</span><span class="o">,_)</span> <span class="o">-&gt;</span>
+</span><span class="line">                        <span class="n">mk</span> <span class="o">(</span><span class="n">mk</span> <span class="n">t1l</span> <span class="n">t1k</span> <span class="n">t1rl</span><span class="o">)</span> <span class="n">t1rk</span> <span class="o">(</span><span class="n">mk</span> <span class="n">t1rr</span> <span class="n">k</span> <span class="n">t2</span><span class="o">)</span>
+</span><span class="line">                    <span class="o">|</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="n">failwith</span> <span class="s2">&quot;rebalance&quot;</span>
+</span><span class="line">                <span class="k">else</span>
+</span><span class="line">                    <span class="n">mk</span> <span class="n">t1l</span> <span class="n">t1k</span> <span class="o">(</span><span class="n">mk</span> <span class="n">t1r</span> <span class="n">k</span> <span class="n">t2</span><span class="o">)</span>
+</span><span class="line">            <span class="o">|</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="n">failwith</span> <span class="s2">&quot;rebalance&quot;</span>
+</span><span class="line">        <span class="k">else</span> <span class="n">mk</span> <span class="n">t1</span> <span class="n">k</span> <span class="n">t2</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>So F# is using what looks like a slightly modified AVL tree, which uses a definable
+tolerance for how unbalanced the tree can get before rebalancing happens.  The
+strict AVL tree rebalances if the difference in height between the left and right
+branches is greater than 1.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -493,54 +624,6 @@ operation will be usd to create a Zipper for the binary tree.</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/04/05/type-providers-tutorial-part-3-instantiables/">Type Providers - Tutorial Part 3 - Instantiables</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-04-05T16:42:52-04:00" pubdate data-updated="true">Apr 5<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>In the last tutorial, we built a simple type named <code>Hello</code> which had some static members.  In this tutorial, we’ll expand our <code>Hello</code> type to include a constructor, an instance property, and an instance method.  Adding these will allow us to create instances of <code>Hello</code> using the <code>new</code> operator:</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="n">x</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hello</span><span class="bp">()</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>We’ll also make <code>Hello</code> store some data, that means our type providers will be one step closer to awesome.  Also, one step closer to being an effective means of interacting with structured data sources.</p>
-
-<p>The full code for what we make in this part will be at the end of this post.
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/04/05/type-providers-tutorial-part-3-instantiables/">Lay on, MacDuff &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -556,6 +639,10 @@ operation will be usd to create a Zipper for the binary tree.</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/04/10/f-number-data-structures-set/">F# Data Structures: Set</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/03/21/purely-functional-data-structures-chapter-2-binary-search-trees/">Purely Functional Data Structures: Chapter 2 - Binary Search Trees</a>
       </li>
     
@@ -569,10 +656,6 @@ operation will be usd to create a Zipper for the binary tree.</p>
     
       <li class="post">
         <a href="/blog/2015/11/01/zippers-2-building-a-rose-tree-zipper/">Zippers 2: Building a Rose Tree Zipper</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/08/17/f-number-zippers/">F# Zippers</a>
       </li>
     
   </ul>

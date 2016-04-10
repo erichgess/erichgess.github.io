@@ -11,7 +11,7 @@
   <meta name="author" content="Erich G. Ess">
 
   
-  <meta name="description" content="Over the last two years, I’ve really become interested in distributed computing and things like big data. My interest in these topics grew in &hellip;">
+  <meta name="description" content="In my previous post, I described a distributed monitoring system called Odin. Which I am building because it will help me learn and explore topics in &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -67,6 +67,49 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/03/08/odin-prototype/">Odin Prototype</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-08T02:32:30-05:00" pubdate data-updated="true">Mar 8<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>In my previous post, I described a distributed monitoring system called Odin.  Which I am building because it will help me learn and explore topics in distributed computing independent of work.</p>
+
+<p>I’ve been slowly working on it when I get a chance and have put together a very basic prototype:
+https://github.com/erichgess/OdinPrototype</p>
+
+<p>This prototype is some hacking I did over a few, very spread out days, to try out some concepts.  It has a very simple agent, which reads %CPU used and sends a message to a receiver.  That receiver this publishes that message as an IObservable.  Multiple mailbox processors subscribe to the Observable and use Reactive to do some queries on the incoming messages.</p>
+
+<p>This is very very little.  However, it served as a way for me to try out a few different concepts: RabbitMQ, Mailbox Processors, and Reactive.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -246,6 +289,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/04/10/f-number-data-structures-set/">F# Data Structures: Set</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/03/21/purely-functional-data-structures-chapter-2-binary-search-trees/">Purely Functional Data Structures: Chapter 2 - Binary Search Trees</a>
       </li>
     
@@ -259,10 +306,6 @@
     
       <li class="post">
         <a href="/blog/2015/11/01/zippers-2-building-a-rose-tree-zipper/">Zippers 2: Building a Rose Tree Zipper</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/08/17/f-number-zippers/">F# Zippers</a>
       </li>
     
   </ul>

@@ -11,7 +11,7 @@
   <meta name="author" content="Erich G. Ess">
 
   
-  <meta name="description" content="In Part 1 of this series, I briefly explained what a Type Provider was and some of the main concepts which you would need to know. In Part 2, I am &hellip;">
+  <meta name="description" content="In the last tutorial, we built a simple type named Hello which had some static members. In this tutorial, we’ll expand our Hello type to include a &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -67,6 +67,54 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/04/05/type-providers-tutorial-part-3-instantiables/">Type Providers - Tutorial Part 3 - Instantiables</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-05T16:42:52-04:00" pubdate data-updated="true">Apr 5<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>In the last tutorial, we built a simple type named <code>Hello</code> which had some static members.  In this tutorial, we’ll expand our <code>Hello</code> type to include a constructor, an instance property, and an instance method.  Adding these will allow us to create instances of <code>Hello</code> using the <code>new</code> operator:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="n">x</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hello</span><span class="bp">()</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>We’ll also make <code>Hello</code> store some data, that means our type providers will be one step closer to awesome.  Also, one step closer to being an effective means of interacting with structured data sources.</p>
+
+<p>The full code for what we make in this part will be at the end of this post.
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2014/04/05/type-providers-tutorial-part-3-instantiables/">Lay on, MacDuff &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -541,49 +589,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/03/08/odin-prototype/">Odin Prototype</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-03-08T02:32:30-05:00" pubdate data-updated="true">Mar 8<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>In my previous post, I described a distributed monitoring system called Odin.  Which I am building because it will help me learn and explore topics in distributed computing independent of work.</p>
-
-<p>I’ve been slowly working on it when I get a chance and have put together a very basic prototype:
-https://github.com/erichgess/OdinPrototype</p>
-
-<p>This prototype is some hacking I did over a few, very spread out days, to try out some concepts.  It has a very simple agent, which reads %CPU used and sends a message to a receiver.  That receiver this publishes that message as an IObservable.  Multiple mailbox processors subscribe to the Observable and use Reactive to do some queries on the incoming messages.</p>
-
-<p>This is very very little.  However, it served as a way for me to try out a few different concepts: RabbitMQ, Mailbox Processors, and Reactive.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -601,6 +606,10 @@ https://github.com/erichgess/OdinPrototype</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/04/10/f-number-data-structures-set/">F# Data Structures: Set</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/03/21/purely-functional-data-structures-chapter-2-binary-search-trees/">Purely Functional Data Structures: Chapter 2 - Binary Search Trees</a>
       </li>
     
@@ -614,10 +623,6 @@ https://github.com/erichgess/OdinPrototype</p>
     
       <li class="post">
         <a href="/blog/2015/11/01/zippers-2-building-a-rose-tree-zipper/">Zippers 2: Building a Rose Tree Zipper</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/08/17/f-number-zippers/">F# Zippers</a>
       </li>
     
   </ul>
