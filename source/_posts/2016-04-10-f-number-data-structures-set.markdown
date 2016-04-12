@@ -307,9 +307,17 @@ let rec exists f m =
     | SetEmpty -> false         
 
 let subset comparer a b  = forall (fun x -> mem comparer x b) a
-
-let psubset comparer a b  = forall (fun x -> mem comparer x b) a && exists (fun x -> not (mem comparer x a)) b
 {% endcodeblock %}
+
+These two functions aren't that difficult to understand.  Much like `mem`
+they don't modify the tree so there's no need for rebalancing.
+
+`subset` traverses every node in `a` and checks to see if that node's value
+also exists in `b`.  `forall` will short circuit if it hits a node which is
+not in `b` and will evaluate to `false`.
+
+The SuperSet function is exactly the same except it swaps the arguments and
+tests if `b` is a subset of `a`.
 
 ## Conclusion
 
