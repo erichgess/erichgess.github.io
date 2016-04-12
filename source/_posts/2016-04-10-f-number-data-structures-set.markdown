@@ -206,16 +206,117 @@ This image visually illustrates what happens when `rebalance t1 k t2` is called:
 
 ### Contains
 
+Set `Contains` function is just a call to the `SetTree` function `mem`.
+
+Here's `mem`:
+{% codeblock lang:fsharp %}
+let rec mem (comparer: IComparer<'T>) k t = 
+    match t with 
+    | SetNode(k2,l,r,_) -> 
+        let c = comparer.Compare(k,k2) 
+        if   c < 0 then mem comparer k l
+        elif c = 0 then true
+        else mem comparer k r
+    | SetOne(k2) -> (comparer.Compare(k,k2) = 0)
+    | SetEmpty -> false
+{% endcodeblock %}
+
+`mem` is the simplest of all these functions, because it doesn't make any changes
+to the tree and so it doesn't trigger any rebalancing actions.
+
+`mem` recurively walks through the binary search tree using the comparer argument
+to determine whether it should follow the left child or the right child or if the
+value has been found.  If it reaches an edge node it compares the node with the
+value argument and returns that as the result.  If it reaches an empty tree then
+the value is not in the tree and false is returned.
+
 ### Remove
+{% codeblock lang:fsharp %}
+let rec remove (comparer: IComparer<'T>) k t = 
+    match t with 
+    | SetEmpty -> t
+    | SetOne (k2) -> 
+        let c = comparer.Compare(k,k2) 
+        if   c = 0 then SetEmpty
+        else t
+    | SetNode (k2,l,r,_) -> 
+        let c = comparer.Compare(k,k2) 
+        if   c < 0 then rebalance (remove comparer k l) k2 r
+        elif c = 0 then 
+          match l,r with 
+          | SetEmpty,_ -> r
+          | _,SetEmpty -> l
+          | _ -> 
+              let sk,r' = spliceOutSuccessor r 
+              mk l sk r'
+        else rebalance l k2 (remove comparer k r) 
+{% endcodeblock %}
 
 ### Union
 
+{% codeblock lang:fsharp %}
+let rec union comparer t1 t2 =
+    // Perf: tried bruteForce for low heights, but nothing significant 
+    match t1,t2 with               
+    | SetNode(k1,t11,t12,h1),SetNode(k2,t21,t22,h2) -> // (t11 < k < t12) AND (t21 < k2 < t22) 
+        // Divide and Conquer:
+        //   Suppose t1 is largest.
+        //   Split t2 using pivot k1 into lo and hi.
+        //   Union disjoint subproblems and then combine. 
+        if h1 > h2 then
+          let lo,_,hi = split comparer k1 t2 in
+          balance comparer (union comparer t11 lo) k1 (union comparer t12 hi)
+        else
+          let lo,_,hi = split comparer k2 t1 in
+          balance comparer (union comparer t21 lo) k2 (union comparer t22 hi)
+    | SetEmpty,t -> t
+    | t,SetEmpty -> t
+    | SetOne k1,t2 -> add comparer k1 t2
+    | t1,SetOne k2 -> add comparer k2 t1
+{% endcodeblock %}
+
 ### Intersect
+
+{% codeblock lang:fsharp %}
+let rec intersectionAux comparer b m acc = 
+    match m with 
+    | SetNode(k,l,r,_) -> 
+        let acc = intersectionAux comparer b r acc 
+        let acc = if mem comparer k b then add comparer k acc else acc 
+        intersectionAux comparer b l acc
+    | SetOne(k) -> 
+        if mem comparer k b then add comparer k acc else acc
+    | SetEmpty -> acc
+
+let intersection comparer a b = intersectionAux comparer b a SetEmpty
+{% endcodeblock %}
 
 ### IsSubset/IsSuperSet
 
+{% codeblock lang:fsharp %}
+let rec forall f m = 
+    match m with 
+    | SetNode(k2,l,r,_) -> f k2 && forall f l && forall f r
+    | SetOne(k2) -> f k2
+    | SetEmpty -> true          
+
+let rec exists f m = 
+    match m with 
+    | SetNode(k2,l,r,_) -> f k2 || exists f l || exists f r
+    | SetOne(k2) -> f k2
+    | SetEmpty -> false         
+
+let subset comparer a b  = forall (fun x -> mem comparer x b) a
+
+let psubset comparer a b  = forall (fun x -> mem comparer x b) a && exists (fun x -> not (mem comparer x a)) b
+{% endcodeblock %}
+
 ## Conclusion
 
-- It's basically exactly what you would do after reading _Purely Functional Data Structures_
-- This is awesome because that small book is clearly super good
+What's awesome is that, fundamentally, this is the same way that sets are
+implemented in _Purely Functional Data Structures_.  Which just shows how
+valuable that book still is, even with it being 20 years old!
 
+The most important difference, of course, is that the book doesn't use a
+self balancing binary search tree while F# uses an AVL tree.  But no one
+would use a non-self balancing BST in a real implementation.
