@@ -1,10 +1,4 @@
----
-layout: post
-title: "F# Data Structures: Set"
-date: 2016-04-10 11:15:48 -0400
-comments: true
-categories: [F#, Data Structures]
----
+Outline
 
 ## How do the F# Core data structures work
 To help improve my understanding of functional programming, I'm reading
@@ -205,17 +199,12 @@ This image visually illustrates what happens when `rebalance t1 k t2` is called:
 {% img /images/posts/fsharp_set/settree_rebalance_diagram.png %}
 
 ### Contains
-
 ### Remove
-
 ### Union
-
 ### Intersect
-
 ### IsSubset/IsSuperSet
 
 ## Conclusion
-
-- It's basically exactly what you would do after reading _Purely Functional Data Structures_
-- This is awesome because that small book is clearly super good
+### It's basically exactly what you would do after reading _Purely Functional Data Structures_
+#### This is awesome because that small book is clearly super good
 
