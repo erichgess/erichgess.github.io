@@ -4,7 +4,7 @@
   <title><![CDATA[Category: F# | Elegant Architecture]]></title>
   <link href="http://erichgess.github.io/blog/categories/f-number/atom.xml" rel="self"/>
   <link href="http://erichgess.github.io/"/>
-  <updated>2016-04-10T12:06:13-04:00</updated>
+  <updated>2016-04-12T09:51:59-04:00</updated>
   <id>http://erichgess.github.io/</id>
   <author>
     <name><![CDATA[Erich G. Ess]]></name>
@@ -18,40 +18,142 @@
     <link href="http://erichgess.github.io/blog/2016/04/10/f-number-data-structures-set/"/>
     <updated>2016-04-10T11:15:48-04:00</updated>
     <id>http://erichgess.github.io/blog/2016/04/10/f-number-data-structures-set</id>
-    <content type="html"><![CDATA[<p>As I’ve been going through Okasaki’s book on functional data structures, it occurred to
-me that it’d also be a lot of fun to run through the F# implementation of it’s core data
-structures and compare them with the book <em>Purely Functional Data Structures</em>.</p>
+    <content type="html"><![CDATA[<h2 id="how-do-the-f-core-data-structures-work">How do the F# Core data structures work</h2>
+<p>To help improve my understanding of functional programming, I’m reading
+through Chris Okasaki’s <em>Purely Functional Data Structures</em>.  This book has been a great
+refresher for my knowledge of data structures and algorithms.  Just for fun, I’m also
+diving in the F# Core source code to see how many of the data structures that are covered
+by Okasaki get implemented in real work functional source code.</p>
 
-<p>It’s a lot of fun seeing how fundamental and still powerful the data structures used in
-<em>Purely Functional Data Structures</em> are and has made reading through this book even more
-satisfying.</p>
+<p>Okasaki’s book starts with implementing a Set data structure with a binary search tree.
+So this small series also starts with F#’s implementation of Set.</p>
 
-<p>The first significant data structure in Okasaki is the Set, which is implemented using
-a binary search tree.  It’s simple enough to find the F# Core implementation of set in
-the GitHub <a href="https://github.com/fsharp/fsharp/blob/master/src/fsharp/FSharp.Core/set.fs#L17">repository</a>.</p>
+<h2 id="what-are-the-important-and-interesting-parts-of-set">What are the important and interesting parts of Set?</h2>
+<p>There are a lot of functions in F#’s <code>Set</code> type and many of them aren’t that interesting
+and a dive into everything would make an over long post.  So we’ll focus on just a few
+of the core <code>Set</code> functions.  <code>Add</code>, <code>Contains</code>, and <code>Remove</code> are not, on the surface,
+interesting but they provide a great way to explain on the underlying data structure
+used for <code>Set</code> is implemented.</p>
 
-<!-- more -->
+<h3 id="add">Add</h3>
+<p>This function will add a new element to a Set, if it doesn’t already exist.  If it does
+already exist in the Set then it, of course, won’t make any change to Set.</p>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<h3 id="contains">Contains</h3>
+<p>Checks to see if a value is in the Set.</p>
+
+<h3 id="remove">Remove</h3>
+<p>Take a set and a value and if the value is in the set then return a new set without that
+value.</p>
+
+<h3 id="union">Union</h3>
+<p>Take two sets and return a new set which contains all the values from both sets.</p>
+
+<h3 id="intersect">Intersect</h3>
+<p>Take two sets and return a new set which contains only the values that are in both sets.</p>
+
+<h3 id="issubsetissuperset">IsSubset/IsSuperSet</h3>
+<p>Takes two sets and returns true if all the values of one set are also in the other set.</p>
+
+<h2 id="implemented-with-a-binary-search-tree">Implemented with a Binary Search Tree</h2>
+<p>Starting with the actual definition for the <code>Set</code> type «<insert link="" to="" github="">&gt;&gt;.
+Which is actually built out of the `SetTree` type.
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">type</span> <span class="nc">Set</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;[&lt;</span><span class="n">equalityconditionalon</span><span class="o">&gt;]</span><span class="k">&#39;</span><span class="nc">T</span> <span class="k">when</span> <span class="k">&#39;</span><span class="nc">T</span> <span class="o">:</span> <span class="n">comparison</span> <span class="o">&amp;</span><span class="n">gt</span><span class="o">;(</span><span class="n">comparer</span><span class="o">:</span><span class="nc">IComparer</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="k">&#39;</span><span class="nc">T</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;,</span> <span class="n">tree</span><span class="o">:</span> <span class="nc">SetTree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="k">&#39;</span><span class="nc">T</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></equalityconditionalon></insert></p>
+
+<p>So skipping up to the definition of <code>SetTree</code>:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 </pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">type</span> <span class="nc">SetTree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="nc">T</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="k">when</span> <span class="err">‘</span><span class="nc">T</span> <span class="o">:</span> <span class="n">comparison</span> <span class="o">=</span>
 </span><span class='line'>    <span class="o">|</span> <span class="nc">SetEmpty</span>                                          <span class="c1">// height = 0 &lt;br /&gt;</span>
 </span><span class='line'>    <span class="o">|</span> <span class="nc">SetNode</span> <span class="k">of</span> <span class="err">‘</span><span class="nc">T</span> <span class="o">*</span> <span class="nc">SetTree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="nc">T</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">*</span>  <span class="nc">SetTree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="nc">T</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">*</span> <span class="kt">int</span>    <span class="c1">// height = int </span>
-</span><span class='line'>    <span class="o">|</span> <span class="nc">SetOne</span>  <span class="k">of</span> <span class="err">‘</span><span class="nc">T</span>                                     <span class="c1">// height = 1 </span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">SetOne</span>  <span class="k">of</span> <span class="err">‘</span><span class="nc">T</span>                                     <span class="c1">// height = 1 &lt;br /&gt;</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
-<p>and a little further down in the source file we find this definition of <code>Set</code>:
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">type</span> <span class="nc">Set</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;[&lt;</span><span class="n">equalityconditionalon</span><span class="o">&gt;]</span><span class="k">&#39;</span><span class="nc">T</span> <span class="k">when</span> <span class="k">&#39;</span><span class="nc">T</span> <span class="o">:</span> <span class="n">comparison</span> <span class="o">&amp;</span><span class="n">gt</span><span class="o">;(</span><span class="n">comparer</span><span class="o">:</span><span class="nc">IComparer</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="k">&#39;</span><span class="nc">T</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;,</span> <span class="n">tree</span><span class="o">:</span> <span class="nc">SetTree</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="k">&#39;</span><span class="nc">T</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;)</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></equalityconditionalon></p>
+<p>So F#’s <code>Set</code> type is actually built out of a binary search tree which, as will be seen shortly,
+is self balancing.  This is pretty much exactly how Okasaki implements Sets in his book.</p>
 
-<p>So the <code>Set</code> type is definitely built on top of a binary search tree.  Now the question is,
-what type of binary search tree and that can be determined by looking at the functions
-used on the <code>SetTree</code> type.  There’s the expected <code>add</code> and <code>remove</code> and within those
-functions are calls to a <code>rebalance</code> function.  Meaning that F# is using a self balancing
-BST for its <code>Set</code> implementation.  Here’s the code for the <code>rebalance</code> function:</p>
+<h2 id="how-each-function-is-implemented">How each function is implemented</h2>
+<p>We already know that <code>Set</code> is built on top of a binary search tree named <code>SetTree</code>, but
+lets first take a look at how <code>Set</code> implements <code>Add</code>, <code>Contains</code>, and <code>Removes</code>:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">member</span> <span class="n">s</span><span class="o">.</span><span class="nc">Add</span><span class="o">(</span><span class="n">x</span><span class="o">)</span> <span class="o">:</span> <span class="nc">Set</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="nc">T</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">new</span> <span class="nc">Set</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="nc">T</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;(</span><span class="n">s</span><span class="o">.</span><span class="nc">Comparer</span><span class="o">,</span><span class="nn">SetTree</span><span class="p">.</span><span class="n">add</span> <span class="n">s</span><span class="o">.</span><span class="nc">Comparer</span> <span class="n">x</span> <span class="n">s</span><span class="o">.</span><span class="nc">Tree</span> <span class="o">)&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">member</span> <span class="n">s</span><span class="o">.</span><span class="nc">Remove</span><span class="o">(</span><span class="n">x</span><span class="o">)</span> <span class="o">:</span> <span class="nc">Set</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="nc">T</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">new</span> <span class="nc">Set</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="nc">T</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;(</span><span class="n">s</span><span class="o">.</span><span class="nc">Comparer</span><span class="o">,</span><span class="nn">SetTree</span><span class="p">.</span><span class="n">remove</span> <span class="n">s</span><span class="o">.</span><span class="nc">Comparer</span> <span class="n">x</span> <span class="n">s</span><span class="o">.</span><span class="nc">Tree</span><span class="o">)&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">member</span> <span class="n">s</span><span class="o">.</span><span class="nc">Count</span> <span class="o">=</span> <span class="nn">SetTree</span><span class="p">.</span><span class="n">count</span> <span class="n">s</span><span class="o">.</span><span class="nc">Tree</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">member</span> <span class="n">s</span><span class="o">.</span><span class="nc">Contains</span><span class="o">(</span><span class="n">x</span><span class="o">)</span> <span class="o">=</span>
+</span><span class='line'>    <span class="nn">SetTree</span><span class="p">.</span><span class="n">mem</span> <span class="n">s</span><span class="o">.</span><span class="nc">Comparer</span>  <span class="n">x</span> <span class="n">s</span><span class="o">.</span><span class="nc">Tree</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>It’s not much surprise to see that <code>Set</code> just makes simple calls to <code>SetTree</code> for these
+core actions.</p>
+
+<h3 id="add-1">Add</h3>
+
+<p>Here’s the implementation of <code>SetTree</code>’s <code>add</code> function:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="k">rec</span> <span class="n">add</span> <span class="o">(</span><span class="n">comparer</span><span class="o">:</span> <span class="nc">IComparer</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="nc">T</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;)</span> <span class="n">k</span> <span class="n">t</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">match</span> <span class="n">t</span> <span class="k">with</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">SetNode</span> <span class="o">(</span><span class="n">k2</span><span class="o">,</span><span class="n">l</span><span class="o">,</span><span class="n">r</span><span class="o">,_)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'>        <span class="k">let</span> <span class="n">c</span> <span class="o">=</span> <span class="n">comparer</span><span class="o">.</span><span class="nc">Compare</span><span class="o">(</span><span class="n">k</span><span class="o">,</span><span class="n">k2</span><span class="o">)</span>
+</span><span class='line'>        <span class="k">if</span>   <span class="n">c</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span> <span class="mi">0</span> <span class="k">then</span> <span class="n">rebalance</span> <span class="o">(</span><span class="n">add</span> <span class="n">comparer</span> <span class="n">k</span> <span class="n">l</span><span class="o">)</span> <span class="n">k2</span> <span class="n">r</span>
+</span><span class='line'>        <span class="k">elif</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">then</span> <span class="n">t</span>
+</span><span class='line'>        <span class="k">else</span>            <span class="n">rebalance</span> <span class="n">l</span> <span class="n">k2</span> <span class="o">(</span><span class="n">add</span> <span class="n">comparer</span> <span class="n">k</span> <span class="n">r</span><span class="o">)</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">SetOne</span><span class="o">(</span><span class="n">k2</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'>        <span class="c1">// nb. no check for rebalance needed for small trees, also be sure to reuse node already allocated </span>
+</span><span class='line'>        <span class="k">let</span> <span class="n">c</span> <span class="o">=</span> <span class="n">comparer</span><span class="o">.</span><span class="nc">Compare</span><span class="o">(</span><span class="n">k</span><span class="o">,</span><span class="n">k2</span><span class="o">)</span>
+</span><span class='line'>        <span class="k">if</span> <span class="n">c</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span> <span class="mi">0</span>   <span class="k">then</span> <span class="nc">SetNode</span> <span class="o">(</span><span class="n">k</span><span class="o">,</span><span class="nc">SetEmpty</span><span class="o">,</span><span class="n">t</span><span class="o">,</span><span class="mi">2</span><span class="o">)</span>
+</span><span class='line'>        <span class="k">elif</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">then</span> <span class="n">t</span>
+</span><span class='line'>        <span class="k">else</span>            <span class="nc">SetNode</span> <span class="o">(</span><span class="n">k</span><span class="o">,</span><span class="n">t</span><span class="o">,</span><span class="nc">SetEmpty</span><span class="o">,</span><span class="mi">2</span><span class="o">)</span>                <span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">SetEmpty</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="nc">SetOne</span><span class="o">(</span><span class="n">k</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Adding a value to an empty set just returns the leaf type, <code>SetOne</code>, which has
+no children.</p>
+
+<p>Adding a value to a tree which has only one value is also pretty simple:  a comparison is made to
+see if <code>t</code>, the tree passed into the function, should be on the left or right branch.  It’s
+important to note that by putting <code>t</code> as a child of the added value we get to reuse <code>t</code> and not
+waste time or memory by creating a new node for that value.<br />
+For the third case, the tree is complex enough to require checking for rebalancing when new
+values are added.  Rebalancing insures that both branches of a tree are have nearly the same
+height which keeps searches near the ideal of <code>n * log n</code>.</p>
+
+<p>The <code>rebalance</code> function is critical and is also used by the <code>remove</code> function.  So now’s a great
+time to cover how it works.  This function is the the most important part of the binary search
+tree’s implementation (how a tree rebalances is the core difference between trees like AVL, red
+black, and other search trees).</p>
 
 <p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -83,7 +185,25 @@ BST for its <code>Set</code> implementation.  Here’s the code for the <code>re
 <span class='line-number'>28</span>
 <span class='line-number'>29</span>
 <span class='line-number'>30</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">rebalance</span> <span class="n">t1</span> <span class="n">k</span> <span class="n">t2</span> <span class="o">=</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">mk</span> <span class="n">l</span> <span class="n">k</span> <span class="n">r</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">match</span> <span class="n">l</span><span class="o">,</span><span class="n">r</span> <span class="k">with</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">SetEmpty</span><span class="o">,</span><span class="nc">SetEmpty</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="nc">SetOne</span> <span class="o">(</span><span class="n">k</span><span class="o">)</span>
+</span><span class='line'>    <span class="o">|</span> <span class="o">_</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'>      <span class="k">let</span> <span class="n">hl</span> <span class="o">=</span> <span class="n">height</span> <span class="n">l</span>
+</span><span class='line'>      <span class="k">let</span> <span class="n">hr</span> <span class="o">=</span> <span class="n">height</span> <span class="n">r</span>
+</span><span class='line'>      <span class="k">let</span> <span class="n">m</span> <span class="o">=</span> <span class="k">if</span> <span class="n">hl</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span> <span class="n">hr</span> <span class="k">then</span> <span class="n">hr</span> <span class="k">else</span> <span class="n">hl</span>
+</span><span class='line'>      <span class="nc">SetNode</span><span class="o">(</span><span class="n">k</span><span class="o">,</span><span class="n">l</span><span class="o">,</span><span class="n">r</span><span class="o">,</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="o">)&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">let</span> <span class="n">rebalance</span> <span class="n">t1</span> <span class="n">k</span> <span class="n">t2</span> <span class="o">=</span>
 </span><span class='line'>    <span class="k">let</span> <span class="n">t1h</span> <span class="o">=</span> <span class="n">height</span> <span class="n">t1</span>
 </span><span class='line'>    <span class="k">let</span> <span class="n">t2h</span> <span class="o">=</span> <span class="n">height</span> <span class="n">t2</span>
 </span><span class='line'>    <span class="k">if</span>  <span class="n">t2h</span> <span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">t1h</span> <span class="o">+</span> <span class="n">tolerance</span> <span class="k">then</span> <span class="c1">// right is heavier than left </span>
@@ -115,15 +235,90 @@ BST for its <code>Set</code> implementation.  Here’s the code for the <code>re
 </span><span class='line'>        <span class="k">else</span> <span class="n">mk</span> <span class="n">t1</span> <span class="n">k</span> <span class="n">t2</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
-<p>So F# is using what looks like a slightly modified AVL tree, which uses a definable
-tolerance for how unbalanced the tree can get before rebalancing happens.  The
-strict AVL tree rebalances if the difference in height between the left and right
-branches is greater than 1.</p>
+<p>The <code>mk</code> function takes two trees <code>l</code> and <code>r</code> and a value <code>k</code> and creates
+a new tree and updates the new height value.</p>
 
-<p>There’s another interesting function nestled within the <code>SetTree</code> module: <code>split</code>.
-This function interested me because it wasn’t referenced in the balance or the
-<code>add</code>/<code>remove</code> functions.</p>
+<p><code>rebalance</code> also takes two trees, <code>t1</code> and <code>t2</code>, and a value <code>k</code>.  If the difference
+between the heights of <code>t1</code> and <code>t2</code> is not greater than the <code>tolerance</code> (a parameter
+for how much tolerance <code>SetTree</code> has for imbalance, then <code>rebalance</code> simply makes
+a new tree with <code>t1</code> as the left and <code>t2</code> as the right branch, respectively, and <code>k</code>
+as the value of the new root node.</p>
 
+<p>If the difference in heights is greater than the tolerance then the tree needs to be
+rebalanced.  We’ll just cover how the rebalance works when <code>t2</code> is taller than <code>t1</code>,
+because the reverse case follows the exact same process.</p>
+
+<p>The <code>match</code> expression is used to deconstruct <code>t2</code> into it’s value, <code>t2k</code>, and it’s 
+left and right branches, <code>t2l</code> and <code>t2r</code>.  Now we check to see if the <code>t2l</code> or <code>t2r</code>
+is taller than <code>t1</code> which determines how we’ll rebalance the tree.</p>
+
+<p>If <code>t2r</code> is taller than <code>t1</code> then we’ll rotate the tree to the left with this code:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="n">mk</span> <span class="o">(</span><span class="n">mk</span> <span class="n">t1</span> <span class="n">k</span> <span class="n">t2l</span><span class="o">)</span> <span class="n">t2k</span> <span class="n">t2r</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>If <code>t2l</code> is taller than <code>t1</code> then the code is a little more complicated:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">if</span> <span class="n">height</span> <span class="n">t2l</span> <span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">t1h</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">then</span>  <span class="c1">// balance left: combination </span>
+</span><span class='line'>    <span class="k">match</span> <span class="n">t2l</span> <span class="k">with</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">SetNode</span><span class="o">(</span><span class="n">t2lk</span><span class="o">,</span><span class="n">t2ll</span><span class="o">,</span><span class="n">t2lr</span><span class="o">,_)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'>        <span class="n">mk</span> <span class="o">(</span><span class="n">mk</span> <span class="n">t1</span> <span class="n">k</span> <span class="n">t2ll</span><span class="o">)</span> <span class="n">t2lk</span> <span class="o">(</span><span class="n">mk</span> <span class="n">t2lr</span> <span class="n">t2k</span> <span class="n">t2r</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+Again <code>match</code> is used to deconstruct a tree node, <code>t2l</code>, into it’s components:
+<code>t2lk</code> (the value) and <code>t2ll</code> and <code>t2lr</code> (the left and right branches of <code>t2l</code>.</p>
+
+<p>Once the <code>t2l</code> is deconstructed <code>rebalance</code> creates a new tree:</p>
+
+<ol>
+  <li>The value of <code>t2l</code> becomes the new root of the tree.</li>
+  <li>The left branch is a tree with the value <code>k</code>, this tree’s left branch is <code>t1</code>
+and it’s right branch is <code>t2ll</code> (the left child of <code>t2l</code>, the left child of <code>t2</code>).</li>
+  <li>The right branch is a tree with value <code>t2k</code>, which is the value of <code>t2</code>, and
+this tree’s left branch is <code>t2lr</code> (the right child of <code>t2l</code>, the left child of <code>t2</code>)
+and it’s left branch is <code>t2r</code> (the right branch of <code>t2</code>).</li>
+</ol>
+
+<p>This image visually illustrates what happens when <code>rebalance t1 k t2</code> is called:
+<img src="/images/posts/fsharp_set/settree_rebalance_diagram.png"></p>
+
+<h3 id="contains-1">Contains</h3>
+
+<p>Set <code>Contains</code> function is just a call to the <code>SetTree</code> function <code>mem</code>.</p>
+
+<p>Here’s <code>mem</code>:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="k">rec</span> <span class="n">mem</span> <span class="o">(</span><span class="n">comparer</span><span class="o">:</span> <span class="nc">IComparer</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="nc">T</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;)</span> <span class="n">k</span> <span class="n">t</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">match</span> <span class="n">t</span> <span class="k">with</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">SetNode</span><span class="o">(</span><span class="n">k2</span><span class="o">,</span><span class="n">l</span><span class="o">,</span><span class="n">r</span><span class="o">,_)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'>        <span class="k">let</span> <span class="n">c</span> <span class="o">=</span> <span class="n">comparer</span><span class="o">.</span><span class="nc">Compare</span><span class="o">(</span><span class="n">k</span><span class="o">,</span><span class="n">k2</span><span class="o">)</span>
+</span><span class='line'>        <span class="k">if</span>   <span class="n">c</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span> <span class="mi">0</span> <span class="k">then</span> <span class="n">mem</span> <span class="n">comparer</span> <span class="n">k</span> <span class="n">l</span>
+</span><span class='line'>        <span class="k">elif</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">then</span> <span class="bp">true</span>
+</span><span class='line'>        <span class="k">else</span> <span class="n">mem</span> <span class="n">comparer</span> <span class="n">k</span> <span class="n">r</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">SetOne</span><span class="o">(</span><span class="n">k2</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="o">(</span><span class="n">comparer</span><span class="o">.</span><span class="nc">Compare</span><span class="o">(</span><span class="n">k</span><span class="o">,</span><span class="n">k2</span><span class="o">)</span> <span class="o">=</span> <span class="mi">0</span><span class="o">)</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">SetEmpty</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="bp">false</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><code>mem</code> is the simplest of all these functions, because it doesn’t make any changes
+to the tree and so it doesn’t trigger any rebalancing actions.</p>
+
+<p><code>mem</code> recurively walks through the binary search tree using the comparer argument
+to determine whether it should follow the left child or the right child or if the
+value has been found.  If it reaches an edge node it compares the node with the
+value argument and returns that as the result.  If it reaches an empty tree then
+the value is not in the tree and false is returned.</p>
+
+<h3 id="remove-1">Remove</h3>
 <p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -142,39 +337,29 @@ This function interested me because it wasn’t referenced in the balance or the
 <span class='line-number'>16</span>
 <span class='line-number'>17</span>
 <span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="k">rec</span> <span class="n">split</span> <span class="o">(</span><span class="n">comparer</span> <span class="o">:</span> <span class="nc">IComparer</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="nc">T</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;)</span> <span class="n">pivot</span> <span class="n">t</span> <span class="o">=</span>
-</span><span class='line'>    <span class="c1">// Given a pivot and a set t</span>
-</span><span class='line'>    <span class="c1">// Return { x in t s.t. x &amp;lt; pivot }, pivot in t? , { x in t s.t. x &amp;gt; pivot } </span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="k">rec</span> <span class="n">remove</span> <span class="o">(</span><span class="n">comparer</span><span class="o">:</span> <span class="nc">IComparer</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="err">’</span><span class="nc">T</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;)</span> <span class="n">k</span> <span class="n">t</span> <span class="o">=</span>
 </span><span class='line'>    <span class="k">match</span> <span class="n">t</span> <span class="k">with</span>
-</span><span class='line'>    <span class="o">|</span> <span class="nc">SetNode</span><span class="o">(</span><span class="n">k1</span><span class="o">,</span><span class="n">t11</span><span class="o">,</span><span class="n">t12</span><span class="o">,_)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span>
-</span><span class='line'>        <span class="k">let</span> <span class="n">c</span> <span class="o">=</span> <span class="n">comparer</span><span class="o">.</span><span class="nc">Compare</span><span class="o">(</span><span class="n">pivot</span><span class="o">,</span><span class="n">k1</span><span class="o">)</span>
-</span><span class='line'>        <span class="k">if</span>   <span class="n">c</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span> <span class="mi">0</span> <span class="k">then</span> <span class="c1">// pivot t1 </span>
-</span><span class='line'>            <span class="k">let</span> <span class="n">t11Lo</span><span class="o">,</span><span class="n">havePivot</span><span class="o">,</span><span class="n">t11Hi</span> <span class="o">=</span> <span class="n">split</span> <span class="n">comparer</span> <span class="n">pivot</span> <span class="n">t11</span>
-</span><span class='line'>            <span class="n">t11Lo</span><span class="o">,</span><span class="n">havePivot</span><span class="o">,</span><span class="n">balance</span> <span class="n">comparer</span> <span class="n">t11Hi</span> <span class="n">k1</span> <span class="n">t12</span>
-</span><span class='line'>        <span class="k">elif</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">then</span> <span class="c1">// pivot is k1 </span>
-</span><span class='line'>            <span class="n">t11</span><span class="o">,</span><span class="bp">true</span><span class="o">,</span><span class="n">t12</span>
-</span><span class='line'>        <span class="k">else</span>            <span class="c1">// pivot t2 </span>
-</span><span class='line'>            <span class="k">let</span> <span class="n">t12Lo</span><span class="o">,</span><span class="n">havePivot</span><span class="o">,</span><span class="n">t12Hi</span> <span class="o">=</span> <span class="n">split</span> <span class="n">comparer</span> <span class="n">pivot</span> <span class="n">t12</span>
-</span><span class='line'>            <span class="n">balance</span> <span class="n">comparer</span> <span class="n">t11</span> <span class="n">k1</span> <span class="n">t12Lo</span><span class="o">,</span><span class="n">havePivot</span><span class="o">,</span><span class="n">t12Hi</span>
-</span><span class='line'>    <span class="o">|</span> <span class="nc">SetOne</span> <span class="n">k1</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span>
-</span><span class='line'>        <span class="k">let</span> <span class="n">c</span> <span class="o">=</span> <span class="n">comparer</span><span class="o">.</span><span class="nc">Compare</span><span class="o">(</span><span class="n">k1</span><span class="o">,</span><span class="n">pivot</span><span class="o">)</span>
-</span><span class='line'>        <span class="k">if</span>   <span class="n">c</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span> <span class="mi">0</span> <span class="k">then</span> <span class="n">t</span>       <span class="o">,</span><span class="bp">false</span><span class="o">,</span><span class="nc">SetEmpty</span> <span class="c1">// singleton under pivot </span>
-</span><span class='line'>        <span class="k">elif</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">then</span> <span class="nc">SetEmpty</span><span class="o">,</span><span class="bp">true</span> <span class="o">,</span><span class="nc">SetEmpty</span> <span class="c1">// singleton is    pivot </span>
-</span><span class='line'>        <span class="k">else</span>            <span class="nc">SetEmpty</span><span class="o">,</span><span class="bp">false</span><span class="o">,</span><span class="n">t</span>        <span class="c1">// singleton over  pivot </span>
-</span><span class='line'>    <span class="o">|</span> <span class="nc">SetEmpty</span>  <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span>
-</span><span class='line'>        <span class="nc">SetEmpty</span><span class="o">,</span><span class="bp">false</span><span class="o">,</span><span class="nc">SetEmpty</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">SetEmpty</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">t</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">SetOne</span> <span class="o">(</span><span class="n">k2</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'>        <span class="k">let</span> <span class="n">c</span> <span class="o">=</span> <span class="n">comparer</span><span class="o">.</span><span class="nc">Compare</span><span class="o">(</span><span class="n">k</span><span class="o">,</span><span class="n">k2</span><span class="o">)</span>
+</span><span class='line'>        <span class="k">if</span>   <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">then</span> <span class="nc">SetEmpty</span>
+</span><span class='line'>        <span class="k">else</span> <span class="n">t</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">SetNode</span> <span class="o">(</span><span class="n">k2</span><span class="o">,</span><span class="n">l</span><span class="o">,</span><span class="n">r</span><span class="o">,&lt;</span><span class="n">em</span><span class="o">&gt;)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'>        <span class="k">let</span> <span class="n">c</span> <span class="o">=</span> <span class="n">comparer</span><span class="o">.</span><span class="nc">Compare</span><span class="o">(</span><span class="n">k</span><span class="o">,</span><span class="n">k2</span><span class="o">)</span>
+</span><span class='line'>        <span class="k">if</span>   <span class="n">c</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span> <span class="mi">0</span> <span class="k">then</span> <span class="n">rebalance</span> <span class="o">(</span><span class="n">remove</span> <span class="n">comparer</span> <span class="n">k</span> <span class="n">l</span><span class="o">)</span> <span class="n">k2</span> <span class="n">r</span>
+</span><span class='line'>        <span class="k">elif</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">then</span>
+</span><span class='line'>          <span class="k">match</span> <span class="n">l</span><span class="o">,</span><span class="n">r</span> <span class="k">with</span>
+</span><span class='line'>          <span class="o">|</span> <span class="nc">SetEmpty</span><span class="o">,&lt;/</span><span class="n">em</span><span class="o">&gt;</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">r</span>
+</span><span class='line'>          <span class="o">|</span> <span class="o">_,</span><span class="nc">SetEmpty</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">l</span>
+</span><span class='line'>          <span class="o">|</span> <span class="o">_</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'>              <span class="k">let</span> <span class="n">sk</span><span class="o">,</span><span class="n">r</span><span class="err">’</span> <span class="o">=</span> <span class="n">spliceOutSuccessor</span> <span class="n">r</span>
+</span><span class='line'>              <span class="n">mk</span> <span class="n">l</span> <span class="n">sk</span> <span class="n">r</span><span class="err">’</span>
+</span><span class='line'>        <span class="k">else</span> <span class="n">rebalance</span> <span class="n">l</span> <span class="n">k2</span> <span class="o">(</span><span class="n">remove</span> <span class="n">comparer</span> <span class="n">k</span> <span class="n">r</span><span class="o">)</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
-<p>This function has type <code>SetTree, boolean, SetTree</code> and takes a <code>SetTree t</code> and a pivot
-value <code>pivot</code>.  The first <code>SetTree</code> in the return type is the set of all values in <code>t</code>
-which are less than <code>pivot</code>, the boolean is true if <code>pivot</code> is in <code>t</code>, and the right
-<code>SetTree</code> contains all the values in <code>t</code> which are greater than <code>pivot</code>.</p>
+<h3 id="union-1">Union</h3>
 
-<p>The <code>split</code> function is used in the union function:
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
@@ -210,24 +395,83 @@ which are less than <code>pivot</code>, the boolean is true if <code>pivot</code
 </span><span class='line'>    <span class="o">|</span> <span class="n">t</span><span class="o">,</span><span class="nc">SetEmpty</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">t</span>
 </span><span class='line'>    <span class="o">|</span> <span class="nc">SetOne</span> <span class="n">k1</span><span class="o">,</span><span class="n">t2</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">add</span> <span class="n">comparer</span> <span class="n">k1</span> <span class="n">t2</span>
 </span><span class='line'>    <span class="o">|</span> <span class="n">t1</span><span class="o">,</span><span class="nc">SetOne</span> <span class="n">k2</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">add</span> <span class="n">comparer</span> <span class="n">k2</span> <span class="n">t1</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-This function takes two trees <code>t1</code> and <code>t2</code> and merges them together and returns a
-single <code>TreeSet</code> with all the elements from <code>t1</code> and <code>t2</code>.  Here’s how split is used
-in this function:</p>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
-<ol>
-  <li>Assuming <code>t1</code> is taller than <code>t2</code> (it’s basically the same if <code>t2</code> is taller than
-<code>t1</code>)</li>
-  <li><code>split</code> all the elements in <code>t2</code> by if they are smaller than the root value of <code>t1</code>.
-Call the set of nodes smaller than the <code>t1</code> root <code>lo</code> and the set of larger nodes <code>hi</code>.</li>
-  <li>Use <code>union</code> to merge the left subtree of <code>t1</code> with <code>lo</code> and to merge the right subtree
-of <code>t1</code> with <code>hi</code>.</li>
-  <li>Balance the to newly generated subtrees.  This leaves a set of all the values smaller
-than the <code>t1</code> value and a set of all the values larger than <code>t1</code>.  These can then be used
-to create a new <code>TreeSet</code> representing the fully balanced merging of <code>t1</code> and <code>t2</code>.</li>
-</ol>
+<h3 id="intersect-1">Intersect</h3>
 
-<p>This process will merge the two trees into a new balanced tree.</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="k">rec</span> <span class="n">intersectionAux</span> <span class="n">comparer</span> <span class="n">b</span> <span class="n">m</span> <span class="n">acc</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">match</span> <span class="n">m</span> <span class="k">with</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">SetNode</span><span class="o">(</span><span class="n">k</span><span class="o">,</span><span class="n">l</span><span class="o">,</span><span class="n">r</span><span class="o">,_)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'>        <span class="k">let</span> <span class="n">acc</span> <span class="o">=</span> <span class="n">intersectionAux</span> <span class="n">comparer</span> <span class="n">b</span> <span class="n">r</span> <span class="n">acc</span>
+</span><span class='line'>        <span class="k">let</span> <span class="n">acc</span> <span class="o">=</span> <span class="k">if</span> <span class="n">mem</span> <span class="n">comparer</span> <span class="n">k</span> <span class="n">b</span> <span class="k">then</span> <span class="n">add</span> <span class="n">comparer</span> <span class="n">k</span> <span class="n">acc</span> <span class="k">else</span> <span class="n">acc</span>
+</span><span class='line'>        <span class="n">intersectionAux</span> <span class="n">comparer</span> <span class="n">b</span> <span class="n">l</span> <span class="n">acc</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">SetOne</span><span class="o">(</span><span class="n">k</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'>        <span class="k">if</span> <span class="n">mem</span> <span class="n">comparer</span> <span class="n">k</span> <span class="n">b</span> <span class="k">then</span> <span class="n">add</span> <span class="n">comparer</span> <span class="n">k</span> <span class="n">acc</span> <span class="k">else</span> <span class="n">acc</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">SetEmpty</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">acc</span><span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">let</span> <span class="n">intersection</span> <span class="n">comparer</span> <span class="n">a</span> <span class="n">b</span> <span class="o">=</span> <span class="n">intersectionAux</span> <span class="n">comparer</span> <span class="n">b</span> <span class="n">a</span> <span class="nc">SetEmpty</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h3 id="issubsetissuperset-1">IsSubset/IsSuperSet</h3>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="k">rec</span> <span class="n">forall</span> <span class="n">f</span> <span class="n">m</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">match</span> <span class="n">m</span> <span class="k">with</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">SetNode</span><span class="o">(</span><span class="n">k2</span><span class="o">,</span><span class="n">l</span><span class="o">,</span><span class="n">r</span><span class="o">,_)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">f</span> <span class="n">k2</span> <span class="o">&amp;</span><span class="n">amp</span><span class="o">;&amp;</span><span class="n">amp</span><span class="o">;</span> <span class="n">forall</span> <span class="n">f</span> <span class="n">l</span> <span class="o">&amp;</span><span class="n">amp</span><span class="o">;&amp;</span><span class="n">amp</span><span class="o">;</span> <span class="n">forall</span> <span class="n">f</span> <span class="n">r</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">SetOne</span><span class="o">(</span><span class="n">k2</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">f</span> <span class="n">k2</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">SetEmpty</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="bp">true</span>          <span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">let</span> <span class="k">rec</span> <span class="n">exists</span> <span class="n">f</span> <span class="n">m</span> <span class="o">=</span>
+</span><span class='line'>    <span class="k">match</span> <span class="n">m</span> <span class="k">with</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">SetNode</span><span class="o">(</span><span class="n">k2</span><span class="o">,</span><span class="n">l</span><span class="o">,</span><span class="n">r</span><span class="o">,_)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">f</span> <span class="n">k2</span> <span class="o">||</span> <span class="n">exists</span> <span class="n">f</span> <span class="n">l</span> <span class="o">||</span> <span class="n">exists</span> <span class="n">f</span> <span class="n">r</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">SetOne</span><span class="o">(</span><span class="n">k2</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">f</span> <span class="n">k2</span>
+</span><span class='line'>    <span class="o">|</span> <span class="nc">SetEmpty</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="bp">false</span>         <span class="o">&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="k">let</span> <span class="n">subset</span> <span class="n">comparer</span> <span class="n">a</span> <span class="n">b</span>  <span class="o">=</span> <span class="n">forall</span> <span class="o">(</span><span class="k">fun</span> <span class="n">x</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">mem</span> <span class="n">comparer</span> <span class="n">x</span> <span class="n">b</span><span class="o">)</span> <span class="n">a</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>These two functions aren’t that difficult to understand.  Much like <code>mem</code>
+they don’t modify the tree so there’s no need for rebalancing.</p>
+
+<p><code>subset</code> traverses every node in <code>a</code> and checks to see if that node’s value
+also exists in <code>b</code>.  <code>forall</code> will short circuit if it hits a node which is
+not in <code>b</code> and will evaluate to <code>false</code>.</p>
+
+<p>The SuperSet function is exactly the same except it swaps the arguments and
+tests if <code>b</code> is a subset of <code>a</code>.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>What’s awesome is that, fundamentally, this is the same way that sets are
+implemented in <em>Purely Functional Data Structures</em>.  Which just shows how
+valuable that book still is, even with it being 20 years old!</p>
+
+<p>The most important difference, of course, is that the book doesn’t use a
+self balancing binary search tree while F# uses an AVL tree.  But no one
+would use a non-self balancing BST in a real implementation.</p>
 ]]></content>
   </entry>
   
