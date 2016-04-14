@@ -253,6 +253,11 @@ let rec remove (comparer: IComparer<'T>) k t =
 {% endcodeblock %}
 
 ### Union
+`Set.Union` might be the most complex of all the functions in `Set`.  Like
+`add` and `remove` it makes use of helper functions which contain most of
+the major complexity.  Below is the code for `SetTree.union` the code for the
+two helper functions is further down, in this section, but we'll cover the
+cases in `union` that don't reqiure the helper functions first.
 
 {% codeblock lang:fsharp %}
 let rec union comparer t1 t2 =
@@ -275,7 +280,116 @@ let rec union comparer t1 t2 =
     | t1,SetOne k2 -> add comparer k2 t1
 {% endcodeblock %}
 
+`union` takes two trees, `t1` and `t2`, and puts them together as a tuple and
+then de-structures that tuple.  This function is only complicated if both
+`t1` and `t2` have children, for all other cases it's extremely simple.
+
+Here are the simple patterns that `(t1,t2)` can match against
+1.  `SetEmpty,t` or `t,SetEmpty`: because one of the two sets is empty, the union
+is just whatever the value of the other set is.
+1.  `SetOne k1,t2` or `t1,SetOne k2: one of the trees contains a single value,
+so the union is can be gotten, efficiently, by just adding that value to the 
+other tree.
+
+The one remaining case is the complicated interesting one.  Obviously, the union
+could be found by simply traversing the first tree and adding every value to the second
+tree.  But the F# compiler is being more efficient in it's solution to this problem.
+That's where the two helper fuctions, `balance` and `split`, come into play and their
+code is listed below.
+
+Note that `balance` calls `rebalance`, whose code is listed above.
+
+{% codeblock lang:fsharp %}
+let rec balance comparer t1 k t2 =
+    // Given t1 < k < t2 where t1 and t2 are "balanced",
+    // return a balanced tree for <t1,k,t2>.
+    // Recall: balance means subtrees heights differ by at most "tolerance"
+    match t1,t2 with
+    | SetEmpty,t2  -> add comparer k t2 // drop t1 = empty 
+    | t1,SetEmpty  -> add comparer k t1 // drop t2 = empty 
+    | SetOne k1,t2 -> add comparer k (add comparer k1 t2)
+    | t1,SetOne k2 -> add comparer k (add comparer k2 t1)
+    | SetNode(k1,t11,t12,h1),SetNode(k2,t21,t22,h2) ->
+        // Have:  (t11 < k1 < t12) < k < (t21 < k2 < t22)
+        // Either (a) h1,h2 differ by at most 2 - no rebalance needed.
+        //        (b) h1 too small, i.e. h1+2 < h2
+        //        (c) h2 too small, i.e. h2+2 < h1 
+        if   h1+tolerance < h2 then
+            // case: b, h1 too small 
+            // push t1 into low side of t2, may increase height by 1 so rebalance 
+            rebalance (balance comparer t1 k t21) k2 t22
+        elif h2+tolerance < h1 then
+            // case: c, h2 too small 
+            // push t2 into high side of t1, may increase height by 1 so rebalance 
+            rebalance t11 k1 (balance comparer t12 k t2)
+        else
+            // case: a, h1 and h2 meet balance requirement 
+            mk t1 k t2
+
+let rec split (comparer : IComparer<'T>) pivot t =
+    // Given a pivot and a set t
+    // Return { x in t s.t. x < pivot }, pivot in t? , { x in t s.t. x > pivot } 
+    match t with
+    | SetNode(k1,t11,t12,_) ->
+        let c = comparer.Compare(pivot,k1)
+        if   c < 0 then // pivot t1 
+            let t11Lo,havePivot,t11Hi = split comparer pivot t11
+            t11Lo,havePivot,balance comparer t11Hi k1 t12
+        elif c = 0 then // pivot is k1 
+            t11,true,t12
+        else            // pivot t2 
+            let t12Lo,havePivot,t12Hi = split comparer pivot t12
+            balance comparer t11 k1 t12Lo,havePivot,t12Hi
+    | SetOne k1 ->
+        let c = comparer.Compare(k1,pivot)
+        if   c < 0 then t       ,false,SetEmpty // singleton under pivot 
+        elif c = 0 then SetEmpty,true ,SetEmpty // singleton is    pivot 
+        else            SetEmpty,false,t        // singleton over  pivot 
+    | SetEmpty  -> 
+        SetEmpty,false,SetEmpty
+{% endcodeblock %}
+
+#### Split
+Of the two helper functions, `split` is the easiest.  It simply takes a tree, `t`,
+and a value, `pivot`, and splits `t` into two subtrees:  one with all the values
+that are greater than `pivot` and one with all the values smaller than `pivot`.
+It evaluates to a tuple which contains those two trees and a boolean flag for if
+`pivot` is in `t`.
+
+#### Balance
+This function is more complex than `split` and just looking at the code it's not
+immediately obvious what purpose it plays.  `balance` takes 3 key arguments:
+two trees, `t1` and `t2`, and a value, `k`.  These arguments must satisfy certain
+requirements: every value in `t1` is smaller than every value in `t2` and k
+is larger than every value in `t1` and smaller than every value in `t2`.
+It basically takes two trees and a value
+and puts them together into a single tree which is balanced.  The trivial cases
+are when one of the trees is empty or contains only a single value.  The complex
+case is when both trees contain multiple values.  `balance`'s goal is to add the
+two tree's together into a single balanced tree.  So it looks at the heights of 
+the two trees to see how much they differ:  if the heights of the two trees are within
+the tolerance then it can simply make `k` a new root node and set the two trees
+as the left and right children of `k`.
+
+If the two trees differ in height by more than
+the tolerance then `balance` has to do some extra work in order to evaluate to
+a balanced tree.  It takes the smaller tree and makes it the child of the larger
+tree, then does a rebalance in case the result is unbalanced.
+
+#### Final Union Case
+
+
 ### Intersect
+The `Set.Intersect a b` function takes two sets `a` and `b` and returns a new set
+consisting of all the values which are in both `a` and `b`.  Intuitively, this
+function seems like it will behave nearly identically to `Subset`: both functions
+involve traversing two sets and finding all the elements that are in both sets. This
+function merely needs to save all the elements that are in both sets rather than 
+return a boolean value.
+
+Below is the code from `FSharp.Core` for `SetTree` intersection.  Note that the real
+work is done by the function `intersectionAux` the `intersection` function is used
+to set the initial value for the accumulator argument to `SetEmpty`.
 
 {% codeblock lang:fsharp %}
 let rec intersectionAux comparer b m acc = 
@@ -290,6 +404,23 @@ let rec intersectionAux comparer b m acc =
 
 let intersection comparer a b = intersectionAux comparer b a SetEmpty
 {% endcodeblock %}
+
+`intersectionAux` takes the two sets, note that the labelling has changed to `b` and
+`m`, and the accumulator argument, which will collect all the values which are in both
+`b` and `m`.  `intersectionAux` traverses the tree `m` and for each value, `k`, in `m`
+it checks to see if the value is also in `b`.  If `k` is in `b` then it's added to
+the accumulator, `acc`, otherwise it's left out.  After completing the traversal of
+`m`, `acc` will represent the intersection of `m` and `b`.
+
+The argument `m` is deconstructed using `match` into it's possible values: `SetEmpty`,
+`SetOne`, and `SetNode`.  If it's `SetEmpty` then there is no value in the node and
+the only thing to do is return `acc`.  If it's `SetOne` we extract the value into `k`
+and check if `k` exists in the set `b`:  if it does then add it to `acc` if it's not
+in `b` then just return `acc` with no additions. Finally, if it's `SetNode` extract 
+the value, `k`, and the children, `l` and `r`. Then
+recursively call `intersectionAux` on `r` and add any elements that are in `r` and `b`
+to `acc`.  Check if `k` is in `b` and if it is, add it to `acc`.  Finally, call
+`intersectionAux` on `l` and add any values which are in both `l` and `b` to `acc`.
 
 ### IsSubset/IsSuperSet
 
