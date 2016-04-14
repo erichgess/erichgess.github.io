@@ -442,6 +442,11 @@ the value is not in the tree and false is returned.</p>
 </span></code></pre></td></tr></table></div></figure></notextile></div>
 
 <h3 id="union-1">Union</h3>
+<p><code>Set.Union</code> might be the most complex of all the functions in <code>Set</code>.  Like
+<code>add</code> and <code>remove</code> it makes use of helper functions which contain most of
+the major complexity.  Below is the code for <code>SetTree.union</code> the code for the
+two helper functions is further down, in this section, but we’ll cover the
+cases in <code>union</code> that don’t reqiure the helper functions first.</p>
 
 <div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
 <span class="line-number">2</span>
@@ -481,7 +486,161 @@ the value is not in the tree and false is returned.</p>
 </span><span class="line">    <span class="o">|</span> <span class="n">t1</span><span class="o">,</span><span class="nc">SetOne</span> <span class="n">k2</span> <span class="o">-&gt;</span> <span class="n">add</span> <span class="n">comparer</span> <span class="n">k2</span> <span class="n">t1</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div>
 
+<p><code>union</code> takes two trees, <code>t1</code> and <code>t2</code>, and puts them together as a tuple and
+then de-structures that tuple.  This function is only complicated if both
+<code>t1</code> and <code>t2</code> have children, for all other cases it’s extremely simple.</p>
+
+<p>Here are the simple patterns that <code>(t1,t2)</code> can match against
+1.  <code>SetEmpty,t</code> or <code>t,SetEmpty</code>: because one of the two sets is empty, the union
+is just whatever the value of the other set is.
+1.  <code>SetOne k1,t2</code> or `t1,SetOne k2: one of the trees contains a single value,
+so the union is can be gotten, efficiently, by just adding that value to the 
+other tree.</p>
+
+<p>The one remaining case is the complicated interesting one.  Obviously, the union
+could be found by simply traversing the first tree and adding every value to the second
+tree.  But the F# compiler is being more efficient in it’s solution to this problem.
+That’s where the two helper fuctions, <code>balance</code> and <code>split</code>, come into play and their
+code is listed below.</p>
+
+<p>Note that <code>balance</code> calls <code>rebalance</code>, whose code is listed above.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+<span class="line-number">38</span>
+<span class="line-number">39</span>
+<span class="line-number">40</span>
+<span class="line-number">41</span>
+<span class="line-number">42</span>
+<span class="line-number">43</span>
+<span class="line-number">44</span>
+<span class="line-number">45</span>
+<span class="line-number">46</span>
+<span class="line-number">47</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="k">rec</span> <span class="n">balance</span> <span class="n">comparer</span> <span class="n">t1</span> <span class="n">k</span> <span class="n">t2</span> <span class="o">=</span>
+</span><span class="line">    <span class="c1">// Given t1 &lt; k &lt; t2 where t1 and t2 are &quot;balanced&quot;,</span>
+</span><span class="line">    <span class="c1">// return a balanced tree for &lt;t1,k,t2&gt;.</span>
+</span><span class="line">    <span class="c1">// Recall: balance means subtrees heights differ by at most &quot;tolerance&quot;</span>
+</span><span class="line">    <span class="k">match</span> <span class="n">t1</span><span class="o">,</span><span class="n">t2</span> <span class="k">with</span>
+</span><span class="line">    <span class="o">|</span> <span class="nc">SetEmpty</span><span class="o">,</span><span class="n">t2</span>  <span class="o">-&gt;</span> <span class="n">add</span> <span class="n">comparer</span> <span class="n">k</span> <span class="n">t2</span> <span class="c1">// drop t1 = empty </span>
+</span><span class="line">    <span class="o">|</span> <span class="n">t1</span><span class="o">,</span><span class="nc">SetEmpty</span>  <span class="o">-&gt;</span> <span class="n">add</span> <span class="n">comparer</span> <span class="n">k</span> <span class="n">t1</span> <span class="c1">// drop t2 = empty </span>
+</span><span class="line">    <span class="o">|</span> <span class="nc">SetOne</span> <span class="n">k1</span><span class="o">,</span><span class="n">t2</span> <span class="o">-&gt;</span> <span class="n">add</span> <span class="n">comparer</span> <span class="n">k</span> <span class="o">(</span><span class="n">add</span> <span class="n">comparer</span> <span class="n">k1</span> <span class="n">t2</span><span class="o">)</span>
+</span><span class="line">    <span class="o">|</span> <span class="n">t1</span><span class="o">,</span><span class="nc">SetOne</span> <span class="n">k2</span> <span class="o">-&gt;</span> <span class="n">add</span> <span class="n">comparer</span> <span class="n">k</span> <span class="o">(</span><span class="n">add</span> <span class="n">comparer</span> <span class="n">k2</span> <span class="n">t1</span><span class="o">)</span>
+</span><span class="line">    <span class="o">|</span> <span class="nc">SetNode</span><span class="o">(</span><span class="n">k1</span><span class="o">,</span><span class="n">t11</span><span class="o">,</span><span class="n">t12</span><span class="o">,</span><span class="n">h1</span><span class="o">),</span><span class="nc">SetNode</span><span class="o">(</span><span class="n">k2</span><span class="o">,</span><span class="n">t21</span><span class="o">,</span><span class="n">t22</span><span class="o">,</span><span class="n">h2</span><span class="o">)</span> <span class="o">-&gt;</span>
+</span><span class="line">        <span class="c1">// Have:  (t11 &lt; k1 &lt; t12) &lt; k &lt; (t21 &lt; k2 &lt; t22)</span>
+</span><span class="line">        <span class="c1">// Either (a) h1,h2 differ by at most 2 - no rebalance needed.</span>
+</span><span class="line">        <span class="c1">//        (b) h1 too small, i.e. h1+2 &lt; h2</span>
+</span><span class="line">        <span class="c1">//        (c) h2 too small, i.e. h2+2 &lt; h1 </span>
+</span><span class="line">        <span class="k">if</span>   <span class="n">h1</span><span class="o">+</span><span class="n">tolerance</span> <span class="o">&lt;</span> <span class="n">h2</span> <span class="k">then</span>
+</span><span class="line">            <span class="c1">// case: b, h1 too small </span>
+</span><span class="line">            <span class="c1">// push t1 into low side of t2, may increase height by 1 so rebalance </span>
+</span><span class="line">            <span class="n">rebalance</span> <span class="o">(</span><span class="n">balance</span> <span class="n">comparer</span> <span class="n">t1</span> <span class="n">k</span> <span class="n">t21</span><span class="o">)</span> <span class="n">k2</span> <span class="n">t22</span>
+</span><span class="line">        <span class="k">elif</span> <span class="n">h2</span><span class="o">+</span><span class="n">tolerance</span> <span class="o">&lt;</span> <span class="n">h1</span> <span class="k">then</span>
+</span><span class="line">            <span class="c1">// case: c, h2 too small </span>
+</span><span class="line">            <span class="c1">// push t2 into high side of t1, may increase height by 1 so rebalance </span>
+</span><span class="line">            <span class="n">rebalance</span> <span class="n">t11</span> <span class="n">k1</span> <span class="o">(</span><span class="n">balance</span> <span class="n">comparer</span> <span class="n">t12</span> <span class="n">k</span> <span class="n">t2</span><span class="o">)</span>
+</span><span class="line">        <span class="k">else</span>
+</span><span class="line">            <span class="c1">// case: a, h1 and h2 meet balance requirement </span>
+</span><span class="line">            <span class="n">mk</span> <span class="n">t1</span> <span class="n">k</span> <span class="n">t2</span>
+</span><span class="line">
+</span><span class="line"><span class="k">let</span> <span class="k">rec</span> <span class="n">split</span> <span class="o">(</span><span class="n">comparer</span> <span class="o">:</span> <span class="nc">IComparer</span><span class="o">&lt;</span><span class="k">&#39;</span><span class="nc">T</span><span class="o">&gt;)</span> <span class="n">pivot</span> <span class="n">t</span> <span class="o">=</span>
+</span><span class="line">    <span class="c1">// Given a pivot and a set t</span>
+</span><span class="line">    <span class="c1">// Return { x in t s.t. x &lt; pivot }, pivot in t? , { x in t s.t. x &gt; pivot } </span>
+</span><span class="line">    <span class="k">match</span> <span class="n">t</span> <span class="k">with</span>
+</span><span class="line">    <span class="o">|</span> <span class="nc">SetNode</span><span class="o">(</span><span class="n">k1</span><span class="o">,</span><span class="n">t11</span><span class="o">,</span><span class="n">t12</span><span class="o">,_)</span> <span class="o">-&gt;</span>
+</span><span class="line">        <span class="k">let</span> <span class="n">c</span> <span class="o">=</span> <span class="n">comparer</span><span class="o">.</span><span class="nc">Compare</span><span class="o">(</span><span class="n">pivot</span><span class="o">,</span><span class="n">k1</span><span class="o">)</span>
+</span><span class="line">        <span class="k">if</span>   <span class="n">c</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">then</span> <span class="c1">// pivot t1 </span>
+</span><span class="line">            <span class="k">let</span> <span class="n">t11Lo</span><span class="o">,</span><span class="n">havePivot</span><span class="o">,</span><span class="n">t11Hi</span> <span class="o">=</span> <span class="n">split</span> <span class="n">comparer</span> <span class="n">pivot</span> <span class="n">t11</span>
+</span><span class="line">            <span class="n">t11Lo</span><span class="o">,</span><span class="n">havePivot</span><span class="o">,</span><span class="n">balance</span> <span class="n">comparer</span> <span class="n">t11Hi</span> <span class="n">k1</span> <span class="n">t12</span>
+</span><span class="line">        <span class="k">elif</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">then</span> <span class="c1">// pivot is k1 </span>
+</span><span class="line">            <span class="n">t11</span><span class="o">,</span><span class="bp">true</span><span class="o">,</span><span class="n">t12</span>
+</span><span class="line">        <span class="k">else</span>            <span class="c1">// pivot t2 </span>
+</span><span class="line">            <span class="k">let</span> <span class="n">t12Lo</span><span class="o">,</span><span class="n">havePivot</span><span class="o">,</span><span class="n">t12Hi</span> <span class="o">=</span> <span class="n">split</span> <span class="n">comparer</span> <span class="n">pivot</span> <span class="n">t12</span>
+</span><span class="line">            <span class="n">balance</span> <span class="n">comparer</span> <span class="n">t11</span> <span class="n">k1</span> <span class="n">t12Lo</span><span class="o">,</span><span class="n">havePivot</span><span class="o">,</span><span class="n">t12Hi</span>
+</span><span class="line">    <span class="o">|</span> <span class="nc">SetOne</span> <span class="n">k1</span> <span class="o">-&gt;</span>
+</span><span class="line">        <span class="k">let</span> <span class="n">c</span> <span class="o">=</span> <span class="n">comparer</span><span class="o">.</span><span class="nc">Compare</span><span class="o">(</span><span class="n">k1</span><span class="o">,</span><span class="n">pivot</span><span class="o">)</span>
+</span><span class="line">        <span class="k">if</span>   <span class="n">c</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">then</span> <span class="n">t</span>       <span class="o">,</span><span class="bp">false</span><span class="o">,</span><span class="nc">SetEmpty</span> <span class="c1">// singleton under pivot </span>
+</span><span class="line">        <span class="k">elif</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">then</span> <span class="nc">SetEmpty</span><span class="o">,</span><span class="bp">true</span> <span class="o">,</span><span class="nc">SetEmpty</span> <span class="c1">// singleton is    pivot </span>
+</span><span class="line">        <span class="k">else</span>            <span class="nc">SetEmpty</span><span class="o">,</span><span class="bp">false</span><span class="o">,</span><span class="n">t</span>        <span class="c1">// singleton over  pivot </span>
+</span><span class="line">    <span class="o">|</span> <span class="nc">SetEmpty</span>  <span class="o">-&gt;</span>
+</span><span class="line">        <span class="nc">SetEmpty</span><span class="o">,</span><span class="bp">false</span><span class="o">,</span><span class="nc">SetEmpty</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h4 id="split">Split</h4>
+<p>Of the two helper functions, <code>split</code> is the easiest.  It simply takes a tree, <code>t</code>,
+and a value, <code>pivot</code>, and splits <code>t</code> into two subtrees:  one with all the values
+that are greater than <code>pivot</code> and one with all the values smaller than <code>pivot</code>.
+It evaluates to a tuple which contains those two trees and a boolean flag for if
+<code>pivot</code> is in <code>t</code>.</p>
+
+<h4 id="balance">Balance</h4>
+<p>This function is more complex than <code>split</code> and just looking at the code it’s not
+immediately obvious what purpose it plays.  <code>balance</code> takes 3 key arguments:
+two trees, <code>t1</code> and <code>t2</code>, and a value, <code>k</code>.  These arguments must satisfy certain
+requirements: every value in <code>t1</code> is smaller than every value in <code>t2</code> and k
+is larger than every value in <code>t1</code> and smaller than every value in <code>t2</code>.
+It basically takes two trees and a value
+and puts them together into a single tree which is balanced.  The trivial cases
+are when one of the trees is empty or contains only a single value.  The complex
+case is when both trees contain multiple values.  <code>balance</code>’s goal is to add the
+two tree’s together into a single balanced tree.  So it looks at the heights of 
+the two trees to see how much they differ:  if the heights of the two trees are within
+the tolerance then it can simply make <code>k</code> a new root node and set the two trees
+as the left and right children of <code>k</code>.</p>
+
+<p>If the two trees differ in height by more than
+the tolerance then <code>balance</code> has to do some extra work in order to evaluate to
+a balanced tree.  It takes the smaller tree and makes it the child of the larger
+tree, then does a rebalance in case the result is unbalanced.</p>
+
+<h4 id="final-union-case">Final Union Case</h4>
+
 <h3 id="intersect-1">Intersect</h3>
+<p>The <code>Set.Intersect a b</code> function takes two sets <code>a</code> and <code>b</code> and returns a new set
+consisting of all the values which are in both <code>a</code> and <code>b</code>.  Intuitively, this
+function seems like it will behave nearly identically to <code>Subset</code>: both functions
+involve traversing two sets and finding all the elements that are in both sets. This
+function merely needs to save all the elements that are in both sets rather than 
+return a boolean value.</p>
+
+<p>Below is the code from <code>FSharp.Core</code> for <code>SetTree</code> intersection.  Note that the real
+work is done by the function <code>intersectionAux</code> the <code>intersection</code> function is used
+to set the initial value for the accumulator argument to <code>SetEmpty</code>.</p>
 
 <div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
 <span class="line-number">2</span>
@@ -506,6 +665,23 @@ the value is not in the tree and false is returned.</p>
 </span><span class="line">
 </span><span class="line"><span class="k">let</span> <span class="n">intersection</span> <span class="n">comparer</span> <span class="n">a</span> <span class="n">b</span> <span class="o">=</span> <span class="n">intersectionAux</span> <span class="n">comparer</span> <span class="n">b</span> <span class="n">a</span> <span class="nc">SetEmpty</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p><code>intersectionAux</code> takes the two sets, note that the labelling has changed to <code>b</code> and
+<code>m</code>, and the accumulator argument, which will collect all the values which are in both
+<code>b</code> and <code>m</code>.  <code>intersectionAux</code> traverses the tree <code>m</code> and for each value, <code>k</code>, in <code>m</code>
+it checks to see if the value is also in <code>b</code>.  If <code>k</code> is in <code>b</code> then it’s added to
+the accumulator, <code>acc</code>, otherwise it’s left out.  After completing the traversal of
+<code>m</code>, <code>acc</code> will represent the intersection of <code>m</code> and <code>b</code>.</p>
+
+<p>The argument <code>m</code> is deconstructed using <code>match</code> into it’s possible values: <code>SetEmpty</code>,
+<code>SetOne</code>, and <code>SetNode</code>.  If it’s <code>SetEmpty</code> then there is no value in the node and
+the only thing to do is return <code>acc</code>.  If it’s <code>SetOne</code> we extract the value into <code>k</code>
+and check if <code>k</code> exists in the set <code>b</code>:  if it does then add it to <code>acc</code> if it’s not
+in <code>b</code> then just return <code>acc</code> with no additions. Finally, if it’s <code>SetNode</code> extract 
+the value, <code>k</code>, and the children, <code>l</code> and <code>r</code>. Then
+recursively call <code>intersectionAux</code> on <code>r</code> and add any elements that are in <code>r</code> and <code>b</code>
+to <code>acc</code>.  Check if <code>k</code> is in <code>b</code> and if it is, add it to <code>acc</code>.  Finally, call
+<code>intersectionAux</code> on <code>l</code> and add any values which are in both <code>l</code> and <code>b</code> to <code>acc</code>.</p>
 
 <h3 id="issubsetissuperset-1">IsSubset/IsSuperSet</h3>
 
