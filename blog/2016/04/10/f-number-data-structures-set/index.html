@@ -112,25 +112,28 @@ of the core <code>Set</code> functions.  <code>Add</code>, <code>Contains</code>
 interesting but they provide a great way to explain on the underlying data structure
 used for <code>Set</code> is implemented.</p>
 
-<h3 id="add">Add</h3>
-<p>This function will add a new element to a Set, if it doesn’t already exist.  If it does
+<ol>
+  <li>
+    <p>Add - This function will add a new element to a Set, if it doesn’t already exist.  If it does
 already exist in the Set then it, of course, won’t make any change to Set.</p>
-
-<h3 id="contains">Contains</h3>
-<p>Checks to see if a value is in the Set.</p>
-
-<h3 id="remove">Remove</h3>
-<p>Take a set and a value and if the value is in the set then return a new set without that
+  </li>
+  <li>
+    <p>Contains - Checks to see if a value is in the Set.</p>
+  </li>
+  <li>
+    <p>Remove - Take a set and a value and if the value is in the set then return a new set without that
 value.</p>
-
-<h3 id="union">Union</h3>
-<p>Take two sets and return a new set which contains all the values from both sets.</p>
-
-<h3 id="intersect">Intersect</h3>
-<p>Take two sets and return a new set which contains only the values that are in both sets.</p>
-
-<h3 id="issubsetissuperset">IsSubset/IsSuperSet</h3>
-<p>Takes two sets and returns true if all the values of one set are also in the other set.</p>
+  </li>
+  <li>
+    <p>Union - Take two sets and return a new set which contains all the values from both sets.</p>
+  </li>
+  <li>
+    <p>Intersect - Take two sets and return a new set which contains only the values that are in both sets.</p>
+  </li>
+  <li>
+    <p>IsSubset/IsSuperSet - Takes two sets and returns true if all the values of one set are also in the other set.</p>
+  </li>
+</ol>
 
 <h2 id="implemented-with-a-binary-search-tree">Implemented with a Binary Search Tree</h2>
 <p>Starting with the actual definition for the <code>Set</code> type «<insert link="" to="" github="">&gt;&gt;.
@@ -184,7 +187,7 @@ lets first take a look at how <code>Set</code> implements <code>Add</code>, <cod
 <p>It’s not much surprise to see that <code>Set</code> just makes simple calls to <code>SetTree</code> for these
 core actions.</p>
 
-<h3 id="add-1">Add</h3>
+<h3 id="add">Add</h3>
 
 <p>Here’s the implementation of <code>SetTree</code>’s <code>add</code> function:</p>
 
@@ -366,7 +369,7 @@ and it’s left branch is <code>t2r</code> (the right branch of <code>t2</code>)
 <p>This image visually illustrates what happens when <code>rebalance t1 k t2</code> is called:
 <img src="/images/posts/fsharp_set/settree_rebalance_diagram.png" /></p>
 
-<h3 id="contains-1">Contains</h3>
+<h3 id="contains">Contains</h3>
 
 <p>Set <code>Contains</code> function is just a call to the <code>SetTree</code> function <code>mem</code>.</p>
 
@@ -401,7 +404,7 @@ value has been found.  If it reaches an edge node it compares the node with the
 value argument and returns that as the result.  If it reaches an empty tree then
 the value is not in the tree and false is returned.</p>
 
-<h3 id="remove-1">Remove</h3>
+<h3 id="remove">Remove</h3>
 
 <div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
 <span class="line-number">2</span>
@@ -441,7 +444,7 @@ the value is not in the tree and false is returned.</p>
 </span><span class="line">        <span class="k">else</span> <span class="n">rebalance</span> <span class="n">l</span> <span class="n">k2</span> <span class="o">(</span><span class="n">remove</span> <span class="n">comparer</span> <span class="n">k</span> <span class="n">r</span><span class="o">)</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div>
 
-<h3 id="union-1">Union</h3>
+<h3 id="union">Union</h3>
 <p><code>Set.Union</code> might be the most complex of all the functions in <code>Set</code>.  Like
 <code>add</code> and <code>remove</code> it makes use of helper functions which contain most of
 the major complexity.  Below is the code for <code>SetTree.union</code> the code for the
@@ -629,8 +632,23 @@ a balanced tree.  It takes the smaller tree and makes it the child of the larger
 tree, then does a rebalance in case the result is unbalanced.</p>
 
 <h4 id="final-union-case">Final Union Case</h4>
+<p>We are now prepared to tackle the final case in the <code>SetTree.union</code> function:
+when both <code>t1</code> and <code>t2</code> have children.  Which is, actually, pretty straight
+forward.</p>
 
-<h3 id="intersect-1">Intersect</h3>
+<ol>
+  <li>First it compares the heights of the trees <code>t1</code> and <code>t2</code></li>
+  <li>Second, If <code>t1</code> is taller, then it takes the root value, <code>k1</code>, of <code>t1</code> and splits
+<code>t2</code> into the set of values smaller, <code>lo</code>, and the set of values greater than <code>k1</code>
+,<code>hi</code>.</li>
+  <li>Third, it unions <code>lo</code> into the left child of <code>t1</code> and <code>hi</code> in to the right child
+of <code>t1</code>.</li>
+  <li>Finally, balances the new tree just in case the unions cause an inbalance.</li>
+</ol>
+
+<p>If <code>t2</code> is taller than <code>t1</code>, then follow the same steps but swap <code>t1</code> and <code>t2</code>.</p>
+
+<h3 id="intersect">Intersect</h3>
 <p>The <code>Set.Intersect a b</code> function takes two sets <code>a</code> and <code>b</code> and returns a new set
 consisting of all the values which are in both <code>a</code> and <code>b</code>.  Intuitively, this
 function seems like it will behave nearly identically to <code>Subset</code>: both functions
@@ -683,7 +701,7 @@ recursively call <code>intersectionAux</code> on <code>r</code> and add any elem
 to <code>acc</code>.  Check if <code>k</code> is in <code>b</code> and if it is, add it to <code>acc</code>.  Finally, call
 <code>intersectionAux</code> on <code>l</code> and add any values which are in both <code>l</code> and <code>b</code> to <code>acc</code>.</p>
 
-<h3 id="issubsetissuperset-1">IsSubset/IsSuperSet</h3>
+<h3 id="issubsetissuperset">IsSubset/IsSuperSet</h3>
 
 <div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
 <span class="line-number">2</span>
