@@ -23,25 +23,19 @@ of the core `Set` functions.  `Add`, `Contains`, and `Remove` are not, on the su
 interesting but they provide a great way to explain on the underlying data structure
 used for `Set` is implemented.
 
-### Add
-This function will add a new element to a Set, if it doesn't already exist.  If it does
+1. Add - This function will add a new element to a Set, if it doesn't already exist.  If it does
 already exist in the Set then it, of course, won't make any change to Set.
 
-### Contains
-Checks to see if a value is in the Set.
+1. Contains - Checks to see if a value is in the Set.
 
-### Remove
-Take a set and a value and if the value is in the set then return a new set without that
+1. Remove - Take a set and a value and if the value is in the set then return a new set without that
 value.
 
-### Union
-Take two sets and return a new set which contains all the values from both sets.
+1. Union - Take two sets and return a new set which contains all the values from both sets.
 
-### Intersect
-Take two sets and return a new set which contains only the values that are in both sets.
+1. Intersect - Take two sets and return a new set which contains only the values that are in both sets.
 
-### IsSubset/IsSuperSet
-Takes two sets and returns true if all the values of one set are also in the other set.
+1. IsSubset/IsSuperSet - Takes two sets and returns true if all the values of one set are also in the other set.
 
 ## Implemented with a Binary Search Tree
 Starting with the actual definition for the `Set` type <<<insert link to github>>>.
@@ -377,7 +371,19 @@ a balanced tree.  It takes the smaller tree and makes it the child of the larger
 tree, then does a rebalance in case the result is unbalanced.
 
 #### Final Union Case
+We are now prepared to tackle the final case in the `SetTree.union` function:
+when both `t1` and `t2` have children.  Which is, actually, pretty straight
+forward.
 
+1. First it compares the heights of the trees `t1` and `t2`
+1. Second, If `t1` is taller, then it takes the root value, `k1`, of `t1` and splits
+`t2` into the set of values smaller, `lo`, and the set of values greater than `k1`
+,`hi`.
+1. Third, it unions `lo` into the left child of `t1` and `hi` in to the right child
+of `t1`.
+1. Finally, balances the new tree just in case the unions cause an inbalance.
+
+If `t2` is taller than `t1`, then follow the same steps but swap `t1` and `t2`.
 
 ### Intersect
 The `Set.Intersect a b` function takes two sets `a` and `b` and returns a new set
