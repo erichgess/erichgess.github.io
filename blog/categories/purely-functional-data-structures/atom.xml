@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Purely Functional Data Structures | Elegant Architecture]]></title>
   <link href="http://erichgess.github.io/blog/categories/purely-functional-data-structures/atom.xml" rel="self"/>
   <link href="http://erichgess.github.io/"/>
-  <updated>2016-03-23T14:02:47-04:00</updated>
+  <updated>2016-06-07T20:32:51-04:00</updated>
   <id>http://erichgess.github.io/</id>
   <author>
     <name><![CDATA[Erich G. Ess]]></name>
@@ -18,9 +18,7 @@
     <link href="http://erichgess.github.io/blog/2016/03/21/purely-functional-data-structures-chapter-2-binary-search-trees/"/>
     <updated>2016-03-21T22:41:37-04:00</updated>
     <id>http://erichgess.github.io/blog/2016/03/21/purely-functional-data-structures-chapter-2-binary-search-trees</id>
-    <content type="html"><![CDATA[<p><em>This post is in progress</em></p>
-
-<p>The second section of Chapter 2 deals focuses on binary search trees (BST) and uses BSTs to
+    <content type="html"><![CDATA[<p>The second section of Chapter 2 deals focuses on binary search trees (BST) and uses BSTs to
 implement a set data structure.  Like the section
 on lists, this gives a nice little explanation on how to deal with inserts to a tree data
 structure when the data is immutable in as efficient a way as possible.  The most brute
@@ -86,7 +84,164 @@ infer that <code>'a</code> must have the <code>comparison</code> constraint.  Te
 case and, in fact, the compiler throws an error because <code>Tree</code> must explicitly have the
 <code>comparison</code> constraint in order for the member methods to work.</p>
 
-<p><img src="/images/posts/purefds_ch2/bst_insert.png"></p>
+<h3 id="ismember">IsMember</h3>
+<p>Checking membership in the tree is the first of the two absolutely necessary functions
+for our BST.  The logic is rather simple, but here I’ve started trying out the <code>function</code>
+  structure for when I’m writing a “polymorphic” function and leaving out explicity
+  parameters.  I rarely used the <code>function</code> expression in the past so this is helping
+  me to get a feel for this as a part of my toolbox.</p>
+
+<p>Leaving out the parameters in the 
+function definition is the <a href="https://en.wikipedia.org/wiki/Tacit_programming">point free</a> 
+style of programming.  Since point free style cuts out one source of self documentation
+in code, I’m not sure I really like it.  However, it fits well with the <code>function</code> expression
+since the focus is the <em>patterns</em> that are being matched and that documents the parameters
+well enough.</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="k">rec</span> <span class="n">isMember</span> <span class="o">=</span> <span class="k">function</span>
+</span><span class='line'>  <span class="o">|</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span><span class="nc">Empty</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="bp">false</span>
+</span><span class='line'>  <span class="o">|</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="nc">Tree</span><span class="o">(</span><span class="n">l</span><span class="o">,</span> <span class="n">n</span><span class="o">,</span> <span class="n">r</span><span class="o">))</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">x</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span> <span class="n">n</span> <span class="k">then</span> <span class="n">isMember</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">l</span><span class="o">)</span>   <span class="c1">// Experimenting with a new format for if/then.  I like having the condition and it’s direct conclusion on the same line</span>
+</span><span class='line'>    <span class="k">elif</span> <span class="n">x</span> <span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">n</span> <span class="k">then</span> <span class="n">isMember</span><span class="o">(</span><span class="n">x</span><span class="o">,</span><span class="n">r</span><span class="o">)</span>
+</span><span class='line'>    <span class="k">else</span> <span class="bp">true</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h3 id="insert">Insert</h3>
+<p>The insert function is a little more complex than <code>isMember</code>:  it needs to handle inserting
+a new value into an immutable tree data structure:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="k">rec</span> <span class="n">insert</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span><span class="n">s</span><span class="o">)</span> <span class="o">=</span>
+</span><span class='line'>  <span class="k">match</span> <span class="n">s</span> <span class="k">with</span>
+</span><span class='line'>  <span class="o">|</span> <span class="nc">Empty</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="nc">Tree</span> <span class="o">(</span><span class="nc">Empty</span><span class="o">,</span> <span class="n">x</span><span class="o">,</span> <span class="nc">Empty</span><span class="o">)</span>
+</span><span class='line'>  <span class="o">|</span> <span class="nc">Tree</span><span class="o">(</span><span class="n">l</span><span class="o">,</span><span class="n">n</span><span class="o">,</span><span class="n">r</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">x</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span> <span class="n">n</span> <span class="k">then</span> <span class="nc">Tree</span><span class="o">(</span><span class="n">insert</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span><span class="n">l</span><span class="o">),</span> <span class="n">n</span><span class="o">,</span> <span class="n">r</span><span class="o">)</span>
+</span><span class='line'>    <span class="k">elif</span> <span class="n">x</span> <span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">n</span> <span class="k">then</span> <span class="nc">Tree</span><span class="o">(</span><span class="n">l</span><span class="o">,</span> <span class="n">n</span><span class="o">,</span> <span class="n">insert</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span><span class="n">r</span><span class="o">))</span>
+</span><span class='line'>    <span class="k">else</span> <span class="n">s</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<code>insert</code> travels from the root node, down the tree, visiting only the nodes on the way to
+where the new node will get inserted.  This is called the <em>search path</em>.  As it moves, 
+<code>insert</code> makes a copy of each node on the search path.  The nodes are copied so that they
+can store the path to the new value, the nodes on the search path are the minimum number
+of nodes that need to be copied.  And of course, because data is immutable, we have to
+copy some nodes in order to make our insert.</p>
+
+<p>This diagram shows what’s happening in a nicely visual form.  The brown nodes are the
+copied nodes on the search path, the dashed lines represent the new links in those nodes.
+Note that most of the original tree remains used in the new ‘post insert’ tree.  A copy of
+<code>7</code> was made and it’s left child is the new <code>5</code> node, then a copy of <code>4</code> is made so that
+<code>4</code>’s right points to the new <code>7</code>.  <code>4</code>’s left still points to the old tree.
+<img src="/images/posts/purefds_ch2/bst_insert.png"></p>
+
+<h3 id="problem-22">Problem 2.2</h3>
+<p>In this problem, we have to update <code>isMember</code> to reduce the number of conditions in the
+execution path.  This is done by propagating the last checked value through the traversal
+and removing the <code>&gt;</code> check:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="n">isMember2</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">t</span><span class="o">)</span> <span class="o">=</span>
+</span><span class='line'>  <span class="k">let</span> <span class="k">rec</span> <span class="n">check</span> <span class="o">=</span> <span class="k">function</span>
+</span><span class='line'>  <span class="o">|</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="nc">None</span><span class="o">,</span> <span class="nc">Empty</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="bp">false</span><span class="o">&lt;</span><span class="n">br</span> <span class="o">/&gt;</span>
+</span><span class='line'>  <span class="o">|</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="nc">Some</span> <span class="n">prev</span><span class="o">,</span> <span class="nc">Empty</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span>  <span class="n">x</span> <span class="o">=</span> <span class="n">prev</span>
+</span><span class='line'>  <span class="o">|</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">prev</span><span class="o">,</span> <span class="nc">Tree</span><span class="o">(</span><span class="n">l</span><span class="o">,</span><span class="n">n</span><span class="o">,</span><span class="n">r</span><span class="o">))</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">x</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span> <span class="n">n</span> <span class="k">then</span> <span class="n">check</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="nc">None</span><span class="o">,</span> <span class="n">l</span><span class="o">)</span>
+</span><span class='line'>    <span class="k">else</span> <span class="n">check</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="nc">Some</span> <span class="n">n</span><span class="o">,</span> <span class="n">r</span><span class="o">)&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="n">check</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="nc">None</span><span class="o">,</span> <span class="n">t</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p><code>isMember2</code> was my first attempt.  While the last pattern matching expression has only
+one conditional rather than two, it also has an additional pattern match check and so
+it seems unlikely that the number of condition checks is actually reduced.  I took a look
+at the IL for this code and verified that it does indeed have just as many conditions
+as `isMember.  The worst part is, that pattern match check must get executed every time.</p>
+
+<p>My second attempt became less idiomatic but it successfully reduces the number of 
+required conditionals:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="k">rec</span> <span class="n">isMember2</span><span class="err">’</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">prev</span><span class="o">:</span> <span class="err">‘</span><span class="n">a</span> <span class="n">option</span><span class="o">,</span> <span class="n">t</span><span class="o">)</span> <span class="o">=</span>
+</span><span class='line'>  <span class="k">match</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">prev</span><span class="o">,</span> <span class="n">t</span><span class="o">)</span> <span class="k">with</span>
+</span><span class='line'>  <span class="o">|</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">prev</span><span class="o">,</span> <span class="nc">Empty</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span>  <span class="k">if</span> <span class="n">prev</span><span class="o">.</span><span class="nc">IsSome</span> <span class="k">then</span> <span class="n">x</span> <span class="o">=</span> <span class="n">prev</span><span class="o">.</span><span class="nc">Value</span> <span class="k">else</span> <span class="bp">false</span>
+</span><span class='line'>  <span class="o">|</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">prev</span><span class="o">,</span> <span class="nc">Tree</span><span class="o">(</span><span class="n">l</span><span class="o">,</span><span class="n">n</span><span class="o">,</span><span class="n">r</span><span class="o">))</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">x</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span> <span class="n">n</span> <span class="k">then</span> <span class="n">isMember2</span><span class="err">’</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="nc">None</span><span class="o">,</span> <span class="n">l</span><span class="o">)</span>
+</span><span class='line'>    <span class="k">else</span> <span class="n">isMember2</span><span class="err">’</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="nc">Some</span> <span class="n">n</span><span class="o">,</span> <span class="n">r</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>While working on this code, I noticed that in F# I’m much more comfortable writing
+<code>if</code> expressions on a single line.  In other languages, I almost never do this (not
+counting the ternary operator in the C family).</p>
+
+<h3 id="problem-23-improving-insert">Problem 2.3: improving insert</h3>
+<p>If we insert a value that’s already in the tree, then the resulting tree will be
+identical to the input tree.  However, the current <code>insert</code> function will still
+copy all the nodes on the search path.  This problem Okasaki has us fix that by
+throwing a fault if the value is already in the tree.  This will bubble a break
+up through the recursive path and break the execution path before any copies
+are made:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="k">rec</span> <span class="n">insert2</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span><span class="n">s</span><span class="o">)</span> <span class="o">=</span>
+</span><span class='line'>  <span class="k">match</span> <span class="n">s</span> <span class="k">with</span>
+</span><span class='line'>  <span class="o">|</span> <span class="nc">Empty</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="nc">Tree</span> <span class="o">(</span><span class="nc">Empty</span><span class="o">,</span> <span class="n">x</span><span class="o">,</span> <span class="nc">Empty</span><span class="o">)</span>
+</span><span class='line'>  <span class="o">|</span> <span class="nc">Tree</span><span class="o">(</span><span class="n">l</span><span class="o">,</span><span class="n">n</span><span class="o">,</span><span class="n">r</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">x</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span> <span class="n">n</span> <span class="k">then</span> <span class="nc">Tree</span><span class="o">(</span><span class="n">insert2</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span><span class="n">l</span><span class="o">),</span> <span class="n">n</span><span class="o">,</span> <span class="n">r</span><span class="o">)</span>
+</span><span class='line'>    <span class="k">elif</span> <span class="n">x</span> <span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">n</span> <span class="k">then</span> <span class="nc">Tree</span><span class="o">(</span><span class="n">l</span><span class="o">,</span> <span class="n">n</span><span class="o">,</span> <span class="n">insert2</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span><span class="n">r</span><span class="o">))</span>
+</span><span class='line'>    <span class="k">else</span> <span class="n">failwith</span> <span class="err">“</span><span class="nc">Element</span> <span class="n">already</span> <span class="n">exists</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Finally, we combine this update with the update to <code>isMember</code> to optimize insertion
+even more:</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='fsharp'><span class='line'><span class="k">let</span> <span class="k">rec</span> <span class="n">insert3</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">prev</span><span class="o">:</span> <span class="err">‘</span><span class="n">a</span> <span class="n">option</span><span class="o">,</span> <span class="n">t</span><span class="o">)</span> <span class="o">=</span>
+</span><span class='line'>  <span class="k">match</span> <span class="n">t</span> <span class="k">with</span>
+</span><span class='line'>  <span class="o">|</span> <span class="nc">Empty</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="k">if</span> <span class="n">prev</span><span class="o">.</span><span class="nc">IsSome</span> <span class="o">&amp;</span><span class="n">amp</span><span class="o">;&amp;</span><span class="n">amp</span><span class="o">;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">prev</span><span class="o">.</span><span class="nc">Value</span>
+</span><span class='line'>             <span class="k">then</span> <span class="n">failwith</span> <span class="err">“</span><span class="nc">Element</span> <span class="n">already</span> <span class="n">exists</span><span class="err">”</span>
+</span><span class='line'>             <span class="k">else</span> <span class="nc">Tree</span> <span class="o">(</span><span class="nc">Empty</span><span class="o">,</span> <span class="n">x</span><span class="o">,</span> <span class="nc">Empty</span><span class="o">)</span>
+</span><span class='line'>  <span class="o">|</span> <span class="nc">Tree</span><span class="o">(</span><span class="n">l</span><span class="o">,</span> <span class="n">n</span><span class="o">,</span> <span class="n">r</span><span class="o">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="o">;</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">x</span> <span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span> <span class="n">n</span>
+</span><span class='line'>    <span class="k">then</span> <span class="nc">Tree</span><span class="o">(</span><span class="n">insert3</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">prev</span><span class="o">,</span> <span class="n">l</span><span class="o">),</span> <span class="n">n</span><span class="o">,</span> <span class="n">r</span><span class="o">)</span>
+</span><span class='line'>    <span class="k">else</span> <span class="nc">Tree</span><span class="o">(</span><span class="n">l</span><span class="o">,</span> <span class="n">n</span><span class="o">,</span> <span class="n">insert3</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="nc">Some</span> <span class="n">n</span><span class="o">,</span> <span class="n">r</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 ]]></content>
   </entry>
   

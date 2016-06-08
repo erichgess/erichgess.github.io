@@ -11,8 +11,8 @@
   <meta name="author" content="Erich G. Ess">
 
   
-  <meta name="description" content="This post is in progress The second section of Chapter 2 deals focuses on binary search trees (BST) and uses BSTs to
-implement a set data structure. &hellip;">
+  <meta name="description" content="As I’ve been going through Okasaki’s book on functional data structures, it occurred to
+me that it’d also be a lot of fun to run through the F# &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -74,6 +74,57 @@ implement a set data structure. &hellip;">
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2016/04/10/f-number-data-structures-set/">F# Data Structures: Set</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-04-10T11:15:48-04:00" pubdate data-updated="true">Apr 10<span>th</span>, 2016</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>As I’ve been going through Okasaki’s book on functional data structures, it occurred to
+me that it’d also be a lot of fun to run through the F# implementation of it’s core data
+structures and compare them with the book <em>Purely Functional Data Structures</em>.</p>
+
+<p>It’s a lot of fun seeing how fundamental and still powerful the data structures used in
+<em>Purely Functional Data Structures</em> are and has made reading through this book even more
+satisfying.</p>
+
+<p>The first significant data structure in Okasaki is the Set, which is implemented using
+a binary search tree.  It’s simple enough to find the F# Core implementation of set in
+the GitHub <a href="https://github.com/fsharp/fsharp/blob/master/src/fsharp/FSharp.Core/set.fs#L17">repository</a>.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2016/04/10/f-number-data-structures-set/">Lay on, MacDuff &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2016/03/21/purely-functional-data-structures-chapter-2-binary-search-trees/">Purely Functional Data Structures: Chapter 2 - Binary Search Trees</a></h1>
     
     
@@ -97,9 +148,7 @@ implement a set data structure. &hellip;">
   </header>
 
 
-  <div class="entry-content"><p><em>This post is in progress</em></p>
-
-<p>The second section of Chapter 2 deals focuses on binary search trees (BST) and uses BSTs to
+  <div class="entry-content"><p>The second section of Chapter 2 deals focuses on binary search trees (BST) and uses BSTs to
 implement a set data structure.  Like the section
 on lists, this gives a nice little explanation on how to deal with inserts to a tree data
 structure when the data is immutable in as efficient a way as possible.  The most brute
@@ -494,54 +543,6 @@ operation will be usd to create a Zipper for the binary tree.</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/04/05/type-providers-tutorial-part-3-instantiables/">Type Providers - Tutorial Part 3 - Instantiables</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-04-05T16:42:52-04:00" pubdate data-updated="true">Apr 5<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>In the last tutorial, we built a simple type named <code>Hello</code> which had some static members.  In this tutorial, we’ll expand our <code>Hello</code> type to include a constructor, an instance property, and an instance method.  Adding these will allow us to create instances of <code>Hello</code> using the <code>new</code> operator:</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="n">x</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Hello</span><span class="bp">()</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-
-<p>We’ll also make <code>Hello</code> store some data, that means our type providers will be one step closer to awesome.  Also, one step closer to being an effective means of interacting with structured data sources.</p>
-
-<p>The full code for what we make in this part will be at the end of this post.
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/2014/04/05/type-providers-tutorial-part-3-instantiables/">Lay on, MacDuff &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -557,6 +558,10 @@ operation will be usd to create a Zipper for the binary tree.</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/04/10/f-number-data-structures-set/">F# Data Structures: Set</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/03/21/purely-functional-data-structures-chapter-2-binary-search-trees/">Purely Functional Data Structures: Chapter 2 - Binary Search Trees</a>
       </li>
     
@@ -570,10 +575,6 @@ operation will be usd to create a Zipper for the binary tree.</p>
     
       <li class="post">
         <a href="/blog/2015/11/01/zippers-2-building-a-rose-tree-zipper/">Zippers 2: Building a Rose Tree Zipper</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/08/17/f-number-zippers/">F# Zippers</a>
       </li>
     
   </ul>

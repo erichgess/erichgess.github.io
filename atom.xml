@@ -4,7 +4,7 @@
   <title><![CDATA[Elegant Architecture]]></title>
   <link href="http://erichgess.github.io/atom.xml" rel="self"/>
   <link href="http://erichgess.github.io/"/>
-  <updated>2016-03-23T14:02:47-04:00</updated>
+  <updated>2016-06-07T20:32:51-04:00</updated>
   <id>http://erichgess.github.io/</id>
   <author>
     <name><![CDATA[Erich G. Ess]]></name>
@@ -14,13 +14,231 @@
 
   
   <entry>
+    <title type="html"><![CDATA[F# Data Structures: Set]]></title>
+    <link href="http://erichgess.github.io/blog/2016/04/10/f-number-data-structures-set/"/>
+    <updated>2016-04-10T11:15:48-04:00</updated>
+    <id>http://erichgess.github.io/blog/2016/04/10/f-number-data-structures-set</id>
+    <content type="html"><![CDATA[<p>As I’ve been going through Okasaki’s book on functional data structures, it occurred to
+me that it’d also be a lot of fun to run through the F# implementation of it’s core data
+structures and compare them with the book <em>Purely Functional Data Structures</em>.</p>
+
+<p>It’s a lot of fun seeing how fundamental and still powerful the data structures used in
+<em>Purely Functional Data Structures</em> are and has made reading through this book even more
+satisfying.</p>
+
+<p>The first significant data structure in Okasaki is the Set, which is implemented using
+a binary search tree.  It’s simple enough to find the F# Core implementation of set in
+the GitHub <a href="https://github.com/fsharp/fsharp/blob/master/src/fsharp/FSharp.Core/set.fs#L17">repository</a>.</p>
+
+<!-- more -->
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">type</span> <span class="nc">SetTree</span><span class="o">&lt;</span><span class="k">&#39;</span><span class="nc">T</span><span class="o">&gt;</span> <span class="k">when</span> <span class="k">&#39;</span><span class="nc">T</span> <span class="o">:</span> <span class="n">comparison</span> <span class="o">=</span>
+</span><span class="line">    <span class="o">|</span> <span class="nc">SetEmpty</span>                                          <span class="c1">// height = 0   </span>
+</span><span class="line">    <span class="o">|</span> <span class="nc">SetNode</span> <span class="k">of</span> <span class="k">&#39;</span><span class="nc">T</span> <span class="o">*</span> <span class="nc">SetTree</span><span class="o">&lt;</span><span class="k">&#39;</span><span class="nc">T</span><span class="o">&gt;</span> <span class="o">*</span>  <span class="nc">SetTree</span><span class="o">&lt;</span><span class="k">&#39;</span><span class="nc">T</span><span class="o">&gt;</span> <span class="o">*</span> <span class="kt">int</span>    <span class="c1">// height = int </span>
+</span><span class="line">    <span class="o">|</span> <span class="nc">SetOne</span>  <span class="k">of</span> <span class="k">&#39;</span><span class="nc">T</span>                                     <span class="c1">// height = 1 </span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>and a little further down in the source file we find this definition of <code>Set</code>:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">type</span> <span class="nc">Set</span><span class="o">&lt;[&lt;</span><span class="nc">EqualityConditionalOn</span><span class="o">&gt;]</span><span class="k">&#39;</span><span class="nc">T</span> <span class="k">when</span> <span class="k">&#39;</span><span class="nc">T</span> <span class="o">:</span> <span class="n">comparison</span> <span class="o">&gt;(</span><span class="n">comparer</span><span class="o">:</span><span class="nc">IComparer</span><span class="o">&lt;</span><span class="k">&#39;</span><span class="nc">T</span><span class="o">&gt;,</span> <span class="n">tree</span><span class="o">:</span> <span class="nc">SetTree</span><span class="o">&lt;</span><span class="k">&#39;</span><span class="nc">T</span><span class="o">&gt;)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>So the <code>Set</code> type is definitely built on top of a binary search tree.  Now the question is,
+what type of binary search tree and that can be determined by looking at the functions
+used on the <code>SetTree</code> type.  There’s the expected <code>add</code> and <code>remove</code> and within those
+functions are calls to a <code>rebalance</code> function.  Meaning that F# is using a self balancing
+BST for its <code>Set</code> implementation.  Here’s the code for the <code>rebalance</code> function:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="n">rebalance</span> <span class="n">t1</span> <span class="n">k</span> <span class="n">t2</span> <span class="o">=</span>
+</span><span class="line">    <span class="k">let</span> <span class="n">t1h</span> <span class="o">=</span> <span class="n">height</span> <span class="n">t1</span>
+</span><span class="line">    <span class="k">let</span> <span class="n">t2h</span> <span class="o">=</span> <span class="n">height</span> <span class="n">t2</span>
+</span><span class="line">    <span class="k">if</span>  <span class="n">t2h</span> <span class="o">&gt;</span> <span class="n">t1h</span> <span class="o">+</span> <span class="n">tolerance</span> <span class="k">then</span> <span class="c1">// right is heavier than left </span>
+</span><span class="line">        <span class="k">match</span> <span class="n">t2</span> <span class="k">with</span>
+</span><span class="line">        <span class="o">|</span> <span class="nc">SetNode</span><span class="o">(</span><span class="n">t2k</span><span class="o">,</span><span class="n">t2l</span><span class="o">,</span><span class="n">t2r</span><span class="o">,_)</span> <span class="o">-&gt;</span>
+</span><span class="line">            <span class="c1">// one of the nodes must have height &gt; height t1 + 1 </span>
+</span><span class="line">            <span class="k">if</span> <span class="n">height</span> <span class="n">t2l</span> <span class="o">&gt;</span> <span class="n">t1h</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">then</span>  <span class="c1">// balance left: combination </span>
+</span><span class="line">                <span class="k">match</span> <span class="n">t2l</span> <span class="k">with</span>
+</span><span class="line">                <span class="o">|</span> <span class="nc">SetNode</span><span class="o">(</span><span class="n">t2lk</span><span class="o">,</span><span class="n">t2ll</span><span class="o">,</span><span class="n">t2lr</span><span class="o">,_)</span> <span class="o">-&gt;</span>
+</span><span class="line">                    <span class="n">mk</span> <span class="o">(</span><span class="n">mk</span> <span class="n">t1</span> <span class="n">k</span> <span class="n">t2ll</span><span class="o">)</span> <span class="n">t2lk</span> <span class="o">(</span><span class="n">mk</span> <span class="n">t2lr</span> <span class="n">t2k</span> <span class="n">t2r</span><span class="o">)</span>
+</span><span class="line">                <span class="o">|</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="n">failwith</span> <span class="s2">&quot;rebalance&quot;</span>
+</span><span class="line">            <span class="k">else</span> <span class="c1">// rotate left </span>
+</span><span class="line">                <span class="n">mk</span> <span class="o">(</span><span class="n">mk</span> <span class="n">t1</span> <span class="n">k</span> <span class="n">t2l</span><span class="o">)</span> <span class="n">t2k</span> <span class="n">t2r</span>
+</span><span class="line">        <span class="o">|</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="n">failwith</span> <span class="s2">&quot;rebalance&quot;</span>
+</span><span class="line">    <span class="k">else</span>
+</span><span class="line">        <span class="k">if</span>  <span class="n">t1h</span> <span class="o">&gt;</span> <span class="n">t2h</span> <span class="o">+</span> <span class="n">tolerance</span> <span class="k">then</span> <span class="c1">// left is heavier than right </span>
+</span><span class="line">            <span class="k">match</span> <span class="n">t1</span> <span class="k">with</span>
+</span><span class="line">            <span class="o">|</span> <span class="nc">SetNode</span><span class="o">(</span><span class="n">t1k</span><span class="o">,</span><span class="n">t1l</span><span class="o">,</span><span class="n">t1r</span><span class="o">,_)</span> <span class="o">-&gt;</span>
+</span><span class="line">                <span class="c1">// one of the nodes must have height &gt; height t2 + 1 </span>
+</span><span class="line">                <span class="k">if</span> <span class="n">height</span> <span class="n">t1r</span> <span class="o">&gt;</span> <span class="n">t2h</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">then</span>
+</span><span class="line">                    <span class="c1">// balance right: combination </span>
+</span><span class="line">                    <span class="k">match</span> <span class="n">t1r</span> <span class="k">with</span>
+</span><span class="line">                    <span class="o">|</span> <span class="nc">SetNode</span><span class="o">(</span><span class="n">t1rk</span><span class="o">,</span><span class="n">t1rl</span><span class="o">,</span><span class="n">t1rr</span><span class="o">,_)</span> <span class="o">-&gt;</span>
+</span><span class="line">                        <span class="n">mk</span> <span class="o">(</span><span class="n">mk</span> <span class="n">t1l</span> <span class="n">t1k</span> <span class="n">t1rl</span><span class="o">)</span> <span class="n">t1rk</span> <span class="o">(</span><span class="n">mk</span> <span class="n">t1rr</span> <span class="n">k</span> <span class="n">t2</span><span class="o">)</span>
+</span><span class="line">                    <span class="o">|</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="n">failwith</span> <span class="s2">&quot;rebalance&quot;</span>
+</span><span class="line">                <span class="k">else</span>
+</span><span class="line">                    <span class="n">mk</span> <span class="n">t1l</span> <span class="n">t1k</span> <span class="o">(</span><span class="n">mk</span> <span class="n">t1r</span> <span class="n">k</span> <span class="n">t2</span><span class="o">)</span>
+</span><span class="line">            <span class="o">|</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="n">failwith</span> <span class="s2">&quot;rebalance&quot;</span>
+</span><span class="line">        <span class="k">else</span> <span class="n">mk</span> <span class="n">t1</span> <span class="n">k</span> <span class="n">t2</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>So F# is using what looks like a slightly modified AVL tree, which uses a definable
+tolerance for how unbalanced the tree can get before rebalancing happens.  The
+strict AVL tree rebalances if the difference in height between the left and right
+branches is greater than 1.</p>
+
+<p>There’s another interesting function nestled within the <code>SetTree</code> module: <code>split</code>.
+This function interested me because it wasn’t referenced in the balance or the
+<code>add</code>/<code>remove</code> functions.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="k">rec</span> <span class="n">split</span> <span class="o">(</span><span class="n">comparer</span> <span class="o">:</span> <span class="nc">IComparer</span><span class="o">&lt;</span><span class="k">&#39;</span><span class="nc">T</span><span class="o">&gt;)</span> <span class="n">pivot</span> <span class="n">t</span> <span class="o">=</span>
+</span><span class="line">    <span class="c1">// Given a pivot and a set t</span>
+</span><span class="line">    <span class="c1">// Return { x in t s.t. x &lt; pivot }, pivot in t? , { x in t s.t. x &gt; pivot } </span>
+</span><span class="line">    <span class="k">match</span> <span class="n">t</span> <span class="k">with</span>
+</span><span class="line">    <span class="o">|</span> <span class="nc">SetNode</span><span class="o">(</span><span class="n">k1</span><span class="o">,</span><span class="n">t11</span><span class="o">,</span><span class="n">t12</span><span class="o">,_)</span> <span class="o">-&gt;</span>
+</span><span class="line">        <span class="k">let</span> <span class="n">c</span> <span class="o">=</span> <span class="n">comparer</span><span class="o">.</span><span class="nc">Compare</span><span class="o">(</span><span class="n">pivot</span><span class="o">,</span><span class="n">k1</span><span class="o">)</span>
+</span><span class="line">        <span class="k">if</span>   <span class="n">c</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">then</span> <span class="c1">// pivot t1 </span>
+</span><span class="line">            <span class="k">let</span> <span class="n">t11Lo</span><span class="o">,</span><span class="n">havePivot</span><span class="o">,</span><span class="n">t11Hi</span> <span class="o">=</span> <span class="n">split</span> <span class="n">comparer</span> <span class="n">pivot</span> <span class="n">t11</span>
+</span><span class="line">            <span class="n">t11Lo</span><span class="o">,</span><span class="n">havePivot</span><span class="o">,</span><span class="n">balance</span> <span class="n">comparer</span> <span class="n">t11Hi</span> <span class="n">k1</span> <span class="n">t12</span>
+</span><span class="line">        <span class="k">elif</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">then</span> <span class="c1">// pivot is k1 </span>
+</span><span class="line">            <span class="n">t11</span><span class="o">,</span><span class="bp">true</span><span class="o">,</span><span class="n">t12</span>
+</span><span class="line">        <span class="k">else</span>            <span class="c1">// pivot t2 </span>
+</span><span class="line">            <span class="k">let</span> <span class="n">t12Lo</span><span class="o">,</span><span class="n">havePivot</span><span class="o">,</span><span class="n">t12Hi</span> <span class="o">=</span> <span class="n">split</span> <span class="n">comparer</span> <span class="n">pivot</span> <span class="n">t12</span>
+</span><span class="line">            <span class="n">balance</span> <span class="n">comparer</span> <span class="n">t11</span> <span class="n">k1</span> <span class="n">t12Lo</span><span class="o">,</span><span class="n">havePivot</span><span class="o">,</span><span class="n">t12Hi</span>
+</span><span class="line">    <span class="o">|</span> <span class="nc">SetOne</span> <span class="n">k1</span> <span class="o">-&gt;</span>
+</span><span class="line">        <span class="k">let</span> <span class="n">c</span> <span class="o">=</span> <span class="n">comparer</span><span class="o">.</span><span class="nc">Compare</span><span class="o">(</span><span class="n">k1</span><span class="o">,</span><span class="n">pivot</span><span class="o">)</span>
+</span><span class="line">        <span class="k">if</span>   <span class="n">c</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">then</span> <span class="n">t</span>       <span class="o">,</span><span class="bp">false</span><span class="o">,</span><span class="nc">SetEmpty</span> <span class="c1">// singleton under pivot </span>
+</span><span class="line">        <span class="k">elif</span> <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">then</span> <span class="nc">SetEmpty</span><span class="o">,</span><span class="bp">true</span> <span class="o">,</span><span class="nc">SetEmpty</span> <span class="c1">// singleton is    pivot </span>
+</span><span class="line">        <span class="k">else</span>            <span class="nc">SetEmpty</span><span class="o">,</span><span class="bp">false</span><span class="o">,</span><span class="n">t</span>        <span class="c1">// singleton over  pivot </span>
+</span><span class="line">    <span class="o">|</span> <span class="nc">SetEmpty</span>  <span class="o">-&gt;</span>
+</span><span class="line">        <span class="nc">SetEmpty</span><span class="o">,</span><span class="bp">false</span><span class="o">,</span><span class="nc">SetEmpty</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>This function has type <code>SetTree, boolean, SetTree</code> and takes a <code>SetTree t</code> and a pivot
+value <code>pivot</code>.  The first <code>SetTree</code> in the return type is the set of all values in <code>t</code>
+which are less than <code>pivot</code>, the boolean is true if <code>pivot</code> is in <code>t</code>, and the right
+<code>SetTree</code> contains all the values in <code>t</code> which are greater than <code>pivot</code>.</p>
+
+<p>The <code>split</code> function is used in the union function:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="k">rec</span> <span class="n">union</span> <span class="n">comparer</span> <span class="n">t1</span> <span class="n">t2</span> <span class="o">=</span>
+</span><span class="line">    <span class="c1">// Perf: tried bruteForce for low heights, but nothing significant </span>
+</span><span class="line">    <span class="k">match</span> <span class="n">t1</span><span class="o">,</span><span class="n">t2</span> <span class="k">with</span>
+</span><span class="line">    <span class="o">|</span> <span class="nc">SetNode</span><span class="o">(</span><span class="n">k1</span><span class="o">,</span><span class="n">t11</span><span class="o">,</span><span class="n">t12</span><span class="o">,</span><span class="n">h1</span><span class="o">),</span><span class="nc">SetNode</span><span class="o">(</span><span class="n">k2</span><span class="o">,</span><span class="n">t21</span><span class="o">,</span><span class="n">t22</span><span class="o">,</span><span class="n">h2</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="c1">// (t11 &lt; k &lt; t12) AND (t21 &lt; k2 &lt; t22) </span>
+</span><span class="line">        <span class="c1">// Divide and Conquer:</span>
+</span><span class="line">        <span class="c1">//   Suppose t1 is largest.</span>
+</span><span class="line">        <span class="c1">//   Split t2 using pivot k1 into lo and hi.</span>
+</span><span class="line">        <span class="c1">//   Union disjoint subproblems and then combine. </span>
+</span><span class="line">        <span class="k">if</span> <span class="n">h1</span> <span class="o">&gt;</span> <span class="n">h2</span> <span class="k">then</span>
+</span><span class="line">          <span class="k">let</span> <span class="n">lo</span><span class="o">,_,</span><span class="n">hi</span> <span class="o">=</span> <span class="n">split</span> <span class="n">comparer</span> <span class="n">k1</span> <span class="n">t2</span> <span class="k">in</span>
+</span><span class="line">          <span class="n">balance</span> <span class="n">comparer</span> <span class="o">(</span><span class="n">union</span> <span class="n">comparer</span> <span class="n">t11</span> <span class="n">lo</span><span class="o">)</span> <span class="n">k1</span> <span class="o">(</span><span class="n">union</span> <span class="n">comparer</span> <span class="n">t12</span> <span class="n">hi</span><span class="o">)</span>
+</span><span class="line">        <span class="k">else</span>
+</span><span class="line">          <span class="k">let</span> <span class="n">lo</span><span class="o">,_,</span><span class="n">hi</span> <span class="o">=</span> <span class="n">split</span> <span class="n">comparer</span> <span class="n">k2</span> <span class="n">t1</span> <span class="k">in</span>
+</span><span class="line">          <span class="n">balance</span> <span class="n">comparer</span> <span class="o">(</span><span class="n">union</span> <span class="n">comparer</span> <span class="n">t21</span> <span class="n">lo</span><span class="o">)</span> <span class="n">k2</span> <span class="o">(</span><span class="n">union</span> <span class="n">comparer</span> <span class="n">t22</span> <span class="n">hi</span><span class="o">)</span>
+</span><span class="line">    <span class="o">|</span> <span class="nc">SetEmpty</span><span class="o">,</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="n">t</span>
+</span><span class="line">    <span class="o">|</span> <span class="n">t</span><span class="o">,</span><span class="nc">SetEmpty</span> <span class="o">-&gt;</span> <span class="n">t</span>
+</span><span class="line">    <span class="o">|</span> <span class="nc">SetOne</span> <span class="n">k1</span><span class="o">,</span><span class="n">t2</span> <span class="o">-&gt;</span> <span class="n">add</span> <span class="n">comparer</span> <span class="n">k1</span> <span class="n">t2</span>
+</span><span class="line">    <span class="o">|</span> <span class="n">t1</span><span class="o">,</span><span class="nc">SetOne</span> <span class="n">k2</span> <span class="o">-&gt;</span> <span class="n">add</span> <span class="n">comparer</span> <span class="n">k2</span> <span class="n">t1</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>This function takes two trees <code>t1</code> and <code>t2</code> and merges them together and returns a
+single <code>TreeSet</code> with all the elements from <code>t1</code> and <code>t2</code>.  Here’s how split is used
+in this function:</p>
+
+<ol>
+  <li>Assuming <code>t1</code> is taller than <code>t2</code> (it’s basically the same if <code>t2</code> is taller than
+<code>t1</code>)</li>
+  <li><code>split</code> all the elements in <code>t2</code> by if they are smaller than the root value of <code>t1</code>.
+Call the set of nodes smaller than the <code>t1</code> root <code>lo</code> and the set of larger nodes <code>hi</code>.</li>
+  <li>Use <code>union</code> to merge the left subtree of <code>t1</code> with <code>lo</code> and to merge the right subtree
+of <code>t1</code> with <code>hi</code>.</li>
+  <li>Balance the to newly generated subtrees.  This leaves a set of all the values smaller
+than the <code>t1</code> value and a set of all the values larger than <code>t1</code>.  These can then be used
+to create a new <code>TreeSet</code> representing the fully balanced merging of <code>t1</code> and <code>t2</code>.</li>
+</ol>
+
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[Purely Functional Data Structures: Chapter 2 - Binary Search Trees]]></title>
     <link href="http://erichgess.github.io/blog/2016/03/21/purely-functional-data-structures-chapter-2-binary-search-trees/"/>
     <updated>2016-03-21T22:41:37-04:00</updated>
     <id>http://erichgess.github.io/blog/2016/03/21/purely-functional-data-structures-chapter-2-binary-search-trees</id>
-    <content type="html"><![CDATA[<p><em>This post is in progress</em></p>
-
-<p>The second section of Chapter 2 deals focuses on binary search trees (BST) and uses BSTs to
+    <content type="html"><![CDATA[<p>The second section of Chapter 2 deals focuses on binary search trees (BST) and uses BSTs to
 implement a set data structure.  Like the section
 on lists, this gives a nice little explanation on how to deal with inserts to a tree data
 structure when the data is immutable in as efficient a way as possible.  The most brute
@@ -86,7 +304,167 @@ infer that <code>'a</code> must have the <code>comparison</code> constraint.  Te
 case and, in fact, the compiler throws an error because <code>Tree</code> must explicitly have the
 <code>comparison</code> constraint in order for the member methods to work.</p>
 
-<p><img src="http://erichgess.github.io/images/posts/purefds_ch2/bst_insert.png" /></p>
+<h3 id="ismember">IsMember</h3>
+<p>Checking membership in the tree is the first of the two absolutely necessary functions
+for our BST.  The logic is rather simple, but here I’ve started trying out the <code>function</code>
+  structure for when I’m writing a “polymorphic” function and leaving out explicity
+  parameters.  I rarely used the <code>function</code> expression in the past so this is helping
+  me to get a feel for this as a part of my toolbox.</p>
+
+<p>Leaving out the parameters in the 
+function definition is the <a href="https://en.wikipedia.org/wiki/Tacit_programming">point free</a> 
+style of programming.  Since point free style cuts out one source of self documentation
+in code, I’m not sure I really like it.  However, it fits well with the <code>function</code> expression
+since the focus is the <em>patterns</em> that are being matched and that documents the parameters
+well enough.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="k">rec</span> <span class="n">isMember</span> <span class="o">=</span> <span class="k">function</span>
+</span><span class="line">  <span class="o">|</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span><span class="nc">Empty</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="bp">false</span>
+</span><span class="line">  <span class="o">|</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="nc">Tree</span><span class="o">(</span><span class="n">l</span><span class="o">,</span> <span class="n">n</span><span class="o">,</span> <span class="n">r</span><span class="o">))</span> <span class="o">-&gt;</span>
+</span><span class="line">    <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">n</span> <span class="k">then</span> <span class="n">isMember</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">l</span><span class="o">)</span>   <span class="c1">// Experimenting with a new format for if/then.  I like having the condition and it&#39;s direct conclusion on the same line</span>
+</span><span class="line">    <span class="k">elif</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="n">n</span> <span class="k">then</span> <span class="n">isMember</span><span class="o">(</span><span class="n">x</span><span class="o">,</span><span class="n">r</span><span class="o">)</span>
+</span><span class="line">    <span class="k">else</span> <span class="bp">true</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h3 id="insert">Insert</h3>
+<p>The insert function is a little more complex than <code>isMember</code>:  it needs to handle inserting
+a new value into an immutable tree data structure:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="k">rec</span> <span class="n">insert</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span><span class="n">s</span><span class="o">)</span> <span class="o">=</span>
+</span><span class="line">  <span class="k">match</span> <span class="n">s</span> <span class="k">with</span>
+</span><span class="line">  <span class="o">|</span> <span class="nc">Empty</span> <span class="o">-&gt;</span> <span class="nc">Tree</span> <span class="o">(</span><span class="nc">Empty</span><span class="o">,</span> <span class="n">x</span><span class="o">,</span> <span class="nc">Empty</span><span class="o">)</span>
+</span><span class="line">  <span class="o">|</span> <span class="nc">Tree</span><span class="o">(</span><span class="n">l</span><span class="o">,</span><span class="n">n</span><span class="o">,</span><span class="n">r</span><span class="o">)</span> <span class="o">-&gt;</span>
+</span><span class="line">    <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">n</span> <span class="k">then</span> <span class="nc">Tree</span><span class="o">(</span><span class="n">insert</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span><span class="n">l</span><span class="o">),</span> <span class="n">n</span><span class="o">,</span> <span class="n">r</span><span class="o">)</span>
+</span><span class="line">    <span class="k">elif</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="n">n</span> <span class="k">then</span> <span class="nc">Tree</span><span class="o">(</span><span class="n">l</span><span class="o">,</span> <span class="n">n</span><span class="o">,</span> <span class="n">insert</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span><span class="n">r</span><span class="o">))</span>
+</span><span class="line">    <span class="k">else</span> <span class="n">s</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p><code>insert</code> travels from the root node, down the tree, visiting only the nodes on the way to
+where the new node will get inserted.  This is called the <em>search path</em>.  As it moves, 
+<code>insert</code> makes a copy of each node on the search path.  The nodes are copied so that they
+can store the path to the new value, the nodes on the search path are the minimum number
+of nodes that need to be copied.  And of course, because data is immutable, we have to
+copy some nodes in order to make our insert.</p>
+
+<p>This diagram shows what’s happening in a nicely visual form.  The brown nodes are the
+copied nodes on the search path, the dashed lines represent the new links in those nodes.
+Note that most of the original tree remains used in the new ‘post insert’ tree.  A copy of
+<code>7</code> was made and it’s left child is the new <code>5</code> node, then a copy of <code>4</code> is made so that
+<code>4</code>’s right points to the new <code>7</code>.  <code>4</code>’s left still points to the old tree.
+<img src="http://erichgess.github.io/images/posts/purefds_ch2/bst_insert.png" /></p>
+
+<h3 id="problem-22">Problem 2.2</h3>
+<p>In this problem, we have to update <code>isMember</code> to reduce the number of conditions in the
+execution path.  This is done by propagating the last checked value through the traversal
+and removing the <code>&gt;</code> check:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="n">isMember2</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">t</span><span class="o">)</span> <span class="o">=</span>
+</span><span class="line">  <span class="k">let</span> <span class="k">rec</span> <span class="n">check</span> <span class="o">=</span> <span class="k">function</span>
+</span><span class="line">  <span class="o">|</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="nc">None</span><span class="o">,</span> <span class="nc">Empty</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="bp">false</span>
+</span><span class="line">  <span class="o">|</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="nc">Some</span> <span class="n">prev</span><span class="o">,</span> <span class="nc">Empty</span><span class="o">)</span> <span class="o">-&gt;</span>  <span class="n">x</span> <span class="o">=</span> <span class="n">prev</span>
+</span><span class="line">  <span class="o">|</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">prev</span><span class="o">,</span> <span class="nc">Tree</span><span class="o">(</span><span class="n">l</span><span class="o">,</span><span class="n">n</span><span class="o">,</span><span class="n">r</span><span class="o">))</span> <span class="o">-&gt;</span>
+</span><span class="line">    <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">n</span> <span class="k">then</span> <span class="n">check</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="nc">None</span><span class="o">,</span> <span class="n">l</span><span class="o">)</span>
+</span><span class="line">    <span class="k">else</span> <span class="n">check</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="nc">Some</span> <span class="n">n</span><span class="o">,</span> <span class="n">r</span><span class="o">)</span>
+</span><span class="line">
+</span><span class="line">  <span class="n">check</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="nc">None</span><span class="o">,</span> <span class="n">t</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p><code>isMember2</code> was my first attempt.  While the last pattern matching expression has only
+one conditional rather than two, it also has an additional pattern match check and so
+it seems unlikely that the number of condition checks is actually reduced.  I took a look
+at the IL for this code and verified that it does indeed have just as many conditions
+as `isMember.  The worst part is, that pattern match check must get executed every time.</p>
+
+<p>My second attempt became less idiomatic but it successfully reduces the number of 
+required conditionals:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="k">rec</span> <span class="n">isMember2&#39;</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">prev</span><span class="o">:</span> <span class="k">&#39;</span><span class="n">a</span> <span class="n">option</span><span class="o">,</span> <span class="n">t</span><span class="o">)</span> <span class="o">=</span>
+</span><span class="line">  <span class="k">match</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">prev</span><span class="o">,</span> <span class="n">t</span><span class="o">)</span> <span class="k">with</span>
+</span><span class="line">  <span class="o">|</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">prev</span><span class="o">,</span> <span class="nc">Empty</span><span class="o">)</span> <span class="o">-&gt;</span>  <span class="k">if</span> <span class="n">prev</span><span class="o">.</span><span class="nc">IsSome</span> <span class="k">then</span> <span class="n">x</span> <span class="o">=</span> <span class="n">prev</span><span class="o">.</span><span class="nc">Value</span> <span class="k">else</span> <span class="bp">false</span>
+</span><span class="line">  <span class="o">|</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">prev</span><span class="o">,</span> <span class="nc">Tree</span><span class="o">(</span><span class="n">l</span><span class="o">,</span><span class="n">n</span><span class="o">,</span><span class="n">r</span><span class="o">))</span> <span class="o">-&gt;</span>
+</span><span class="line">    <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">n</span> <span class="k">then</span> <span class="n">isMember2&#39;</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="nc">None</span><span class="o">,</span> <span class="n">l</span><span class="o">)</span>
+</span><span class="line">    <span class="k">else</span> <span class="n">isMember2&#39;</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="nc">Some</span> <span class="n">n</span><span class="o">,</span> <span class="n">r</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>While working on this code, I noticed that in F# I’m much more comfortable writing
+<code>if</code> expressions on a single line.  In other languages, I almost never do this (not
+counting the ternary operator in the C family).</p>
+
+<h3 id="problem-23-improving-insert">Problem 2.3: improving insert</h3>
+<p>If we insert a value that’s already in the tree, then the resulting tree will be
+identical to the input tree.  However, the current <code>insert</code> function will still
+copy all the nodes on the search path.  This problem Okasaki has us fix that by
+throwing a fault if the value is already in the tree.  This will bubble a break
+up through the recursive path and break the execution path before any copies
+are made:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="k">rec</span> <span class="n">insert2</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span><span class="n">s</span><span class="o">)</span> <span class="o">=</span>
+</span><span class="line">  <span class="k">match</span> <span class="n">s</span> <span class="k">with</span>
+</span><span class="line">  <span class="o">|</span> <span class="nc">Empty</span> <span class="o">-&gt;</span> <span class="nc">Tree</span> <span class="o">(</span><span class="nc">Empty</span><span class="o">,</span> <span class="n">x</span><span class="o">,</span> <span class="nc">Empty</span><span class="o">)</span>
+</span><span class="line">  <span class="o">|</span> <span class="nc">Tree</span><span class="o">(</span><span class="n">l</span><span class="o">,</span><span class="n">n</span><span class="o">,</span><span class="n">r</span><span class="o">)</span> <span class="o">-&gt;</span>
+</span><span class="line">    <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">n</span> <span class="k">then</span> <span class="nc">Tree</span><span class="o">(</span><span class="n">insert2</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span><span class="n">l</span><span class="o">),</span> <span class="n">n</span><span class="o">,</span> <span class="n">r</span><span class="o">)</span>
+</span><span class="line">    <span class="k">elif</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="n">n</span> <span class="k">then</span> <span class="nc">Tree</span><span class="o">(</span><span class="n">l</span><span class="o">,</span> <span class="n">n</span><span class="o">,</span> <span class="n">insert2</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span><span class="n">r</span><span class="o">))</span>
+</span><span class="line">    <span class="k">else</span> <span class="n">failwith</span> <span class="s2">&quot;Element already exists</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Finally, we combine this update with the update to <code>isMember</code> to optimize insertion
+even more:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</pre></td><td class="code"><pre><code class="fsharp"><span class="line"><span class="k">let</span> <span class="k">rec</span> <span class="n">insert3</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">prev</span><span class="o">:</span> <span class="k">&#39;</span><span class="n">a</span> <span class="n">option</span><span class="o">,</span> <span class="n">t</span><span class="o">)</span> <span class="o">=</span>
+</span><span class="line">  <span class="k">match</span> <span class="n">t</span> <span class="k">with</span>
+</span><span class="line">  <span class="o">|</span> <span class="nc">Empty</span> <span class="o">-&gt;</span> <span class="k">if</span> <span class="n">prev</span><span class="o">.</span><span class="nc">IsSome</span> <span class="o">&amp;&amp;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">prev</span><span class="o">.</span><span class="nc">Value</span>
+</span><span class="line">             <span class="k">then</span> <span class="n">failwith</span> <span class="s2">&quot;Element already exists&quot;</span>
+</span><span class="line">             <span class="k">else</span> <span class="nc">Tree</span> <span class="o">(</span><span class="nc">Empty</span><span class="o">,</span> <span class="n">x</span><span class="o">,</span> <span class="nc">Empty</span><span class="o">)</span>
+</span><span class="line">  <span class="o">|</span> <span class="nc">Tree</span><span class="o">(</span><span class="n">l</span><span class="o">,</span> <span class="n">n</span><span class="o">,</span> <span class="n">r</span><span class="o">)</span> <span class="o">-&gt;</span>
+</span><span class="line">    <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">n</span>
+</span><span class="line">    <span class="k">then</span> <span class="nc">Tree</span><span class="o">(</span><span class="n">insert3</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="n">prev</span><span class="o">,</span> <span class="n">l</span><span class="o">),</span> <span class="n">n</span><span class="o">,</span> <span class="n">r</span><span class="o">)</span>
+</span><span class="line">    <span class="k">else</span> <span class="nc">Tree</span><span class="o">(</span><span class="n">l</span><span class="o">,</span> <span class="n">n</span><span class="o">,</span> <span class="n">insert3</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span> <span class="nc">Some</span> <span class="n">n</span><span class="o">,</span> <span class="n">r</span><span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
 ]]></content>
   </entry>
   
@@ -2793,22 +3171,6 @@ Here’s a cleaned up reiteration of the problem:  I have a system consisting of
 </span><span class="line">                            <span class="s2">&quot;&quot;</span><span class="o">);</span>
 </span><span class="line">        <span class="nc">Publish</span> <span class="o">=</span> <span class="o">(</span><span class="n">publishToQueue</span> <span class="n">channel</span> <span class="n">queueName</span><span class="o">)}</span>
 </span></code></pre></td></tr></table></div></figure></notextile></div>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Odin Prototype]]></title>
-    <link href="http://erichgess.github.io/blog/2014/03/08/odin-prototype/"/>
-    <updated>2014-03-08T02:32:30-05:00</updated>
-    <id>http://erichgess.github.io/blog/2014/03/08/odin-prototype</id>
-    <content type="html"><![CDATA[<p>In my previous post, I described a distributed monitoring system called Odin.  Which I am building because it will help me learn and explore topics in distributed computing independent of work.</p>
-
-<p>I’ve been slowly working on it when I get a chance and have put together a very basic prototype:
-https://github.com/erichgess/OdinPrototype</p>
-
-<p>This prototype is some hacking I did over a few, very spread out days, to try out some concepts.  It has a very simple agent, which reads %CPU used and sends a message to a receiver.  That receiver this publishes that message as an IObservable.  Multiple mailbox processors subscribe to the Observable and use Reactive to do some queries on the incoming messages.</p>
-
-<p>This is very very little.  However, it served as a way for me to try out a few different concepts: RabbitMQ, Mailbox Processors, and Reactive.</p>
 ]]></content>
   </entry>
   
