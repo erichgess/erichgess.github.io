@@ -7,40 +7,43 @@ categories: [F#, Functional Programming, Type Theory]
 ---
 
 One of the coolest things about working with F# (and other ML languages) is the
-incredibly elegant way that mathematics intersects with programming, to inform
-powerful tools for our toolbox.  Algebraic Data Types (ADTs) are the source of a
-large amount of this mathematical invention.  Recently, I've been exploring the
-algebra and calculus of types and what happens when you take the derivative
-of a type.
+incredibly elegant way that mathematics intersects with programming, providing a
+powerful guide for building new tools.  One of the most obvious examples of this
+intersection is the Algebraic Data Type (ADT).  ADTs are get their name from the
+fact that they are constructed from primitives using addition (the discriminated
+union) and multiplication (tuples and records).  Where things get awesome is the
+fact that differentiation can be done one ADTs which are generic.  This post will
+explain how something as abstract as the derivative of a type can lead to building
+useful constructs called Zippers.
 
 Zippers are a type pattern which provide a functional way to interact with and transform data structures:  linked lists,
-binary trees, rose trees, etc.  The Zipper is a type with a set of functions that create a cursor which moved through a
+binary trees, rose trees, etc.  The Zipper is a type with a set of functions that create a cursor which moves through a
 data structure, much like you move through your computers file directory tree, and can be used to modify the data
-structure.  They're also a really cool demonstration of the intersection between programming and higher math, in this
-case: derivatives.
+structure.
 
-In this blog post, I will explain both the mechanics of the Zipper type and the mathematics of the Zipper.  First,
-I'll explain the list Zipper:  how to make one in F# and what can be done with it.  Second, the list zipper will be used
-as the basis for teaching how to take the derivative of an Algebraic Data Type (ADT).  Finally, the derivative
-operation will be usd to create a Zipper for the binary tree.
+This blog post explain both the mechanics of the Zipper type and how to use mathematics to derive a Zipper for a type.
+First, we'll cover the list Zipper to provide an introduction to what a Zipper is and why it's useful.  Second, the
+list Zipper will be derived from the generic list type using differentiation.  Third, we'll take a binary tree
+ADT and use differentiation to derive the binary tree zipper.  Finally, using that to create a binary tree zipper
+in F#.
 
 <!-- more -->
 
 ## The List Zipper
-To start with, we'll skip the math completely and focus just on the F# code: the type and the functions that, combined,
-form a Zipper.   After that, will be how to use the list zipper to interact with a list.
+We'll skip the math completely and focus just on the F# code: the type and the functions that
+form a Zipper.  Then how to use the list zipper to interact with a list.
 
 ### The F# List Zipper
-Imagine that you have a slide show deck that you want to represent in F#.  You'll want to be able to move back and forth
+Imagine that you want to write a type that represents a slide show.  You'll want to be able to move back and forth
 through the deck as you give your presentation.  You also want to be able to change a specific slide as you work on your
 presentation.
 
-A list makes a good type to represent our slide show, as a first version.  However, how can we move back and forth
-through the deck and how can we swap out slides as we move through the deck?  We want a type which stores an ordered
-set of slides, has a focus on the slide which is being projected to a screen, and has functions for moving the focus
+A list seems like the best candidate for our type, at first.  However, how can we move back and forth
+through the deck and how can we swap out slides as we edit the deck?  We want a type which stores an ordered
+set of slides, has a cursor on the current slide (the one we're editing or presenting), and has functions for moving the focus
 to the previous slide, to the next slide, or swapping in a new slide.
 
-The type we just described is the list zipper.  And the above paragraph describes all the things the list Zipper needs
+The type we just described is the list zipper.  And the above paragraph describes all the things the list zipper needs
 to have:  something which represents the current slide, all the slides before the current slide, all the slides after
 the current slide, and functions to navigate the slide show.  If we take all of those requirements we get this type in
 F#:
@@ -94,7 +97,7 @@ Take the new zipper and move the cursor right one more time
 it.right();;
 // val it : Zipper<int> = Zipper ([2; 1], 3, [4])
 {% endcodeblock %}
-Note that the left list is storing the elements in reverse order.  This is becaues when the cursor moves left in a
+Note that the left list is storing the elements in reverse order.  This is because when the cursor moves left in a
 list it is traversing the list in reverse order.
 
 Update the value at the cursor:
