@@ -1,0 +1,49 @@
+---
+layout: post
+title: "Odin - Learning Distributed Computing"
+date: 2014-03-07 22:39:00 -0800
+comments: true
+categories: [F#, Rx, Odin, Distributed Computing]
+---
+
+Over the last two years, I've really become interested in distributed computing and things like big data.  My interest in these topics grew in coincidence with my falling in love with F#.  I do a lot of different projects at work and not all of them involve any of those three topics.  So, to provide a motive for learning more about distributed computing and sharpening my F# skills I have decided to start working on a small side project (currently, by myself but several friends are interested).  This is called Odin, inspired by the Riemann project, it's a distributed monitoring system.  It will consist of lightweight agents and heavyweight monitoring engines.  The agents will run on servers collecting data and sending it to the monitors.  The monitors will read the stream of events coming from all the servers then process, analyze, and act.
+<!-- more -->
+The goal here is, first and foremost, educational.  To gain experience with F#.  To gain experience with distributed computing.  To play with complex algorithms and designs and new technology.
+
+##### Components
+The foundation of Odin is the event stream.  These area  stream of messages.  Each message containing information about an event or state of a server, application, data source, etc.  It's like a Twitter feed.  This feed is currently being built using RabbitMQ.
+
+The next component is the Agent (called Muninn).  The agent is a small service collects data about a server and sends that data to the event stream.  This is the piece which runs on the servers so it needs to be as light and resource spare as possible.  It will just periodically run data collection funcctions and write the results to the event stream.
+
+Finally, the heavy hitter:  Odin.  Odin is the service which receives all the events and analyzes the events to determine if any action should be taken.  For example, if an agent is sending the percent of CPU being used by Server A, then Odin would monitor that stream of events and, if it went above 90% for 5 minutes, send out an email alert.  Odin is meant to be an easily configured platform.  It will handle receiving the event stream, deserializing messages, doing an parsing, and running monitoring scripts.  The monitoring scripts are what will do the actual logic and analysis.  My goal is to make it easy to write these scripts, then publish them to an Odin node which will handle the execution.
+
+Ultimately, I will make Odin be capapble of running in a cluster.  Where the processing load is distributed across nodes and monitor scripts are distributed so as to keep performance even.  For example, a very complex, resource heavy monitor which is flagged as not-critical might get moved to a low performance server where no other monitor is running.
+
+##### What I'm Exploring
+
+Right now, Odin has provided me with opportunity to explore many things, including:
+
+- The Actor model of concurrency and the F# MailBox Processor
+- RabbitMQ
+- Reactive Extensions
+- F# - this is helping me learn a lot about functional programming
+- ZeroMQ - a possible alternative to RabbitMQ
+- Mono/Crossplatform - This needs to be capable of handling a heterogenous system (many different OS's), so I'll mess around running F# in Linux/OSX using Mono & Xamarin.
+
+###### Actors and Mailbox Processors
+Right now, I'm using F#'s Mailbox processors to handle running concurrent tasks in Odin (e.g. the monitors each run in their own Mailbox Processor).  The Mailbox Processor is an implementation of the Actor Model of concurrency: briefly, each process runs in its own isolated world and if two processes want to communicate they send messages back and forth.  I'm using this for a couple reasons.  One it's built into F# so is easy to use and setup.  Two, it provides a very easy way to think about concurrent systems and helps to minimize the early complexity of Odin.  These two things will let me focus on the overall design and the more high level distributed algorithms (e.g. how to split load across a cluster of Odins).
+
+###### RabbitMQ
+I chose RabbitMQ to handle communication between services because it has a reputation for being fast, it's simple to use, and it's open source.  The nice administration page which lets me see what's happening in the queues is a nice bonus.  I want to make it easy to switch over to a different communication system (like ZeroMQ) if needed, so the design of Odin should make sure that the actual implementation of the event stream is fairly decoupled from what developers actually code against.
+
+###### Reactive Extensions
+The Reactive Extensions will be a big part of Odin.  I chose this because I want to learn the tools, it provides an elegant way for monitors to interact with the event stream, and it provides a simple way to couple the Mailbox processors running the monitors to the queue of messages that contains the events.  Reactive will allow monitors to subscribe to the event stream and then apply queries (LINQ) to the incoming stream of events.  These could be maps, filters, aggregators, you name it, if it can be done on a database table it can be done on an event stream.
+
+###### F# 
+Simply the most fun language to program I have ever seen.
+
+###### ZeroMQ
+A possible alternative to RabbitMQ.  It's written by some of the same people who made the ActiveMQ Protocol.  It differs from RabbitMQ primarily by not having any message brokers.  Its also written in C rather than Erlang.  The goal with ZeroMQ is to make an incredibly simple, incredibly fast messaging system.
+
+###### Mono/Xamarin
+In order for this to support Linux and OSX I'll need to be able to build and run this using Mono and Xamarin.
