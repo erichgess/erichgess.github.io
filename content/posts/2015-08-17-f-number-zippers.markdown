@@ -129,10 +129,10 @@ The derivative of which is:
 
 $$
 \begin{eqnarray} 
-\partial_aL &=& L + a\partial_aL \\
-\partial_aL(1 - a) &=& L \\
-\partial_aL &=& \frac{L}{1 - a} \\
-\partial_aL &=& \frac{1 + a + a^2 + a^3...}{1-a} = \frac{(1 + 2a + 3a^2 + ...)(1-a)}{1-a} = L^2 \\
+\partial_aL &=& L + a\partial_aL \\\\
+\partial_aL(1 - a) &=& L \\\\
+\partial_aL &=& \frac{L}{1 - a} \\\\
+\partial_aL &=& \frac{1 + a + a^2 + a^3...}{1-a} = \frac{(1 + 2a + 3a^2 + ...)(1-a)}{1-a} = L^2 \\\\
 \end{eqnarray}
 $$
 
@@ -171,10 +171,10 @@ And taking the derivative we get:
 
 $$
 \begin{eqnarray}
-\partial_aT(a) &=& T^2(a) + a \cdot (2 \cdot T(a) \cdot \partial_aT(a)) \\
-\partial_aT(a) - 2 \cdot a \cdot T(a) \cdot \partial_aT(a) &=& T^2(a) \\
-\partial_aT(a) \cdot (1 - 2 \cdot a \cdot T(a)) &=& T^2(a) \\
-\partial_aT(a) &=& \frac{T^2(a)}{1 - 2 \cdot a \cdot T(a)} \\
+\partial_aT(a) &=& T^2(a) + a \cdot (2 \cdot T(a) \cdot \partial_aT(a)) \\\\
+\partial_aT(a) - 2 \cdot a \cdot T(a) \cdot \partial_aT(a) &=& T^2(a) \\\\
+\partial_aT(a) \cdot (1 - 2 \cdot a \cdot T(a)) &=& T^2(a) \\\\
+\partial_aT(a) &=& \frac{T^2(a)}{1 - 2 \cdot a \cdot T(a)} \\\\
 \end{eqnarray}
 $$
 

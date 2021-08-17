@@ -38,17 +38,17 @@ Where $$L(R)$$ is a list of rose trees.
 
 The derivative is:
 
-$$
+\\[
 \begin{eqnarray} 
-\partial_aR &=& L(R) + a\partial_aL(R)\partial_aR \\
-\partial_aR - a\partial_aL(R)\partial_aR &=& L(R) \\
-(1 - a\partial_aL(R))\partial_aR &=& L(R) \\
-\partial_aR &=& \frac{L(R)}{1-a\partial_aL(R)} \\
-&=& L(R)\frac{1}{1 - a\partial_aL(R)} \\
-&=& L(R)L(a\partial_aL(R)) \\
-&=& L(R)L(aL^2(R)) \\
+\partial_aR &=& L(R) + a\partial_aL(R)\partial_aR \\\\
+\partial_aR - a\partial_aL(R)\partial_aR &=& L(R) \\\\
+(1 - a\partial_aL(R))\partial_aR &=& L(R) \\\\
+\partial_aR &=& \frac{L(R)}{1-a\partial_aL(R)} \\\\
+&=& L(R)\frac{1}{1 - a\partial_aL(R)} \\\\
+&=& L(R)L(a\partial_aL(R)) \\\\
+&=& L(R)L(aL^2(R)) \\\\
 \end{eqnarray}
-$$
+\\]
 
 The next to last step uses the identity $$L(a) = \frac{1}{1 - a}$$ to arrive at $$L(R)L(aL^2(R))$$.
 
@@ -74,7 +74,7 @@ To help clarify how the rose tree zipper works, here's a visual explanation.
 The color green indicates the position of the cursor.
 
 Here we are with a newly created zipper on a rose tree.  The cursor is pointing to the root of the tree
-![My helpful screenshot]({{ site.url }}/assets/zippers/rosetree_1.png)
+![My helpful screenshot](/images/zippers/rosetree_1.png)
 
 We'll move the cursor down to the middle branch.  The root of the tree and the left and right branches
 are then moved into the history list for the cursor.  The color blue is used to show that all those
@@ -84,14 +84,14 @@ nodes are grouped together as one entry in the history list.
 Here's a visual of the rose tree zipper value after the cursor is moved to the middle node.  The cursor
 points to (C, [G; H]), corresponding to the `'a * RoseTree<'a> list` in the zipper type.  The previous
 cursor position corresponds to the list of `'a * RoseTree<'a> list * RoseTree<'a> list`.
-![The zipper type]({{ site.url }}/assets/zippers/rosetree_2_note.png)
+![The zipper type](/images/zippers/rosetree_2_note.png)
 
 Moving the cursor down the left branch, the previous node and the right branch are colored to indicate
 that they are grouped together and prepended to the history list.
-![Move cursor down left branch]({{ site.url }}/assets/zippers/rosetree_3.png)
+![Move cursor down left branch](/images/zippers/rosetree_3.png)
 
 Visualizing the new rose tree zipper value.  `C, H` have been moved to the head of the history list.
 `H` is moved into the list of branches to the right of where the cursor is.  The list of branches to
 the left is empty, since this subtree only had two branches.  `C` is moved into the node value of the
 entry.
-![New rose tree zipper value]({{ site.url }}/assets/zippers/rosetree_3_note.png)
+![New rose tree zipper value](/images/zippers/rosetree_3_note.png)
