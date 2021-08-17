@@ -4,6 +4,7 @@ title: "Zippers 2: Building a Rose Tree Zipper"
 date: 2015-11-01 09:38:55 -0500
 comments: true
 categories: [Zippers, Type Algebra, Type Theory, F#, Functional Programming]
+mathjax: true
 ---
 As a follow up to my post about Zippers for lists and binary trees, I wanted to create a zipper for
 a slightly more complex data structure.  The Rose Tree is a tree structure where the number of

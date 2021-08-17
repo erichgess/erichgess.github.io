@@ -4,6 +4,7 @@ title: "F# Zippers"
 date: 2015-08-17 13:16:40 -0500
 comments: true
 categories: [F#, Functional Programming, Type Theory]
+mathjax: true
 ---
 
 One of the coolest things about working with F# (and other ML languages) is the
@@ -171,11 +172,8 @@ And taking the derivative we get:
 $$
 \begin{eqnarray}
 \partial_aT(a) &=& T^2(a) + a \cdot (2 \cdot T(a) \cdot \partial_aT(a)) \\
-
 \partial_aT(a) - 2 \cdot a \cdot T(a) \cdot \partial_aT(a) &=& T^2(a) \\
-
 \partial_aT(a) \cdot (1 - 2 \cdot a \cdot T(a)) &=& T^2(a) \\
-
 \partial_aT(a) &=& \frac{T^2(a)}{1 - 2 \cdot a \cdot T(a)} \\
 \end{eqnarray}
 $$
