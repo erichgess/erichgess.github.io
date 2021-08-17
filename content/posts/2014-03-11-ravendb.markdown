@@ -39,7 +39,7 @@ The second is less obvious:  why not just keep a single record for each order an
 The MapReduce step.  RavenDB has a nice MapReduce index feature which will work very well here.  I can tell RavenDB to basically perform a calculation on the entire set of Facts I have stored.  In this casee, what I am going to do is tell RavenDB to divide all the Facts into buckets based on Order Id.  The for each bucket, pick the most recent Fact.  This will generate a table, where each order appears once and has its most recent Fact.  RavenDB will run this task in the back ground and everytime I add a new fact it will update the information.
 
 Here's my order fact type:
-{% codeblock lang:csharp %}
+```csharp
 public class OrderFact {
     public string Id { get; set; }
     public Guid OrderId { get; set;}

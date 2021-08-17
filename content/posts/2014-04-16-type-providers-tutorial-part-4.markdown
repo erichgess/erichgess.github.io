@@ -142,7 +142,7 @@ Now, just for this test, update the call to create type to look like this:
     let types = [ CreateType([]) ] 
 ```
 Build and send the project output to the FSI.  You should get an output that looks like:
-{% codeblock %}
+```
 stdin(2,1): error FS3053: The type provider 'Samples.FSharp.TutorialTypeProvider.TutorialTypeProvider' reported an error: The type provider constructor has thrown an exception: The column list is empty
 ```
 
