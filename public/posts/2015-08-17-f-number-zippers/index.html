@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  
+  <title>F# Zippers | Erich&#39;s Site</title>
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <meta name="description"
+    content="One of the coolest things about working with F# (and other ML languages) is the incredibly elegant way that mathematics intersects with programming, to inform powerful tools for our toolbox. Algebraic Data Types (ADTs) are the source of a large amount of this mathematical invention. Recently, I&rsquo;ve been exploring the algebra and calculus of types and what happens when you take the derivative of a type.
+Zippers are a type pattern which provide a functional way to interact with and transform data structures: linked lists, binary trees, rose trees, etc.">
+
+  <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+
+    window.addEventListener('load', (event) => {
+        document.querySelectorAll("mjx-container").forEach(function (x) {
+            x.parentElement.classList += 'has-jax'
+        })
+    });
+
+</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <meta name="generator" content="Hugo 0.87.0" />
+  
+  
+  <META NAME="ROBOTS" CONTENT="NOINDEX, NOFOLLOW">
+  
+
+  
+<link rel="stylesheet" href="/ananke/css/main.min.css" >
+
+
+
+
+  
+  
+
+  
+
+  
+
+  <meta property="og:title" content="F# Zippers" />
+<meta property="og:description" content="One of the coolest things about working with F# (and other ML languages) is the incredibly elegant way that mathematics intersects with programming, to inform powerful tools for our toolbox. Algebraic Data Types (ADTs) are the source of a large amount of this mathematical invention. Recently, I&rsquo;ve been exploring the algebra and calculus of types and what happens when you take the derivative of a type.
+Zippers are a type pattern which provide a functional way to interact with and transform data structures: linked lists, binary trees, rose trees, etc." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://example.org/posts/2015-08-17-f-number-zippers/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2015-08-17T13:16:40+00:00" />
+<meta property="article:modified_time" content="2015-08-17T13:16:40+00:00" />
+
+<meta itemprop="name" content="F# Zippers">
+<meta itemprop="description" content="One of the coolest things about working with F# (and other ML languages) is the incredibly elegant way that mathematics intersects with programming, to inform powerful tools for our toolbox. Algebraic Data Types (ADTs) are the source of a large amount of this mathematical invention. Recently, I&rsquo;ve been exploring the algebra and calculus of types and what happens when you take the derivative of a type.
+Zippers are a type pattern which provide a functional way to interact with and transform data structures: linked lists, binary trees, rose trees, etc."><meta itemprop="datePublished" content="2015-08-17T13:16:40+00:00" />
+<meta itemprop="dateModified" content="2015-08-17T13:16:40+00:00" />
+<meta itemprop="wordCount" content="2626">
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="F# Zippers"/>
+<meta name="twitter:description" content="One of the coolest things about working with F# (and other ML languages) is the incredibly elegant way that mathematics intersects with programming, to inform powerful tools for our toolbox. Algebraic Data Types (ADTs) are the source of a large amount of this mathematical invention. Recently, I&rsquo;ve been exploring the algebra and calculus of types and what happens when you take the derivative of a type.
+Zippers are a type pattern which provide a functional way to interact with and transform data structures: linked lists, binary trees, rose trees, etc."/>
+
+  
+</head>
+
+<body class="ma0 avenir bg-near-white">
+
+  
+   
+  
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv3 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="/" class="f3 fw2 hover-white no-underline white-90 dib">
+      
+        Erich&#39;s Site
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+
+  <main class="pb7" role="main">
+    
+  
+  <article class="flex-l flex-wrap justify-between mw8 center ph3">
+    <header class="mt4 w-100">
+      <aside class="instapaper_ignoref b helvetica tracked">
+          
+        POSTS
+      </aside>
+      
+
+
+
+
+  <div id="sharing" class="mt3">
+
+    
+    <a href="https://www.facebook.com/sharer.php?u=http://example.org/posts/2015-08-17-f-number-zippers/" class="facebook no-underline" aria-label="share on Facebook">
+      <svg height="32px"  style="enable-background:new 0 0 67 67;" version="1.1" viewBox="0 0 67 67" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M28.765,50.32h6.744V33.998h4.499l0.596-5.624h-5.095  l0.007-2.816c0-1.466,0.14-2.253,2.244-2.253h2.812V17.68h-4.5c-5.405,0-7.307,2.729-7.307,7.317v3.377h-3.369v5.625h3.369V50.32z   M33,64C16.432,64,3,50.569,3,34S16.432,4,33,4s30,13.431,30,30S49.568,64,33,64z" style="fill-rule:evenodd;clip-rule:evenodd;"/></svg>
+
+    </a>
+
+    
+    
+    <a href="https://twitter.com/share?url=http://example.org/posts/2015-08-17-f-number-zippers/&amp;text=F#%20Zippers" class="twitter no-underline" aria-label="share on Twitter">
+      <svg height="32px"  style="enable-background:new 0 0 67 67;" version="1.1" viewBox="0 0 67 67" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M37.167,22.283c-2.619,0.953-4.274,3.411-4.086,6.101  l0.063,1.038l-1.048-0.127c-3.813-0.487-7.145-2.139-9.974-4.915l-1.383-1.377l-0.356,1.017c-0.754,2.267-0.272,4.661,1.299,6.271  c0.838,0.89,0.649,1.017-0.796,0.487c-0.503-0.169-0.943-0.296-0.985-0.233c-0.146,0.149,0.356,2.076,0.754,2.839  c0.545,1.06,1.655,2.097,2.871,2.712l1.027,0.487l-1.215,0.021c-1.173,0-1.215,0.021-1.089,0.467  c0.419,1.377,2.074,2.839,3.918,3.475l1.299,0.444l-1.131,0.678c-1.676,0.976-3.646,1.526-5.616,1.568  C19.775,43.256,19,43.341,19,43.405c0,0.211,2.557,1.397,4.044,1.864c4.463,1.377,9.765,0.783,13.746-1.568  c2.829-1.673,5.657-5,6.978-8.221c0.713-1.716,1.425-4.851,1.425-6.354c0-0.975,0.063-1.102,1.236-2.267  c0.692-0.678,1.341-1.419,1.467-1.631c0.21-0.403,0.188-0.403-0.88-0.043c-1.781,0.636-2.033,0.551-1.152-0.402  c0.649-0.678,1.425-1.907,1.425-2.267c0-0.063-0.314,0.042-0.671,0.233c-0.377,0.212-1.215,0.53-1.844,0.72l-1.131,0.361l-1.027-0.7  c-0.566-0.381-1.361-0.805-1.781-0.932C39.766,21.902,38.131,21.944,37.167,22.283z M33,64C16.432,64,3,50.569,3,34S16.432,4,33,4  s30,13.431,30,30S49.568,64,33,64z" style="fill-rule:evenodd;clip-rule:evenodd;fill:;"/></svg>
+
+    </a>
+
+    
+    <a href="https://www.linkedin.com/shareArticle?mini=true&amp;url=http://example.org/posts/2015-08-17-f-number-zippers/&amp;title=F#%20Zippers" class="linkedin no-underline" aria-label="share on LinkedIn">
+      <svg  height="32px"  style="enable-background:new 0 0 65 65;" version="1.1" viewBox="0 0 65 65" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <path d="M50.837,48.137V36.425c0-6.275-3.35-9.195-7.816-9.195  c-3.604,0-5.219,1.983-6.119,3.374V27.71h-6.79c0.09,1.917,0,20.427,0,20.427h6.79V36.729c0-0.609,0.044-1.219,0.224-1.655  c0.49-1.22,1.607-2.483,3.482-2.483c2.458,0,3.44,1.873,3.44,4.618v10.929H50.837z M22.959,24.922c2.367,0,3.842-1.57,3.842-3.531  c-0.044-2.003-1.475-3.528-3.797-3.528s-3.841,1.524-3.841,3.528c0,1.961,1.474,3.531,3.753,3.531H22.959z M34,64  C17.432,64,4,50.568,4,34C4,17.431,17.432,4,34,4s30,13.431,30,30C64,50.568,50.568,64,34,64z M26.354,48.137V27.71h-6.789v20.427  H26.354z" style="fill-rule:evenodd;clip-rule:evenodd;fill:;"/>
+</svg>
+
+    </a>
+  </div>
+
+
+      <h1 class="f1 athelas mt3 mb1">F# Zippers</h1>
+      
+      
+      <time class="f6 mv4 dib tracked" datetime="2015-08-17T13:16:40Z">August 17, 2015</time>
+
+      
+      
+    </header>
+    <div class="nested-copy-line-height lh-copy serif f4 nested-links nested-img mid-gray pr4-l w-two-thirds-l"><p>One of the coolest things about working with F# (and other ML languages) is the
+incredibly elegant way that mathematics intersects with programming, to inform
+powerful tools for our toolbox.  Algebraic Data Types (ADTs) are the source of a
+large amount of this mathematical invention.  Recently, I&rsquo;ve been exploring the
+algebra and calculus of types and what happens when you take the derivative
+of a type.</p>
+<p>Zippers are a type pattern which provide a functional way to interact with and transform data structures:  linked lists,
+binary trees, rose trees, etc.  The Zipper is a type with a set of functions that create a cursor which moved through a
+data structure, much like you move through your computers file directory tree, and can be used to modify the data
+structure.  They&rsquo;re also a really cool demonstration of the intersection between programming and higher math, in this
+case: derivatives.</p>
+<p>In this blog post, I will explain both the mechanics of the Zipper type and the mathematics of the Zipper.  First,
+I&rsquo;ll explain the list Zipper:  how to make one in F# and what can be done with it.  Second, the list zipper will be used
+as the basis for teaching how to take the derivative of an Algebraic Data Type (ADT).  Finally, the derivative
+operation will be usd to create a Zipper for the binary tree.</p>
+<!-- raw HTML omitted -->
+<h2 id="the-list-zipper">The List Zipper</h2>
+<p>To start with, we&rsquo;ll skip the math completely and focus just on the F# code: the type and the functions that, combined,
+form a Zipper.   After that, will be how to use the list zipper to interact with a list.</p>
+<h3 id="the-f-list-zipper">The F# List Zipper</h3>
+<p>Imagine that you have a slide show deck that you want to represent in F#.  You&rsquo;ll want to be able to move back and forth
+through the deck as you give your presentation.  You also want to be able to change a specific slide as you work on your
+presentation.</p>
+<p>A list makes a good type to represent our slide show, as a first version.  However, how can we move back and forth
+through the deck and how can we swap out slides as we move through the deck?  We want a type which stores an ordered
+set of slides, has a focus on the slide which is being projected to a screen, and has functions for moving the focus
+to the previous slide, to the next slide, or swapping in a new slide.</p>
+<p>The type we just described is the list zipper.  And the above paragraph describes all the things the list Zipper needs
+to have:  something which represents the current slide, all the slides before the current slide, all the slides after
+the current slide, and functions to navigate the slide show.  If we take all of those requirements we get this type in
+F#:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fsharp" data-lang="fsharp"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Zipper</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span> Zipper <span style="color:#66d9ef">of</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">&#39;</span>a <span style="color:#66d9ef">list</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">&#39;</span>a <span style="color:#f92672">*</span> <span style="color:#66d9ef">&#39;</span>a <span style="color:#66d9ef">list</span><span style="color:#f92672">)</span> <span style="color:#66d9ef">with</span>
+    <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">member</span> create l <span style="color:#f92672">=</span>
+        <span style="color:#66d9ef">match</span> l <span style="color:#66d9ef">with</span>
+        <span style="color:#f92672">|</span> [] <span style="color:#f92672">-&gt;</span> failwith <span style="color:#e6db74">&#34;oops&#34;</span>
+        <span style="color:#f92672">|</span> h <span style="color:#f92672">::</span> t <span style="color:#f92672">-&gt;</span> Zipper <span style="color:#f92672">(</span>[]<span style="color:#f92672">,</span> h<span style="color:#f92672">,</span> t<span style="color:#f92672">)</span>
+
+    <span style="color:#66d9ef">member</span> z.<span style="color:#a6e22e">right</span> () <span style="color:#f92672">=</span>
+        <span style="color:#66d9ef">match</span> z <span style="color:#66d9ef">with</span>
+        <span style="color:#f92672">|</span> Zipper<span style="color:#f92672">(</span>l<span style="color:#f92672">,</span> z<span style="color:#f92672">,</span> []<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> Zipper<span style="color:#f92672">(</span>l<span style="color:#f92672">,</span> z<span style="color:#f92672">,</span> []<span style="color:#f92672">)</span>
+        <span style="color:#f92672">|</span> Zipper<span style="color:#f92672">(</span>l<span style="color:#f92672">,</span> z<span style="color:#f92672">,</span> h<span style="color:#f92672">::</span>rt<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> Zipper<span style="color:#f92672">(</span>z<span style="color:#f92672">::</span>l<span style="color:#f92672">,</span> h<span style="color:#f92672">,</span> rt<span style="color:#f92672">)</span>
+
+    <span style="color:#66d9ef">member</span> z.<span style="color:#a6e22e">left</span> () <span style="color:#f92672">=</span>
+        <span style="color:#66d9ef">match</span> z <span style="color:#66d9ef">with</span>
+        <span style="color:#f92672">|</span> Zipper<span style="color:#f92672">(</span>[]<span style="color:#f92672">,</span> z<span style="color:#f92672">,</span> r<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> Zipper<span style="color:#f92672">(</span>[]<span style="color:#f92672">,</span> z<span style="color:#f92672">,</span> r<span style="color:#f92672">)</span>
+        <span style="color:#f92672">|</span> Zipper<span style="color:#f92672">(</span>h<span style="color:#f92672">::</span>lt<span style="color:#f92672">,</span> z<span style="color:#f92672">,</span> r<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> Zipper<span style="color:#f92672">(</span>lt<span style="color:#f92672">,</span> h<span style="color:#f92672">,</span> z<span style="color:#f92672">::</span>r<span style="color:#f92672">)</span>
+
+    <span style="color:#66d9ef">member</span> z.<span style="color:#a6e22e">update</span> x <span style="color:#f92672">=</span>
+        <span style="color:#66d9ef">let</span> <span style="color:#f92672">(</span>Zipper<span style="color:#f92672">(</span>l<span style="color:#f92672">,</span> <span style="color:#f92672">_,</span> r<span style="color:#f92672">))</span> <span style="color:#f92672">=</span> z <span style="color:#66d9ef">in</span> Zipper<span style="color:#f92672">(</span>l<span style="color:#f92672">,</span> x<span style="color:#f92672">,</span> r<span style="color:#f92672">)</span>
+</code></pre></div><p>This also has a constructor function which takes a list and returns a zipper on that list.</p>
+<p>The core of this type is the tuple: <code>'a list * 'a * 'a list</code>.  The first type represents the list of elements which
+precede the cursor.  The second type, <code>'a</code>, represents the value in the list which the cursor points to.  The third
+type, <code>'a list</code>, represents the list of elements which come after the cursor.</p>
+<h4 id="demonstration-of-the-list-zipper">Demonstration of the List Zipper</h4>
+<p>Start by creating a zipper from a list</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fsharp" data-lang="fsharp"><span style="color:#66d9ef">let</span> z <span style="color:#f92672">=</span> Zipper.create <span style="color:#f92672">[</span>1<span style="color:#f92672">;</span> 2<span style="color:#f92672">;</span> 3<span style="color:#f92672">;</span> 4<span style="color:#f92672">]</span>
+<span style="color:#75715e">// val z : Zipper&lt;int&gt; = Zipper ([], 1, [2; 3; 4])
+</span></code></pre></div><p>The cursor points to the first element in the list, there are no elements to the left of the cursor so that list is
+empty, and all the other elements are to the right of the cursor so they are in the respective list.</p>
+<p>Move the cursor to the right</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fsharp" data-lang="fsharp">z<span style="color:#f92672">.</span>right()<span style="color:#f92672">;;</span>
+<span style="color:#75715e">// val it : Zipper&lt;int&gt; = Zipper ([1], 2, [3; 4])
+</span></code></pre></div><p>Calling the right function has returned a new zipper with the cursor now pointing to the second element in the list.</p>
+<p>Take the new zipper and move the cursor right one more time</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fsharp" data-lang="fsharp">it<span style="color:#f92672">.</span>right()<span style="color:#f92672">;;</span>
+<span style="color:#75715e">// val it : Zipper&lt;int&gt; = Zipper ([2; 1], 3, [4])
+</span></code></pre></div><p>Note that the left list is storing the elements in reverse order.  This is becaues when the cursor moves left in a
+list it is traversing the list in reverse order.</p>
+<p>Update the value at the cursor:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fsharp" data-lang="fsharp">it<span style="color:#f92672">.</span>update <span style="color:#f92672">-</span>3<span style="color:#f92672">;;</span>
+<span style="color:#75715e">// val it : Zipper&lt;int&gt; = Zipper ([2; 1], -3, [4])
+</span></code></pre></div><p>Move to the left:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fsharp" data-lang="fsharp">it<span style="color:#f92672">.</span>left()<span style="color:#f92672">;;</span>
+<span style="color:#75715e">// val it : Zipper&lt;int&gt; = Zipper ([1], 2, [-3; 4])
+</span></code></pre></div><h2 id="the-math-behind-the-list-zipper">The Math Behind the List Zipper</h2>
+<p>Here&rsquo;s an approximate type definition for a list:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fsharp" data-lang="fsharp"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">List</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span> Empty <span style="color:#f92672">|</span> List <span style="color:#66d9ef">of</span> <span style="color:#66d9ef">&#39;</span>a <span style="color:#f92672">*</span> List<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span>
+</code></pre></div><p>This type definition is strictly to make how the algebra &amp; calculus behind the list
+zipper gets derived and to explicitly call out that the list type is, mathematically,
+a recursive type.</p>
+<p>Algebraicly, this List is represented as:</p>
+<p>$$L = 1 + a\cdot L$$</p>
+<p>The derivative of which is:</p>
+<p>$$
+\begin{eqnarray}
+\partial_aL &amp;=&amp; L + a\partial_aL \\<br>
+\partial_aL(1 - a) &amp;=&amp; L \\<br>
+\partial_aL &amp;=&amp; \frac{L}{1 - a} \\<br>
+\partial_aL &amp;=&amp; \frac{1 + a + a^2 + a^3&hellip;}{1-a} = \frac{(1 + 2a + 3a^2 + &hellip;)(1-a)}{1-a} = L^2 \\<br>
+\end{eqnarray}
+$$</p>
+<p>If we take $$L^2$$ and convert it to a type we get:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fsharp" data-lang="fsharp"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">partial_l</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">&#39;</span>a <span style="color:#66d9ef">list</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">&#39;</span>a <span style="color:#66d9ef">list</span>
+</code></pre></div><p>Which is close to our Zipper type but not quite there.</p>
+<p>As explained in Colin McBrides paper on the topic of zippers and type derivatives, we can think of the derivative of a
+type as a hole which is poked into the type where the hole represents the cursor.  The hole can can take any value of
+the type <code>'a</code>.  We can think of the pair of lists representing where in the list the hole is and the <code>'a</code> respresents
+the value of the hole.  In other words, take the derivative of <code>List&lt;'a&gt;</code> and multiply it by <code>'a</code> and you have the
+zipper:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fsharp" data-lang="fsharp"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Zipper</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">&#39;</span>a <span style="color:#66d9ef">list</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">&#39;</span>a <span style="color:#f92672">*</span> <span style="color:#66d9ef">&#39;</span>a <span style="color:#66d9ef">list</span>
+</code></pre></div><h2 id="deriving-the-binary-tree-zipper">Deriving the Binary Tree Zipper</h2>
+<p>Now that we know how to use differentiation to create the zipper for the List type, let&rsquo;s use the same technique to
+create the zipper for a binary tree.  This will start with defining a simple type for the binary tree, then
+evaluating the derivative of the binary tree type, and, finally, converting the result into an F# type.</p>
+<p>Here&rsquo;s the binary tree type we&rsquo;ll work with:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fsharp" data-lang="fsharp"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Tree</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span>
+    <span style="color:#f92672">|</span> Branch <span style="color:#66d9ef">of</span> <span style="color:#66d9ef">&#39;</span>a <span style="color:#f92672">*</span> Tree<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span> <span style="color:#f92672">*</span> Tree<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span>
+    <span style="color:#f92672">|</span> Empty
+</code></pre></div><p>We can take this type in represent it mathematically as:</p>
+<p>$$T(a) = 1 + a \cdot T^2(a)$$</p>
+<p>And taking the derivative we get:</p>
+<p>$$
+\begin{eqnarray}
+\partial_aT(a) &amp;=&amp; T^2(a) + a \cdot (2 \cdot T(a) \cdot \partial_aT(a)) \\<br>
+\partial_aT(a) - 2 \cdot a \cdot T(a) \cdot \partial_aT(a) &amp;=&amp; T^2(a) \\<br>
+\partial_aT(a) \cdot (1 - 2 \cdot a \cdot T(a)) &amp;=&amp; T^2(a) \\<br>
+\partial_aT(a) &amp;=&amp; \frac{T^2(a)}{1 - 2 \cdot a \cdot T(a)} \\<br>
+\end{eqnarray}
+$$</p>
+<p>If we take this result and factor out the $$T^2$$ to get two terms, we get the following:</p>
+<p>$$T^2(a) \cdot \left( \frac{1}{1 - 2 \cdot a \cdot T(a)} \right)$$</p>
+<p>The second term, $$\frac{1}{1 - 2 \cdot a \cdot T(a)}$$, looks remarkably similar to $$\frac{1}{1-a}$$ which, as
+we saw in the section about Lists, becomes $$L(a)$$.  So the derivative of the tree becomes:</p>
+<p>$$\partial_aT(a) = T^2(a) \cdot L(2 \cdot a \cdot T(a))$$</p>
+<p>Now, we know that the Zipper is equal to the derivative of the type times $$a$$, which represents the possible values of
+the focus, this means that our Tree Zipper type will looke like this:</p>
+<p>$$a \cdot T^2 \cdot L(2 \cdot a \cdot T)$$</p>
+<p>Translating the $$a \cdot T^2$$ to F# is easy, but what does the type in the list, $$2 \cdot a \cdot T$$, represent?</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fsharp" data-lang="fsharp"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">TreeZipper</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">&#39;</span>a <span style="color:#f92672">*</span> Tree<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span> <span style="color:#f92672">*</span> Tree<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span> <span style="color:#f92672">*</span> XXX <span style="color:#66d9ef">list</span>
+</code></pre></div><p>We can take $$2 \cdot a \cdot T$$ and expand it to $$a \cdot T + a \cdot T$$, which tells us that $$XXX$$ is a union
+of a tuple:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fsharp" data-lang="fsharp"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">XXX</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span>
+    <span style="color:#f92672">|</span> A <span style="color:#66d9ef">of</span> <span style="color:#66d9ef">&#39;</span>a <span style="color:#f92672">*</span> Tree<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span>
+    <span style="color:#f92672">|</span> B <span style="color:#66d9ef">of</span> <span style="color:#66d9ef">&#39;</span>a <span style="color:#f92672">*</span> Tree<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span>
+</code></pre></div><p>But what the hell does the list of $$XXX$$ represent and what purpose does it play in the Zipper?  Remember, the Zipper
+has to have a focus, which tells you the value the cursor points to, a way to move through the type, and a way to go
+back.  With the List Zipper we can think of <code>right</code> as moving down the list and <code>left</code> as reversing, or undoing, the
+move.  So, with the Tree Zipper, the focus is on a node in the tree and the cursor can be moved down the left or right
+branch.  When you traverse down several levels in a tree, how do you go back?  There must be some record of the branches
+of the tree which were skipped.  When the cursor is at the root of the tree and moves down the left branch, the zipper
+must record the value the cursor pointed to and the right branch.  If the cursor moves down a branch again, it must
+record the next skipped branch.  This is where the $$2 \cdot a \cdot T$$ comes from:  $$a \cdot T$$ is the node value
+and the skipped branch the branch can be either the left branch or the right branch which makes to possible values
+giving us $$2 \cdot a \cdot T$$.  It&rsquo;s a list of $$2 \cdot a \cdot T$$ because each move records the branch which was
+skipped.</p>
+<p>Using this new understanding we can define the type <code>XXX</code> and the TreeZipper as:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fsharp" data-lang="fsharp"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Branch</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span>
+    <span style="color:#f92672">|</span> Left <span style="color:#66d9ef">of</span> <span style="color:#66d9ef">&#39;</span>a <span style="color:#f92672">*</span> Tree<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span>
+    <span style="color:#f92672">|</span> Right <span style="color:#66d9ef">of</span> <span style="color:#66d9ef">&#39;</span>a <span style="color:#f92672">*</span> Tree<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span>
+    
+<span style="color:#66d9ef">type</span> <span style="color:#a6e22e">TreeZipper</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">&#39;</span>a <span style="color:#f92672">*</span> Tree<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span> <span style="color:#f92672">*</span> Tree<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span> <span style="color:#f92672">*</span> Branch<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">list</span>
+</code></pre></div><p>Now we need the functions to satisfy: creating the Tree Zipper, moving down the right branch, moving down the left
+branch, moving back up the tree, and updating the focus.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fsharp" data-lang="fsharp"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Tree</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span>
+    <span style="color:#f92672">|</span> Branch <span style="color:#66d9ef">of</span> <span style="color:#66d9ef">&#39;</span>a <span style="color:#f92672">*</span> Tree<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span> <span style="color:#f92672">*</span> Tree<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span>
+    <span style="color:#f92672">|</span> Empty
+
+<span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Branch</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span>
+    <span style="color:#f92672">|</span> Left <span style="color:#66d9ef">of</span> <span style="color:#66d9ef">&#39;</span>a <span style="color:#f92672">*</span> Tree<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span>
+    <span style="color:#f92672">|</span> Right <span style="color:#66d9ef">of</span> <span style="color:#66d9ef">&#39;</span>a <span style="color:#f92672">*</span> Tree<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span>
+
+<span style="color:#66d9ef">type</span> <span style="color:#a6e22e">TreeZipper</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span> TreeZipper <span style="color:#66d9ef">of</span> <span style="color:#66d9ef">&#39;</span>a <span style="color:#f92672">*</span> Tree<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span> <span style="color:#f92672">*</span> Tree<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span> <span style="color:#f92672">*</span> Branch<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">list</span> <span style="color:#66d9ef">with</span>
+    <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">member</span> create t <span style="color:#f92672">=</span>
+        <span style="color:#66d9ef">match</span> t <span style="color:#66d9ef">with</span>
+        <span style="color:#f92672">|</span> Empty <span style="color:#f92672">-&gt;</span> failwith <span style="color:#e6db74">&#34;oops&#34;</span>
+        <span style="color:#f92672">|</span> Branch<span style="color:#f92672">(</span>x<span style="color:#f92672">,</span> l<span style="color:#f92672">,</span> r<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> TreeZipper<span style="color:#f92672">(</span>x<span style="color:#f92672">,</span> l<span style="color:#f92672">,</span> r<span style="color:#f92672">,</span> []<span style="color:#f92672">)</span>
+
+    <span style="color:#66d9ef">member</span> tz.<span style="color:#a6e22e">left</span> () <span style="color:#f92672">=</span>
+        <span style="color:#66d9ef">match</span> tz <span style="color:#66d9ef">with</span>
+        <span style="color:#f92672">|</span> TreeZipper<span style="color:#f92672">(</span>x<span style="color:#f92672">,</span> Empty<span style="color:#f92672">,</span> r<span style="color:#f92672">,</span> history<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> tz
+        <span style="color:#f92672">|</span> TreeZipper<span style="color:#f92672">(</span>x<span style="color:#f92672">,</span> Branch<span style="color:#f92672">(</span>lx<span style="color:#f92672">,</span> ll<span style="color:#f92672">,</span> lr<span style="color:#f92672">),</span> r<span style="color:#f92672">,</span> history<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> TreeZipper<span style="color:#f92672">(</span>lx<span style="color:#f92672">,</span> ll<span style="color:#f92672">,</span> lr<span style="color:#f92672">,</span> Right<span style="color:#f92672">(</span> x<span style="color:#f92672">,</span> r<span style="color:#f92672">)::</span>history<span style="color:#f92672">)</span>
+
+    <span style="color:#66d9ef">member</span> tz.<span style="color:#a6e22e">right</span> () <span style="color:#f92672">=</span>
+        <span style="color:#66d9ef">match</span> tz <span style="color:#66d9ef">with</span>
+        <span style="color:#f92672">|</span> TreeZipper<span style="color:#f92672">(</span>x<span style="color:#f92672">,</span> l<span style="color:#f92672">,</span> Empty<span style="color:#f92672">,</span> history<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> tz
+        <span style="color:#f92672">|</span> TreeZipper<span style="color:#f92672">(</span>x<span style="color:#f92672">,</span> l<span style="color:#f92672">,</span> Branch<span style="color:#f92672">(</span>rx<span style="color:#f92672">,</span> rl<span style="color:#f92672">,</span> rr<span style="color:#f92672">),</span> history<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> TreeZipper<span style="color:#f92672">(</span>rx<span style="color:#f92672">,</span> rl<span style="color:#f92672">,</span> rr<span style="color:#f92672">,</span> Left<span style="color:#f92672">(</span> x<span style="color:#f92672">,</span> l<span style="color:#f92672">)::</span>history<span style="color:#f92672">)</span>
+
+    <span style="color:#66d9ef">member</span> tz.<span style="color:#a6e22e">back</span> () <span style="color:#f92672">=</span>
+        <span style="color:#66d9ef">match</span> tz <span style="color:#66d9ef">with</span>
+        <span style="color:#f92672">|</span> TreeZipper<span style="color:#f92672">(_,</span> <span style="color:#f92672">_,</span> <span style="color:#f92672">_,</span> []<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> tz
+        <span style="color:#f92672">|</span> TreeZipper<span style="color:#f92672">(</span>x<span style="color:#f92672">,</span> l<span style="color:#f92672">,</span> r<span style="color:#f92672">,</span> Right<span style="color:#f92672">(</span> hx<span style="color:#f92672">,</span> hr<span style="color:#f92672">)::</span>history<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> TreeZipper<span style="color:#f92672">(</span>hx<span style="color:#f92672">,</span> Branch<span style="color:#f92672">(</span>x<span style="color:#f92672">,</span> l<span style="color:#f92672">,</span> r<span style="color:#f92672">),</span> hr<span style="color:#f92672">,</span> history<span style="color:#f92672">)</span>
+        <span style="color:#f92672">|</span> TreeZipper<span style="color:#f92672">(</span>x<span style="color:#f92672">,</span> l<span style="color:#f92672">,</span> r<span style="color:#f92672">,</span> Left<span style="color:#f92672">(</span> hx<span style="color:#f92672">,</span> hl<span style="color:#f92672">)::</span>history<span style="color:#f92672">)</span> <span style="color:#f92672">-&gt;</span> TreeZipper<span style="color:#f92672">(</span>hx<span style="color:#f92672">,</span> hl<span style="color:#f92672">,</span> Branch<span style="color:#f92672">(</span>x<span style="color:#f92672">,</span> l<span style="color:#f92672">,</span> r<span style="color:#f92672">),</span> history<span style="color:#f92672">)</span>
+
+    <span style="color:#66d9ef">member</span> tz.<span style="color:#a6e22e">update</span> x <span style="color:#f92672">=</span>
+        <span style="color:#66d9ef">let</span> <span style="color:#f92672">(</span>TreeZipper<span style="color:#f92672">(_,</span> l<span style="color:#f92672">,</span> r<span style="color:#f92672">,</span> history<span style="color:#f92672">))</span> <span style="color:#f92672">=</span> tz <span style="color:#66d9ef">in</span> TreeZipper<span style="color:#f92672">(</span>x<span style="color:#f92672">,</span> l<span style="color:#f92672">,</span> r<span style="color:#f92672">,</span> history<span style="color:#f92672">)</span>
+</code></pre></div><h3 id="tree-zipper-demonstration">Tree Zipper Demonstration</h3>
+<p>Here&rsquo;s a simple tree from which a Tree Zipper will be created.  That TreeZipper will be used to traverse the tree.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fsharp" data-lang="fsharp"><span style="color:#66d9ef">let</span> t <span style="color:#f92672">=</span> Branch<span style="color:#f92672">(</span>1<span style="color:#f92672">,</span> 
+            Branch<span style="color:#f92672">(</span>2<span style="color:#f92672">,</span> 
+                Branch<span style="color:#f92672">(</span>3<span style="color:#f92672">,</span> Empty<span style="color:#f92672">,</span> Empty<span style="color:#f92672">),</span> 
+                Branch<span style="color:#f92672">(</span>4<span style="color:#f92672">,</span> Empty<span style="color:#f92672">,</span> Empty<span style="color:#f92672">)),</span> 
+            Branch<span style="color:#f92672">(</span>5<span style="color:#f92672">,</span> 
+                Branch<span style="color:#f92672">(</span>6<span style="color:#f92672">,</span> Empty<span style="color:#f92672">,</span> Empty<span style="color:#f92672">),</span> 
+                Branch<span style="color:#f92672">(</span>7<span style="color:#f92672">,</span> Empty<span style="color:#f92672">,</span> Empty<span style="color:#f92672">)));;</span>
+
+<span style="color:#75715e">//val t : Tree&lt;int&gt; =
+</span><span style="color:#75715e">//  Branch
+</span><span style="color:#75715e">//    (1,Branch (2,Branch (3,Empty,Empty),Branch (4,Empty,Empty)),
+</span><span style="color:#75715e">//     Branch (5,Branch (6,Empty,Empty),Branch (7,Empty,Empty)))
+</span><span style="color:#75715e"></span>
+<span style="color:#66d9ef">let</span> tz <span style="color:#f92672">=</span> TreeZipper.create t<span style="color:#f92672">;;</span>
+<span style="color:#75715e">//val tz : TreeZipper&lt;int&gt; =
+</span><span style="color:#75715e">//  TreeZipper
+</span><span style="color:#75715e">//    (1,Branch (2,Branch (3,Empty,Empty),Branch (4,Empty,Empty)),
+</span><span style="color:#75715e">//    Branch (5,Branch (6,Empty,Empty),Branch (7,Empty,Empty)),
+</span><span style="color:#75715e">//    [])
+</span></code></pre></div><p>Note how in the TreeZipper, the history list is empty: <code>[]</code>.  When we start moving through the tree, this list will get
+populated with the paths which were skipped.  That is what will allow us to backtrack.</p>
+<p>Now move the zipper down the left branch:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fsharp" data-lang="fsharp">tz<span style="color:#f92672">.</span>left ()<span style="color:#f92672">;;</span>
+<span style="color:#75715e">//val it : TreeZipper&lt;int&gt; =
+</span><span style="color:#75715e">//  TreeZipper
+</span><span style="color:#75715e">//    (2,Branch (3,Empty,Empty),Branch (4,Empty,Empty),
+</span><span style="color:#75715e">//     [Right (1,Branch (5,Branch (6,Empty,Empty),Branch (7,Empty,Empty)))])
+</span></code></pre></div><p>The zipper started at the root of the tree, <code>1</code>, and moved down to the left branch node.  The zipper is now pointing to
+the value <code>2</code> and has the leaves <code>3</code> and <code>4</code> for the left and right branch, respectively.  When the zipper is moved down
+the left branch, the node it was pointing to and the skipped branch are pushed into the history list.  This is stored as
+<code>Right</code>, because it&rsquo;s the right branch, the parent node, <code>1</code>, and finally the value of the right branch subtree.</p>
+<p>Now the cursor is moved down the right branch:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fsharp" data-lang="fsharp">it<span style="color:#f92672">.</span>right()<span style="color:#f92672">;;</span>
+<span style="color:#75715e">//val it : TreeZipper&lt;int&gt; =
+</span><span style="color:#75715e">//  TreeZipper
+</span><span style="color:#75715e">//    (4,Empty,Empty,
+</span><span style="color:#75715e">//     [Left (2,Branch (3,Empty,Empty));
+</span><span style="color:#75715e">//      Right (1,Branch (5,Branch (6,Empty,Empty),Branch (7,Empty,Empty)))])
+</span></code></pre></div><p>Now we move down the right branch of the node <code>2</code> which puts the cursor at the left <code>3</code>.  The history list as been
+prepended with the cursor&rsquo;s previous position the node <code>2</code> and the left branch of that node.</p>
+<p>Update the value of the cursor:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fsharp" data-lang="fsharp">it<span style="color:#f92672">.</span>update <span style="color:#f92672">-</span>4<span style="color:#f92672">;;</span>
+
+<span style="color:#75715e">//val it : TreeZipper&lt;int&gt; =
+</span><span style="color:#75715e">//  TreeZipper
+</span><span style="color:#75715e">//    (-4,Empty,Empty,
+</span><span style="color:#75715e">//     [Left (2,Branch (3,Empty,Empty));
+</span><span style="color:#75715e">//      Right (1,Branch (5,Branch (6,Empty,Empty),Branch (7,Empty,Empty)))])
+</span></code></pre></div><p>With that leaf updated, time to move back to to the root of the tree:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fsharp" data-lang="fsharp">it<span style="color:#f92672">.</span>back ()<span style="color:#f92672">;;</span>
+
+<span style="color:#75715e">//val it : TreeZipper&lt;int&gt; =
+</span><span style="color:#75715e">//  TreeZipper
+</span><span style="color:#75715e">//    (2,Branch (3,Empty,Empty),Branch (-4,Empty,Empty),
+</span><span style="color:#75715e">//     [Right (1,Branch (5,Branch (6,Empty,Empty),Branch (7,Empty,Empty)))])
+</span></code></pre></div><p>The back operation is pretty straight forward.  Take the head of the history list, in this case <code>Left (2,Branch (3,Empty,Empty))</code>,
+This is the Left branch, so the cursor is now pointed to <code>2</code> the branch from the history is put in the left Branch slot
+and the branch that the zipper was pointing to, <code>Branch (-4,Empty,Empty)</code>, is put in the right Branch slot.</p>
+<p>The process is repeated when we move back again to get to the tree&rsquo;s root.  Only this time, we are pulling the Left branch
+from the history list:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fsharp" data-lang="fsharp">it<span style="color:#f92672">.</span>back()<span style="color:#f92672">;;</span>
+
+<span style="color:#75715e">//val it : TreeZipper&lt;int&gt; =
+</span><span style="color:#75715e">//  TreeZipper
+</span><span style="color:#75715e">//    (1,Branch (2,Branch (3,Empty,Empty),Branch (-4,Empty,Empty)),
+</span><span style="color:#75715e">//     Branch (5,Branch (6,Empty,Empty),Branch (7,Empty,Empty)),[])
+</span></code></pre></div><p>Now this update function only allows the updating of the value of a node.  It wouldn&rsquo;t be much work to add an update
+function which allows replacing the cursor with a whole new subtree.</p>
+<h4 id="flexibility">Flexibility</h4>
+<p>There&rsquo;s a lot of room for how the algebraic representation of a type is converted to it&rsquo;s concrete F# equivalent.</p>
+<p>For example, the <code>Branch</code> type from the binary that is used in the Zipper history list:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fsharp" data-lang="fsharp"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Branch</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span>
+    <span style="color:#f92672">|</span> Left <span style="color:#66d9ef">of</span> <span style="color:#66d9ef">&#39;</span>a <span style="color:#f92672">*</span> Tree<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span>
+    <span style="color:#f92672">|</span> Right <span style="color:#66d9ef">of</span> <span style="color:#66d9ef">&#39;</span>a <span style="color:#f92672">*</span> Tree<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span>
+    
+<span style="color:#66d9ef">type</span> <span style="color:#a6e22e">TreeZipper</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">&#39;</span>a <span style="color:#f92672">*</span> Tree<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span> <span style="color:#f92672">*</span> Tree<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span> <span style="color:#f92672">*</span> Branch<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span> <span style="color:#66d9ef">list</span>
+</code></pre></div><p>Could also be written as:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fsharp" data-lang="fsharp"><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Branch</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span>
+    <span style="color:#f92672">|</span> Left <span style="color:#66d9ef">of</span> Tree<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span>
+    <span style="color:#f92672">|</span> Right <span style="color:#66d9ef">of</span> Tree<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span>
+    
+<span style="color:#66d9ef">type</span> <span style="color:#a6e22e">TreeZipper</span><span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">&#39;</span>a <span style="color:#f92672">*</span> Tree<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span> <span style="color:#f92672">*</span> Tree<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;</span> <span style="color:#f92672">*</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">&#39;</span>a <span style="color:#f92672">*</span> Branch<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">&#39;</span>a<span style="color:#f92672">&gt;)</span> <span style="color:#66d9ef">list</span>
+</code></pre></div><p>In algebraic terms, we could think of this being equivalent to $$a \cdot (2 \cdot T(a))$$.  The two interpretations of the
+algebraic type are equivalent, mathematically, but the second interpretation may be the superior.  It clearly separates
+the parent node from the branch: it&rsquo;s the value <code>'a</code> with it&rsquo;s left or right branch.  Whereas the previous interpretation
+is read as: the right or left branch and it&rsquo;s parent value is <code>'a</code>.</p>
+<h2 id="further-reading">Further Reading</h2>
+<p>A few blog posts about ADTs and calculus (in particular, this article
+from <a href="https://codewords.recurse.com/issues/three/algebra-and-calculus-of-algebraic-data-types">Joel Burget</a>
+and this series from <a href="https://chris-taylor.github.io/blog/2013/02/13/the-algebra-of-algebraic-data-types-part-iii/">Chris Taylor</a>)
+helped clarify how the zipper works.</p>
+<ul class="pa0">
+  
+</ul>
+<div class="mt6 instapaper_ignoref">
+      
+      
+      </div>
+    </div>
+
+    <aside class="w-30-l mt6-l">
+
+
+
+
+</aside>
+
+  </article>
+
+  </main>
+  <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="http://example.org/" >
+    &copy;  Erich's Site 2021 
+  </a>
+    <div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+  </div>
+</footer>
+
+</body>
+
+</html>

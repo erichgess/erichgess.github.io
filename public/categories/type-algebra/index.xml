@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Type Algebra on Erich&#39;s Site</title>
+    <link>http://example.org/categories/type-algebra/</link>
+    <description>Recent content in Type Algebra on Erich&#39;s Site</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 01 Nov 2015 09:38:55 +0000</lastBuildDate><atom:link href="http://example.org/categories/type-algebra/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Zippers 2: Building a Rose Tree Zipper</title>
+      <link>http://example.org/posts/2015-11-01-zippers-2-building-a-rose-tree-zipper/</link>
+      <pubDate>Sun, 01 Nov 2015 09:38:55 +0000</pubDate>
+      
+      <guid>http://example.org/posts/2015-11-01-zippers-2-building-a-rose-tree-zipper/</guid>
+      <description>As a follow up to my post about Zippers for lists and binary trees, I wanted to create a zipper for a slightly more complex data structure. The Rose Tree is a tree structure where the number of branches a node may have is variable. An example of a rose tree would be the directory structure on your computer: each directory may contain 0 or more sub directories which, in turn, may contain addition subdirectories.</description>
+    </item>
+    
+  </channel>
+</rss>

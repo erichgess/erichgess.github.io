@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  
+  <title>Type Providers -  Tutorial Part 3 - Instantiables | Erich&#39;s Site</title>
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <meta name="description"
+    content="In the last tutorial, we built a simple type named Hello which had some static members. In this tutorial, we&rsquo;ll expand our Hello type to include a constructor, an instance property, and an instance method. Adding these will allow us to create instances of Hello using the new operator:
+let x = new Hello() We&rsquo;ll also make Hello store some data, that means our type providers will be one step closer to awesome.">
+
+  
+
+  <meta name="generator" content="Hugo 0.87.0" />
+  
+  
+  <META NAME="ROBOTS" CONTENT="NOINDEX, NOFOLLOW">
+  
+
+  
+<link rel="stylesheet" href="/ananke/css/main.min.css" >
+
+
+
+
+  
+  
+
+  
+
+  
+
+  <meta property="og:title" content="Type Providers -  Tutorial Part 3 - Instantiables" />
+<meta property="og:description" content="In the last tutorial, we built a simple type named Hello which had some static members. In this tutorial, we&rsquo;ll expand our Hello type to include a constructor, an instance property, and an instance method. Adding these will allow us to create instances of Hello using the new operator:
+let x = new Hello() We&rsquo;ll also make Hello store some data, that means our type providers will be one step closer to awesome." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://example.org/posts/2014-04-05-type-providers-tutorial-part-3-instantiables/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2014-04-05T13:42:52+00:00" />
+<meta property="article:modified_time" content="2014-04-05T13:42:52+00:00" />
+
+<meta itemprop="name" content="Type Providers -  Tutorial Part 3 - Instantiables">
+<meta itemprop="description" content="In the last tutorial, we built a simple type named Hello which had some static members. In this tutorial, we&rsquo;ll expand our Hello type to include a constructor, an instance property, and an instance method. Adding these will allow us to create instances of Hello using the new operator:
+let x = new Hello() We&rsquo;ll also make Hello store some data, that means our type providers will be one step closer to awesome."><meta itemprop="datePublished" content="2014-04-05T13:42:52+00:00" />
+<meta itemprop="dateModified" content="2014-04-05T13:42:52+00:00" />
+<meta itemprop="wordCount" content="1448">
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Type Providers -  Tutorial Part 3 - Instantiables"/>
+<meta name="twitter:description" content="In the last tutorial, we built a simple type named Hello which had some static members. In this tutorial, we&rsquo;ll expand our Hello type to include a constructor, an instance property, and an instance method. Adding these will allow us to create instances of Hello using the new operator:
+let x = new Hello() We&rsquo;ll also make Hello store some data, that means our type providers will be one step closer to awesome."/>
+
+  
+</head>
+
+<body class="ma0 avenir bg-near-white">
+
+  
+   
+  
+
+  <header>
+    <div class="bg-black">
+      <nav class="pv3 ph3 ph4-ns" role="navigation">
+  <div class="flex-l justify-between items-center center">
+    <a href="/" class="f3 fw2 hover-white no-underline white-90 dib">
+      
+        Erich&#39;s Site
+      
+    </a>
+    <div class="flex-l items-center">
+      
+
+      
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </div>
+  </div>
+</nav>
+
+    </div>
+  </header>
+
+
+
+  <main class="pb7" role="main">
+    
+  
+  <article class="flex-l flex-wrap justify-between mw8 center ph3">
+    <header class="mt4 w-100">
+      <aside class="instapaper_ignoref b helvetica tracked">
+          
+        POSTS
+      </aside>
+      
+
+
+
+
+  <div id="sharing" class="mt3">
+
+    
+    <a href="https://www.facebook.com/sharer.php?u=http://example.org/posts/2014-04-05-type-providers-tutorial-part-3-instantiables/" class="facebook no-underline" aria-label="share on Facebook">
+      <svg height="32px"  style="enable-background:new 0 0 67 67;" version="1.1" viewBox="0 0 67 67" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M28.765,50.32h6.744V33.998h4.499l0.596-5.624h-5.095  l0.007-2.816c0-1.466,0.14-2.253,2.244-2.253h2.812V17.68h-4.5c-5.405,0-7.307,2.729-7.307,7.317v3.377h-3.369v5.625h3.369V50.32z   M33,64C16.432,64,3,50.569,3,34S16.432,4,33,4s30,13.431,30,30S49.568,64,33,64z" style="fill-rule:evenodd;clip-rule:evenodd;"/></svg>
+
+    </a>
+
+    
+    
+    <a href="https://twitter.com/share?url=http://example.org/posts/2014-04-05-type-providers-tutorial-part-3-instantiables/&amp;text=Type%20Providers%20-%20%20Tutorial%20Part%203%20-%20Instantiables" class="twitter no-underline" aria-label="share on Twitter">
+      <svg height="32px"  style="enable-background:new 0 0 67 67;" version="1.1" viewBox="0 0 67 67" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M37.167,22.283c-2.619,0.953-4.274,3.411-4.086,6.101  l0.063,1.038l-1.048-0.127c-3.813-0.487-7.145-2.139-9.974-4.915l-1.383-1.377l-0.356,1.017c-0.754,2.267-0.272,4.661,1.299,6.271  c0.838,0.89,0.649,1.017-0.796,0.487c-0.503-0.169-0.943-0.296-0.985-0.233c-0.146,0.149,0.356,2.076,0.754,2.839  c0.545,1.06,1.655,2.097,2.871,2.712l1.027,0.487l-1.215,0.021c-1.173,0-1.215,0.021-1.089,0.467  c0.419,1.377,2.074,2.839,3.918,3.475l1.299,0.444l-1.131,0.678c-1.676,0.976-3.646,1.526-5.616,1.568  C19.775,43.256,19,43.341,19,43.405c0,0.211,2.557,1.397,4.044,1.864c4.463,1.377,9.765,0.783,13.746-1.568  c2.829-1.673,5.657-5,6.978-8.221c0.713-1.716,1.425-4.851,1.425-6.354c0-0.975,0.063-1.102,1.236-2.267  c0.692-0.678,1.341-1.419,1.467-1.631c0.21-0.403,0.188-0.403-0.88-0.043c-1.781,0.636-2.033,0.551-1.152-0.402  c0.649-0.678,1.425-1.907,1.425-2.267c0-0.063-0.314,0.042-0.671,0.233c-0.377,0.212-1.215,0.53-1.844,0.72l-1.131,0.361l-1.027-0.7  c-0.566-0.381-1.361-0.805-1.781-0.932C39.766,21.902,38.131,21.944,37.167,22.283z M33,64C16.432,64,3,50.569,3,34S16.432,4,33,4  s30,13.431,30,30S49.568,64,33,64z" style="fill-rule:evenodd;clip-rule:evenodd;fill:;"/></svg>
+
+    </a>
+
+    
+    <a href="https://www.linkedin.com/shareArticle?mini=true&amp;url=http://example.org/posts/2014-04-05-type-providers-tutorial-part-3-instantiables/&amp;title=Type%20Providers%20-%20%20Tutorial%20Part%203%20-%20Instantiables" class="linkedin no-underline" aria-label="share on LinkedIn">
+      <svg  height="32px"  style="enable-background:new 0 0 65 65;" version="1.1" viewBox="0 0 65 65" width="32px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <path d="M50.837,48.137V36.425c0-6.275-3.35-9.195-7.816-9.195  c-3.604,0-5.219,1.983-6.119,3.374V27.71h-6.79c0.09,1.917,0,20.427,0,20.427h6.79V36.729c0-0.609,0.044-1.219,0.224-1.655  c0.49-1.22,1.607-2.483,3.482-2.483c2.458,0,3.44,1.873,3.44,4.618v10.929H50.837z M22.959,24.922c2.367,0,3.842-1.57,3.842-3.531  c-0.044-2.003-1.475-3.528-3.797-3.528s-3.841,1.524-3.841,3.528c0,1.961,1.474,3.531,3.753,3.531H22.959z M34,64  C17.432,64,4,50.568,4,34C4,17.431,17.432,4,34,4s30,13.431,30,30C64,50.568,50.568,64,34,64z M26.354,48.137V27.71h-6.789v20.427  H26.354z" style="fill-rule:evenodd;clip-rule:evenodd;fill:;"/>
+</svg>
+
+    </a>
+  </div>
+
+
+      <h1 class="f1 athelas mt3 mb1">Type Providers -  Tutorial Part 3 - Instantiables</h1>
+      
+      
+      <time class="f6 mv4 dib tracked" datetime="2014-04-05T13:42:52Z">April 5, 2014</time>
+
+      
+      
+    </header>
+    <div class="nested-copy-line-height lh-copy serif f4 nested-links nested-img mid-gray pr4-l w-two-thirds-l"><p>In the last tutorial, we built a simple type named <code>Hello</code> which had some static members.  In this tutorial, we&rsquo;ll expand our <code>Hello</code> type to include a constructor, an instance property, and an instance method.  Adding these will allow us to create instances of <code>Hello</code> using the <code>new</code> operator:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fsharp" data-lang="fsharp"><span style="color:#66d9ef">let</span> x <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Hello()
+</code></pre></div><p>We&rsquo;ll also make <code>Hello</code> store some data, that means our type providers will be one step closer to awesome.  Also, one step closer to being an effective means of interacting with structured data sources.</p>
+<p>The full code for what we make in this part will be at the end of this post.</p>
+<!-- raw HTML omitted -->
+<h3 id="quick-overview">Quick Overview</h3>
+<p>Here&rsquo;s the order of what we&rsquo;ll be doing in Part 3 of this tutorial series</p>
+<ol>
+<li>Add a constructor to <code>Hello</code> and make <code>Hello</code> store a single integer value.</li>
+<li>Add a parameterized construtor to <code>Hello</code>.  This will let us set the value for <code>Hello</code>.</li>
+<li>Add an instance property which returns the integer set by the constructor.</li>
+<li>Add an instance method which doubles the integer set by the constructor.</li>
+</ol>
+<p>Along the way, we&rsquo;ll see the backing <code>obj</code> type for the first time.  This is where the idea of &ldquo;Erased Types&rdquo; I mentioned in Part 1 becomes important.  Remember, as far as the runtime is concerned, our generated types are just instances of <code>obj</code> (all the methods, properties, and names we generate with our Type Providers are illusions to help developers write better code).</p>
+<h3 id="constructors---tonka-tough">Constructors - Tonka Tough</h3>
+<p>In order to make our type instantiable, we have to have a constructor.  It could be a default constructor or one with parameters, it doesn&rsquo;t matter, but at least one must exist.</p>
+<p>The ProvidedTypes module includes a nice type specifically for handling constructors:  <code>ProvidedConstructor</code>.  Not a very surprising name, if you&rsquo;ve been paying attention :).</p>
+<p>We&rsquo;re going to add a default constructor to <code>Hello</code> (meaning it takes no parameters) which sets the value of our <code>Hello</code> instance to 0.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fsharp" data-lang="fsharp">    <span style="color:#66d9ef">let</span> CreateType () <span style="color:#f92672">=</span>
+    	<span style="color:#e6db74">/// ....
+</span><span style="color:#e6db74"></span>    	<span style="color:#e6db74">/// Code from the previous tutorials, removed to save space
+</span><span style="color:#e6db74"></span>    	<span style="color:#e6db74">/// ....
+</span><span style="color:#e6db74"></span>        <span style="color:#66d9ef">let</span> ctor <span style="color:#f92672">=</span> ProvidedConstructor<span style="color:#f92672">(</span>parameters <span style="color:#f92672">=</span> <span style="color:#f92672">[</span> <span style="color:#f92672">],</span> 
+                                       InvokeCode<span style="color:#f92672">=</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">fun</span> args <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">&lt;@@</span> 0 <span style="color:#f92672">:&gt;</span> <span style="color:#66d9ef">obj</span> <span style="color:#f92672">@@&gt;))</span>
+
+        <span style="color:#75715e">// Add documentation to the provided constructor.
+</span><span style="color:#75715e"></span>        ctor<span style="color:#f92672">.</span>AddXmlDocDelayed<span style="color:#f92672">(</span><span style="color:#66d9ef">fun</span> () <span style="color:#f92672">-&gt;</span> <span style="color:#e6db74">&#34;This is the default constructor.  It sets the value of Hello to 0.&#34;</span><span style="color:#f92672">)</span>
+
+        <span style="color:#75715e">// Add the provided constructor to the provided type.
+</span><span style="color:#75715e"></span>        t<span style="color:#f92672">.</span>AddMember ctor
+        t
+</code></pre></div><h5 id="breakdown">Breakdown</h5>
+<p>There really is not much to talk about here, it&rsquo;s very simple.  Except, I want to call out the <code>InvokeCode</code>, because this is the first time we interact with the backing <code>obj</code>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fsharp" data-lang="fsharp">InvokeCode<span style="color:#f92672">=</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">fun</span> args <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">&lt;@@</span> 0 <span style="color:#f92672">:&gt;</span> <span style="color:#66d9ef">obj</span> <span style="color:#f92672">@@&gt;))</span>
+</code></pre></div><p>As I mentioned before, our <code>Hello</code> type basically sits on top of an instance of a formless <code>obj</code> type.  <code>InvokeCode</code> defines a function which gets executed when the construtor for <code>Hello</code> is called.  The value returned by our function is assigned to our underlying <code>obj</code>.  In our case, our <code>InvokeCode</code> function just returns <code>0</code>, because this will get assigned to a <code>obj' type we cast it to </code>obj<code>using</code>0 :&gt; obj`.</p>
+<h3 id="constructors-with-parameters---construx">Constructors with Parameters - Construx</h3>
+<p>Now, being able to instantiate <code>Hello</code> is nice, but pretty pointless if we can&rsquo;t give it any values other than 0.  So here&rsquo;s how we create a constructor which takes a parameter.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fsharp" data-lang="fsharp">        <span style="color:#66d9ef">let</span> ctorParams <span style="color:#f92672">=</span> ProvidedConstructor<span style="color:#f92672">(</span>parameters <span style="color:#f92672">=</span> <span style="color:#f92672">[</span> ProvidedParameter<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;v&#34;</span><span style="color:#f92672">,</span> typeof<span style="color:#f92672">&lt;</span>int<span style="color:#f92672">&gt;)],</span> 
+                                       InvokeCode<span style="color:#f92672">=</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">fun</span> args <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">&lt;@@</span> <span style="color:#f92672">(</span> <span style="color:#f92672">%%(</span>args<span style="color:#f92672">.[</span>0<span style="color:#f92672">])</span> <span style="color:#f92672">:</span> int<span style="color:#f92672">)</span> <span style="color:#f92672">:&gt;</span> <span style="color:#66d9ef">obj</span> <span style="color:#f92672">@@&gt;))</span>
+
+        <span style="color:#75715e">// Add documentation to the provided constructor.
+</span><span style="color:#75715e"></span>        ctorParams<span style="color:#f92672">.</span>AddXmlDocDelayed<span style="color:#f92672">(</span><span style="color:#66d9ef">fun</span> () <span style="color:#f92672">-&gt;</span> <span style="color:#e6db74">&#34;This another constructor.  It sets the value of Hello to the parametr.&#34;</span><span style="color:#f92672">)</span>
+
+        <span style="color:#75715e">// Add the provided constructor to the provided type.
+</span><span style="color:#75715e"></span>        t<span style="color:#f92672">.</span>AddMember ctorParams
+</code></pre></div><h5 id="breakdown-1">Breakdown</h5>
+<ol>
+<li><code>ProvidedParameter(&quot;v&quot;, typeof&lt;int&gt;)]</code> - This is how we define a parameter for a function or constructor.  The <code>&quot;v&quot;</code> is the name of the parameter.  Followed by the type of our parameter.</li>
+<li><code>&lt;@@ ( %%(args.[0]) : int) :&gt; obj @@&gt;</code> - This extracts the value of our first parameter (which is <code>v</code> for those keeping score), casts it to an integer, and then boxes it to <code>obj</code>.  The <code>%%</code> is a Code Quotation operator used for &ldquo;splicing&rdquo;; this is used to &ldquo;splice&rdquo; the <code>args</code> value into a Code Quotation.</li>
+</ol>
+<h5 id="testing">Testing</h5>
+<p>Try loading our new type provider into F# interactive and executing <code>let x = new Tutorial.Hello(1)</code>!</p>
+<h3 id="instance-property---910-of-the-law">Instance Property - 9/10 of the Law</h3>
+<p>Now we can instantiate our <code>Hello</code> type.  We have some data behind our type.  Let&rsquo;s add a way to get that data!</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fsharp" data-lang="fsharp">        <span style="color:#66d9ef">let</span> instProperty <span style="color:#f92672">=</span> ProvidedProperty<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Value&#34;</span><span style="color:#f92672">,</span>
+                                            typeof<span style="color:#f92672">&lt;</span>int<span style="color:#f92672">&gt;,</span>
+                                            GetterCode <span style="color:#f92672">=</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">fun</span> args <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">&lt;@@</span> <span style="color:#f92672">(%%(</span>args<span style="color:#f92672">.[</span>0<span style="color:#f92672">])</span> <span style="color:#f92672">:</span> <span style="color:#66d9ef">obj</span><span style="color:#f92672">)</span> <span style="color:#f92672">:?&gt;</span> int <span style="color:#f92672">@@&gt;))</span>
+        t<span style="color:#f92672">.</span>AddMember instProperty
+</code></pre></div><h5 id="breakdown-2">Breakdown</h5>
+<p>The instance <code>ProvidedProperty</code> is very similar to the one we used for making a static property:  we specify the name of the property and its type.  However, the <code>GetterCode</code> is important for us to review:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fsharp" data-lang="fsharp">GetterCode <span style="color:#f92672">=</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">fun</span> args <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">&lt;@@</span> <span style="color:#f92672">(%%(</span>args<span style="color:#f92672">.[</span>0<span style="color:#f92672">])</span> <span style="color:#f92672">:</span> <span style="color:#66d9ef">obj</span><span style="color:#f92672">)</span> <span style="color:#f92672">:?&gt;</span> int <span style="color:#f92672">@@&gt;))</span>
+</code></pre></div><p>What&rsquo;s important here is the <code>(%%(args.[0]) : obj)</code>.  More specifically, I want to call out the <code>args.[0]</code>:  when dealing with instance methods or properties <code>arg.[0]</code> is where the value of our instance is stored.  In the case of <code>Hello</code>, our instance is just an integer, so we case <code>arg.[0]</code> to an integer and return that value.</p>
+<h5 id="testing-1">Testing</h5>
+<p>Try running this in the F# Interactive console:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fsharp" data-lang="fsharp"><span style="color:#66d9ef">open</span> Tutorial<span style="color:#f92672">;;</span>
+<span style="color:#66d9ef">let</span> c <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Tutorial.Hello<span style="color:#f92672">(</span>3<span style="color:#f92672">);;</span>
+c<span style="color:#f92672">.</span>Value<span style="color:#f92672">;;</span>
+</code></pre></div><h3 id="instance-methods---elementary">Instance Methods - Elementary</h3>
+<p>Finally, to wrap up this part of the tutorial.  We will add an instance method which, when invoked, will return twice the <code>Value</code> of our instance of <code>Hello</code>.</p>
+<p>The code for this is eerily similar to most of the other code we&rsquo;ve written for properties, methods, and constructors:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fsharp" data-lang="fsharp">        <span style="color:#66d9ef">let</span> instanceMeth <span style="color:#f92672">=</span> 
+            ProvidedMethod<span style="color:#f92672">(</span>methodName <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;DoubleValue&#34;</span><span style="color:#f92672">,</span> 
+                           parameters <span style="color:#f92672">=</span> []<span style="color:#f92672">,</span> 
+                           returnType <span style="color:#f92672">=</span> typeof<span style="color:#f92672">&lt;</span>int<span style="color:#f92672">&gt;,</span>
+                           InvokeCode <span style="color:#f92672">=</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">fun</span> args <span style="color:#f92672">-&gt;</span> 
+                              <span style="color:#f92672">&lt;@@</span> <span style="color:#f92672">((%%(</span>args<span style="color:#f92672">.[</span>0<span style="color:#f92672">])</span> <span style="color:#f92672">:</span> <span style="color:#66d9ef">obj</span><span style="color:#f92672">)</span> <span style="color:#f92672">:?&gt;</span> int<span style="color:#f92672">)</span> <span style="color:#f92672">*</span> 2 <span style="color:#f92672">@@&gt;))</span>
+        t<span style="color:#f92672">.</span>AddMember instanceMeth
+</code></pre></div><h5 id="testing-2">Testing</h5>
+<p>Try running:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fsharp" data-lang="fsharp"><span style="color:#66d9ef">open</span> Tutorial<span style="color:#f92672">;;</span>
+<span style="color:#66d9ef">let</span> c <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Tutorial.Hello<span style="color:#f92672">(</span>3<span style="color:#f92672">);;</span>
+c<span style="color:#f92672">.</span>DoubleValue()<span style="color:#f92672">;;</span>
+</code></pre></div><h3 id="conclusion">Conclusion</h3>
+<p>This is probably the most important part of the tutorial so far.  We have actually created a Type Provider which generates a type named <code>Hello</code> that can store some data (granted only a single integer :)).  We also made this an instantiable type.  The most important thing is that we got to see the underlying <code>obj</code> upon which our generated type is built.</p>
+<p>This underlying type is critical and we will explore it further in a later section of this tutorial.</p>
+<p>If anything is learned from Part 3, it&rsquo;s that our generated type is really just some frosting put on top of an existing type (in <code>Hello</code>&rsquo;s case an integer).  This may seem silly right now, but keep in mind, the real purpose of a type provider is to allow us to point to a source of data and get a bunch of types which will let us work with that data source in a very F# like manner.</p>
+<h2 id="full-code">Full Code</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fsharp" data-lang="fsharp"><span style="color:#66d9ef">namespace</span> Samples.FSharp.HelloWorldTypeProvider
+
+<span style="color:#66d9ef">open</span> System
+<span style="color:#66d9ef">open</span> System.Reflection
+<span style="color:#66d9ef">open</span> Samples.FSharp.ProvidedTypes
+<span style="color:#66d9ef">open</span> Microsoft.FSharp.Core.CompilerServices
+<span style="color:#66d9ef">open</span> Microsoft.FSharp.Quotations
+
+<span style="color:#75715e">// This defines the type provider. When compiled to a DLL it can be added as a reference to an F#
+</span><span style="color:#75715e">// command-line compilation, script or project.
+</span><span style="color:#75715e"></span><span style="color:#f92672">[&lt;</span>TypeProvider<span style="color:#f92672">&gt;]</span>
+<span style="color:#66d9ef">type</span> <span style="color:#a6e22e">HelloWorldTypeProvider</span><span style="color:#f92672">(</span>config<span style="color:#f92672">:</span> TypeProviderConfig<span style="color:#f92672">)</span> <span style="color:#66d9ef">as</span> this <span style="color:#f92672">=</span> 
+
+    <span style="color:#75715e">// Inheriting from this type provides implementations of ITypeProvider in terms of the
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// provided types below.
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">inherit</span> TypeProviderForNamespaces()
+
+    <span style="color:#66d9ef">let</span> namespaceName <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Tutorial&#34;</span>
+    <span style="color:#66d9ef">let</span> thisAssembly <span style="color:#f92672">=</span> Assembly.GetExecutingAssembly()
+    
+    <span style="color:#66d9ef">let</span> CreateType () <span style="color:#f92672">=</span>
+        <span style="color:#66d9ef">let</span> t <span style="color:#f92672">=</span> ProvidedTypeDefinition<span style="color:#f92672">(</span>thisAssembly<span style="color:#f92672">,</span>namespaceName<span style="color:#f92672">,</span>
+                                        <span style="color:#e6db74">&#34;Hello&#34;</span><span style="color:#f92672">,</span>
+                                        baseType <span style="color:#f92672">=</span> Some typeof<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">obj</span><span style="color:#f92672">&gt;)</span>
+
+        <span style="color:#66d9ef">let</span> staticProp <span style="color:#f92672">=</span> ProvidedProperty<span style="color:#f92672">(</span>propertyName <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;StaticProperty&#34;</span><span style="color:#f92672">,</span> 
+                                            propertyType <span style="color:#f92672">=</span> typeof<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">string</span><span style="color:#f92672">&gt;,</span> 
+                                            IsStatic<span style="color:#f92672">=</span><span style="color:#66d9ef">true</span><span style="color:#f92672">,</span>
+                                            GetterCode<span style="color:#f92672">=</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">fun</span> args <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">&lt;@@</span> <span style="color:#e6db74">&#34;World!&#34;</span> <span style="color:#f92672">@@&gt;))</span>
+
+        <span style="color:#75715e">// Add documentation to the provided static property.
+</span><span style="color:#75715e"></span>        staticProp<span style="color:#f92672">.</span>AddXmlDocDelayed<span style="color:#f92672">(</span><span style="color:#66d9ef">fun</span> () <span style="color:#f92672">-&gt;</span> <span style="color:#e6db74">&#34;This is a static property&#34;</span><span style="color:#f92672">)</span>
+
+        <span style="color:#75715e">// Add the static property to the type.
+</span><span style="color:#75715e"></span>        t<span style="color:#f92672">.</span>AddMember staticProp
+
+        <span style="color:#75715e">// Add a static method
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">let</span> staticMeth <span style="color:#f92672">=</span> 
+            ProvidedMethod<span style="color:#f92672">(</span>methodName <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;StaticMethod&#34;</span><span style="color:#f92672">,</span> 
+                           parameters <span style="color:#f92672">=</span> []<span style="color:#f92672">,</span> 
+                           returnType <span style="color:#f92672">=</span> typeof<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">string</span><span style="color:#f92672">&gt;,</span> 
+                           IsStaticMethod <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span><span style="color:#f92672">,</span>
+                           InvokeCode <span style="color:#f92672">=</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">fun</span> args <span style="color:#f92672">-&gt;</span> 
+                              <span style="color:#f92672">&lt;@@</span> <span style="color:#e6db74">&#34;World!&#34;</span> <span style="color:#f92672">@@&gt;))</span>
+        t<span style="color:#f92672">.</span>AddMember staticMeth
+
+        <span style="color:#66d9ef">let</span> ctor <span style="color:#f92672">=</span> ProvidedConstructor<span style="color:#f92672">(</span>parameters <span style="color:#f92672">=</span> <span style="color:#f92672">[</span> <span style="color:#f92672">],</span> 
+                                       InvokeCode<span style="color:#f92672">=</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">fun</span> args <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">&lt;@@</span> 0 <span style="color:#f92672">:&gt;</span> <span style="color:#66d9ef">obj</span> <span style="color:#f92672">@@&gt;))</span>
+
+        <span style="color:#75715e">// Add documentation to the provided constructor.
+</span><span style="color:#75715e"></span>        ctor<span style="color:#f92672">.</span>AddXmlDocDelayed<span style="color:#f92672">(</span><span style="color:#66d9ef">fun</span> () <span style="color:#f92672">-&gt;</span> <span style="color:#e6db74">&#34;This is the default constructor.  It sets the value of Hello to 0.&#34;</span><span style="color:#f92672">)</span>
+
+        <span style="color:#75715e">// Add the provided constructor to the provided type.
+</span><span style="color:#75715e"></span>        t<span style="color:#f92672">.</span>AddMember ctor
+
+        <span style="color:#66d9ef">let</span> ctorParams <span style="color:#f92672">=</span> ProvidedConstructor<span style="color:#f92672">(</span>parameters <span style="color:#f92672">=</span> <span style="color:#f92672">[</span> ProvidedParameter<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;v&#34;</span><span style="color:#f92672">,</span> typeof<span style="color:#f92672">&lt;</span>int<span style="color:#f92672">&gt;)],</span> 
+                                       InvokeCode<span style="color:#f92672">=</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">fun</span> args <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">&lt;@@</span> <span style="color:#f92672">(</span> <span style="color:#f92672">%%(</span>args<span style="color:#f92672">.[</span>0<span style="color:#f92672">])</span> <span style="color:#f92672">:</span> int<span style="color:#f92672">)</span> <span style="color:#f92672">:&gt;</span> <span style="color:#66d9ef">obj</span> <span style="color:#f92672">@@&gt;))</span>
+
+        <span style="color:#75715e">// Add documentation to the provided constructor.
+</span><span style="color:#75715e"></span>        ctorParams<span style="color:#f92672">.</span>AddXmlDocDelayed<span style="color:#f92672">(</span><span style="color:#66d9ef">fun</span> () <span style="color:#f92672">-&gt;</span> <span style="color:#e6db74">&#34;This another constructor.  It sets the value of Hello to the parametr.&#34;</span><span style="color:#f92672">)</span>
+
+        <span style="color:#75715e">// Add the provided constructor to the provided type.
+</span><span style="color:#75715e"></span>        t<span style="color:#f92672">.</span>AddMember ctorParams
+
+        <span style="color:#66d9ef">let</span> instProperty <span style="color:#f92672">=</span> ProvidedProperty<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;Value&#34;</span><span style="color:#f92672">,</span>
+                                            typeof<span style="color:#f92672">&lt;</span>int<span style="color:#f92672">&gt;,</span>
+                                            GetterCode <span style="color:#f92672">=</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">fun</span> args <span style="color:#f92672">-&gt;</span> <span style="color:#f92672">&lt;@@</span> <span style="color:#f92672">(%%(</span>args<span style="color:#f92672">.[</span>0<span style="color:#f92672">])</span> <span style="color:#f92672">:</span> <span style="color:#66d9ef">obj</span><span style="color:#f92672">)</span> <span style="color:#f92672">:?&gt;</span> int <span style="color:#f92672">@@&gt;))</span>
+        t<span style="color:#f92672">.</span>AddMember instProperty
+
+        <span style="color:#66d9ef">let</span> instanceMeth <span style="color:#f92672">=</span> 
+            ProvidedMethod<span style="color:#f92672">(</span>methodName <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;DoubleValue&#34;</span><span style="color:#f92672">,</span> 
+                           parameters <span style="color:#f92672">=</span> []<span style="color:#f92672">,</span> 
+                           returnType <span style="color:#f92672">=</span> typeof<span style="color:#f92672">&lt;</span>int<span style="color:#f92672">&gt;,</span>
+                           InvokeCode <span style="color:#f92672">=</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">fun</span> args <span style="color:#f92672">-&gt;</span> 
+                              <span style="color:#f92672">&lt;@@</span> <span style="color:#f92672">((%%(</span>args<span style="color:#f92672">.[</span>0<span style="color:#f92672">])</span> <span style="color:#f92672">:</span> <span style="color:#66d9ef">obj</span><span style="color:#f92672">)</span> <span style="color:#f92672">:?&gt;</span> int<span style="color:#f92672">)</span> <span style="color:#f92672">*</span> 2 <span style="color:#f92672">@@&gt;))</span>
+        t<span style="color:#f92672">.</span>AddMember instanceMeth
+
+        t
+
+    <span style="color:#66d9ef">let</span> types <span style="color:#f92672">=</span> <span style="color:#f92672">[</span> CreateType() <span style="color:#f92672">]</span> 
+
+    <span style="color:#75715e">// And add them to the namespace
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">do</span> this<span style="color:#f92672">.</span>AddNamespace<span style="color:#f92672">(</span>namespaceName<span style="color:#f92672">,</span> types<span style="color:#f92672">)</span>
+
+<span style="color:#f92672">[&lt;</span>assembly<span style="color:#f92672">:</span>TypeProviderAssembly<span style="color:#f92672">&gt;]</span> 
+<span style="color:#66d9ef">do</span>()
+</code></pre></div><ul class="pa0">
+  
+</ul>
+<div class="mt6 instapaper_ignoref">
+      
+      
+      </div>
+    </div>
+
+    <aside class="w-30-l mt6-l">
+
+
+
+
+</aside>
+
+  </article>
+
+  </main>
+  <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
+  <div class="flex justify-between">
+  <a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href="http://example.org/" >
+    &copy;  Erich's Site 2021 
+  </a>
+    <div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+  </div>
+</footer>
+
+</body>
+
+</html>

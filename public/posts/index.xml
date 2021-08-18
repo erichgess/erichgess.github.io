@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on Erich&#39;s Site</title>
+    <link>http://example.org/posts/</link>
+    <description>Recent content in Posts on Erich&#39;s Site</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 01 Nov 2015 09:38:55 +0000</lastBuildDate><atom:link href="http://example.org/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Zippers 2: Building a Rose Tree Zipper</title>
+      <link>http://example.org/posts/2015-11-01-zippers-2-building-a-rose-tree-zipper/</link>
+      <pubDate>Sun, 01 Nov 2015 09:38:55 +0000</pubDate>
+      
+      <guid>http://example.org/posts/2015-11-01-zippers-2-building-a-rose-tree-zipper/</guid>
+      <description>As a follow up to my post about Zippers for lists and binary trees, I wanted to create a zipper for a slightly more complex data structure. The Rose Tree is a tree structure where the number of branches a node may have is variable. An example of a rose tree would be the directory structure on your computer: each directory may contain 0 or more sub directories which, in turn, may contain addition subdirectories.</description>
+    </item>
+    
+    <item>
+      <title>F# Zippers</title>
+      <link>http://example.org/posts/2015-08-17-f-number-zippers/</link>
+      <pubDate>Mon, 17 Aug 2015 13:16:40 +0000</pubDate>
+      
+      <guid>http://example.org/posts/2015-08-17-f-number-zippers/</guid>
+      <description>One of the coolest things about working with F# (and other ML languages) is the incredibly elegant way that mathematics intersects with programming, to inform powerful tools for our toolbox. Algebraic Data Types (ADTs) are the source of a large amount of this mathematical invention. Recently, I&amp;rsquo;ve been exploring the algebra and calculus of types and what happens when you take the derivative of a type.
+Zippers are a type pattern which provide a functional way to interact with and transform data structures: linked lists, binary trees, rose trees, etc.</description>
+    </item>
+    
+    <item>
+      <title>Fundamental Theorem of Prog Rock</title>
+      <link>http://example.org/posts/2015-07-19-fundamental-theorem-of-prog-rock/</link>
+      <pubDate>Sun, 19 Jul 2015 16:47:25 +0000</pubDate>
+      
+      <guid>http://example.org/posts/2015-07-19-fundamental-theorem-of-prog-rock/</guid>
+      <description>Given $$B$$, a band, and $$S$$, the set of all songs composed by $$B$$ then $$B$$ is Prog iff $$\exists s \in S$$ such that $$s$$ contains the sound of a baby.
+Testing out MathJax and Jekyll.</description>
+    </item>
+    
+    <item>
+      <title>A Cartoon Map of Knowledge</title>
+      <link>http://example.org/posts/2015-02-13-a-cartoon-map-of-knowledge/</link>
+      <pubDate>Fri, 13 Feb 2015 13:48:53 +0000</pubDate>
+      
+      <guid>http://example.org/posts/2015-02-13-a-cartoon-map-of-knowledge/</guid>
+      <description>While visiting San Diego, for some much needed time off from work, I had a fantastic evening hanging out my friend Steve Bjorg and his family. As the bookend to the evening, Steve and I sat down and had chatted about reading books. It started as merely a random topic on which to build an enjoyable conversation, but quickly morphed into a discussion about how to represent knowledge.
+The driver behind our discussion was an exploration of my inability to read technical books on a Kindle or computer.</description>
+    </item>
+    
+    <item>
+      <title>It&#39;s Been 8 Months</title>
+      <link>http://example.org/posts/2015-01-10-its-been-8-months/</link>
+      <pubDate>Sat, 10 Jan 2015 17:42:32 +0000</pubDate>
+      
+      <guid>http://example.org/posts/2015-01-10-its-been-8-months/</guid>
+      <description>It has been quite a long time since my last blog post. Quite a lot has happened in that time. I moved from San Diego to Chicago. I got a new job and now the CTO for a small start up company out in Chicago. I have switched off of Windows development to Linux development. I have gone though doing my work on a Windows box, to a Linux box, and now I&amp;rsquo;m on a MacBook.</description>
+    </item>
+    
+    <item>
+      <title>Type Providers Tutorial Part 4 - Base Types</title>
+      <link>http://example.org/posts/2014-04-16-type-providers-tutorial-part-4/</link>
+      <pubDate>Wed, 16 Apr 2014 22:09:16 +0000</pubDate>
+      
+      <guid>http://example.org/posts/2014-04-16-type-providers-tutorial-part-4/</guid>
+      <description>In Part 3 of this Tutorial, I talked a little about erased types and how the types we generate are actually built on top of a obj. Previously, I just used a plan obj type and cast an integer to and from the obj types.
+InvokeCode= (fun args -&amp;gt; &amp;lt;@@ 0 :&amp;gt; obj @@&amp;gt;)) Using just the basic obj works well enough for a very simple generated type (like the simple integer from part 3).</description>
+    </item>
+    
+    <item>
+      <title>Type Providers -  Tutorial Part 3 - Instantiables</title>
+      <link>http://example.org/posts/2014-04-05-type-providers-tutorial-part-3-instantiables/</link>
+      <pubDate>Sat, 05 Apr 2014 13:42:52 +0000</pubDate>
+      
+      <guid>http://example.org/posts/2014-04-05-type-providers-tutorial-part-3-instantiables/</guid>
+      <description>In the last tutorial, we built a simple type named Hello which had some static members. In this tutorial, we&amp;rsquo;ll expand our Hello type to include a constructor, an instance property, and an instance method. Adding these will allow us to create instances of Hello using the new operator:
+let x = new Hello() We&amp;rsquo;ll also make Hello store some data, that means our type providers will be one step closer to awesome.</description>
+    </item>
+    
+    <item>
+      <title>Type Providers - Tutorial Part 2</title>
+      <link>http://example.org/posts/2014-04-04-type-providers-tutorial-part-2/</link>
+      <pubDate>Fri, 04 Apr 2014 17:51:36 +0000</pubDate>
+      
+      <guid>http://example.org/posts/2014-04-04-type-providers-tutorial-part-2/</guid>
+      <description>In Part 1 of this series, I briefly explained what a Type Provider was and some of the main concepts which you would need to know. In Part 2, I am going to build a very simple Type Provider. The purpose of Part 2 is to cover the basics of developing Type Providers, how to test them with F# Interactive, and the support tools which make developing Type Providers easy.</description>
+    </item>
+    
+    <item>
+      <title>Type Providers - Tutorial Part 1 - Concepts</title>
+      <link>http://example.org/posts/2014-04-03-type-providers-tutorial-part-1/</link>
+      <pubDate>Thu, 03 Apr 2014 20:36:12 +0000</pubDate>
+      
+      <guid>http://example.org/posts/2014-04-03-type-providers-tutorial-part-1/</guid>
+      <description>I&amp;rsquo;ve only been working with the F# language for the last year. Which means that all of my learning has been with version 3.x of the F# language. One of the biggest features of 3.x, and something which I have yet to work with, is the Type Provider. Type Providers dynamically generate new types, usually from some data source (e.g. databases, XML documents, web services), which a developer can use in their code.</description>
+    </item>
+    
+    <item>
+      <title>First Haskell Meetup</title>
+      <link>http://example.org/posts/2014-03-20-first-haskell-meetup/</link>
+      <pubDate>Thu, 20 Mar 2014 08:47:44 +0000</pubDate>
+      
+      <guid>http://example.org/posts/2014-03-20-first-haskell-meetup/</guid>
+      <description>Last night was the first meet up for the San Diego Haskell Users Group. I have to say that it was a lot of fun and probably the most interesting dev meet up I&amp;rsquo;ve been to so far in San Diego. I have barely done any Haskell, beyond get the compiler setup on my computer and make &amp;ldquo;Hello, World&amp;rdquo;. As such, I learned a lot.
+ I reallly love how Haskell allows you to build &amp;ldquo;pipelines of data&amp;rdquo;: when you chain together several functions, put data into the top function and get the output of the bottom.</description>
+    </item>
+    
+    <item>
+      <title>RavenDB, MapReduce, and Logging</title>
+      <link>http://example.org/posts/2014-03-11-ravendb/</link>
+      <pubDate>Tue, 11 Mar 2014 08:38:11 +0000</pubDate>
+      
+      <guid>http://example.org/posts/2014-03-11-ravendb/</guid>
+      <description>Working with a system which is distributed and uses messaging for communication presents some interesting challenges. One frequent challenge I&amp;rsquo;ve gotten to deal with a few times is: how to tell what&amp;rsquo;s happening to a request as the system is processing it. A request comes into the my system, which wakes one service up and it does some work, then it sends off commands to two other services which both do some work, and then, when both are done, a final service does some work and completes the task.</description>
+    </item>
+    
+    <item>
+      <title>RabbitMQ and F# - Part 6</title>
+      <link>http://example.org/posts/2014-03-08-rabbitmq-and-f-number-part-6/</link>
+      <pubDate>Sat, 08 Mar 2014 22:08:19 +0000</pubDate>
+      
+      <guid>http://example.org/posts/2014-03-08-rabbitmq-and-f-number-part-6/</guid>
+      <description>A final round of polish. Now that I have the layout and flow for using my RabbitMQ library defined, it&amp;rsquo;s time to go through and do a bit of clean up on my names. There&amp;rsquo;s a lot I can do to make it so that code you write with this library becomes as readable and literate as possible.
+Here&amp;rsquo;s the code you write to do the initial setup:
+let connection = openConnection &amp;#34;localhost&amp;#34; let myChannel = openChannel connection If I just look at this, I have to ask: open connection to what?</description>
+    </item>
+    
+    <item>
+      <title>RabbitMQ and F# - Part 5</title>
+      <link>http://example.org/posts/2014-03-08-rabbitmq-and-f-number-part-5/</link>
+      <pubDate>Sat, 08 Mar 2014 22:00:00 +0000</pubDate>
+      
+      <guid>http://example.org/posts/2014-03-08-rabbitmq-and-f-number-part-5/</guid>
+      <description>Alright, I now have a simple usable RabbitMQ client library which fits comfortably with F#. However, there&amp;rsquo;s still some inconsistency in the design which I want to polish out:
+ To create a consumer on a queue, you call:  createQueueConsumer myChannel &amp;#34;myQueue&amp;#34; To create a read function for a queue, you call:  let (readFrom,_) = createQueueFuntions myChannel let readFromMyQueue = readFrom &amp;#34;myQueue&amp;#34; To create a write function for a queue, you call:  let (_,writeTo) = createQueueFuntions myChannel let writeToMyQueue = writeTo &amp;#34;myQueue&amp;#34; Why have a function which manages both the read AND the writes for a channel?</description>
+    </item>
+    
+    <item>
+      <title>RabbitMQ and F# - Part 4</title>
+      <link>http://example.org/posts/2014-03-08-rabbitmq-and-f-number-part-4/</link>
+      <pubDate>Sat, 08 Mar 2014 21:55:44 +0000</pubDate>
+      
+      <guid>http://example.org/posts/2014-03-08-rabbitmq-and-f-number-part-4/</guid>
+      <description>In my previous post, I made my RabbitMQ client library a bit more functional by removing the Queue record type and replacing it with higher order functions. These higher order functions are used for creating functions for reading/writing queues. If you want to use &amp;ldquo;MyQueue&amp;rdquo; for writing, you use the &amp;ldquo;writeTo&amp;rdquo; higher order function to create a function for writing to &amp;ldquo;MyQueue&amp;rdquo;. It&amp;rsquo;s sounds more complex than it really is.</description>
+    </item>
+    
+    <item>
+      <title>RabbitMQ and F# - Part 3</title>
+      <link>http://example.org/posts/2014-03-08-rabbitmq-and-f-number-part-3/</link>
+      <pubDate>Sat, 08 Mar 2014 21:38:01 +0000</pubDate>
+      
+      <guid>http://example.org/posts/2014-03-08-rabbitmq-and-f-number-part-3/</guid>
+      <description>I now have a functioning RabbitMQ Library! Though, there is a lot more to be done to make it satisfactory.
+There are two problems:
+ Missing the Queue Consumer functionality. This makes it a lot easier to deal with RabbitMQ so I definitely want to get this in. I&amp;rsquo;m not happy with using the record type to capture the Read and Publish functions for a queue. After all, how often are you going to be writing to and reading from a specific queue in the same process?</description>
+    </item>
+    
+    <item>
+      <title>RabbitMQ and F# - Part 2</title>
+      <link>http://example.org/posts/2014-03-08-rabbitmq-and-f-number-part-2/</link>
+      <pubDate>Sat, 08 Mar 2014 21:15:36 +0000</pubDate>
+      
+      <guid>http://example.org/posts/2014-03-08-rabbitmq-and-f-number-part-2/</guid>
+      <description>Notes about RabbitMQ: - You should have one connection per application and one channel per thread (http://stackoverflow.com/a/10501593)
+I was able to build and run my sender and receiver, both using my client.
+However, something odd happened. The receiver was only printing out every other message which the Sender sent.
+Here&amp;rsquo;s the secret of what&amp;rsquo;s happening:
+OH SNAP! There are two consumers on the queue and RabbitMQ is splitting the messages evenly between the two consumers.</description>
+    </item>
+    
+    <item>
+      <title>Odin Prototype</title>
+      <link>http://example.org/posts/2014-03-07-odin-prototype/</link>
+      <pubDate>Fri, 07 Mar 2014 23:32:30 +0000</pubDate>
+      
+      <guid>http://example.org/posts/2014-03-07-odin-prototype/</guid>
+      <description>In my previous post, I described a distributed monitoring system called Odin. Which I am building because it will help me learn and explore topics in distributed computing independent of work.
+I&amp;rsquo;ve been slowly working on it when I get a chance and have put together a very basic prototype: https://github.com/erichgess/OdinPrototype
+This prototype is some hacking I did over a few, very spread out days, to try out some concepts. It has a very simple agent, which reads %CPU used and sends a message to a receiver.</description>
+    </item>
+    
+    <item>
+      <title>Odin - Learning Distributed Computing</title>
+      <link>http://example.org/posts/2014-03-07-odin-learning-distributed-computing/</link>
+      <pubDate>Fri, 07 Mar 2014 22:39:00 +0000</pubDate>
+      
+      <guid>http://example.org/posts/2014-03-07-odin-learning-distributed-computing/</guid>
+      <description>Over the last two years, I&amp;rsquo;ve really become interested in distributed computing and things like big data. My interest in these topics grew in coincidence with my falling in love with F#. I do a lot of different projects at work and not all of them involve any of those three topics. So, to provide a motive for learning more about distributed computing and sharpening my F# skills I have decided to start working on a small side project (currently, by myself but several friends are interested).</description>
+    </item>
+    
+    <item>
+      <title>Building a RabbitMQ Library in F#</title>
+      <link>http://example.org/posts/2014-03-06-building-a-rabbitmq-library-in-f-number/</link>
+      <pubDate>Thu, 06 Mar 2014 07:44:30 +0000</pubDate>
+      
+      <guid>http://example.org/posts/2014-03-06-building-a-rabbitmq-library-in-f-number/</guid>
+      <description>I&amp;rsquo;ve been doing a lot of experimenting with F# and distributed computing via messaging. As evidenced by my previous, I&amp;rsquo;m using RabbitMQ as my messaging platform, for a couple of reasons: it&amp;rsquo;s easy to use, it&amp;rsquo;s free and open source, and I might decide to switch to RabbitMQ at work. I&amp;rsquo;ve been having a lot of fun experimenting with RabbitMQ and F#. However, I spend a lot of my time just writing and copy/pasting the boilerplate code needed to configure the RabbitMQ client libraries, add the fact that the .</description>
+    </item>
+    
+    <item>
+      <title>Using RabbitMQ with F#</title>
+      <link>http://example.org/posts/2014-03-04-using-rabbitmq-with-f-number/</link>
+      <pubDate>Tue, 04 Mar 2014 19:56:20 +0000</pubDate>
+      
+      <guid>http://example.org/posts/2014-03-04-using-rabbitmq-with-f-number/</guid>
+      <description>Over the last few years, one of the topics on which I have done much of my work has been distributed computing using message queues. Recently, I&amp;rsquo;ve been playing around with RabbitMQ, not for any reason other than that I wanted a simple, easy to setup, and easy to use messaging framework, which I could use for little experiments at home.
+I&amp;rsquo;m not going to talk much about using RabbitMQ. What I am going to talk about is one of the many ways in which F# makes programming just an absolute blast.</description>
+    </item>
+    
+    <item>
+      <title>Experimenting with Quotations</title>
+      <link>http://example.org/posts/2014-02-16-my-first-post/</link>
+      <pubDate>Sun, 16 Feb 2014 20:37:19 +0000</pubDate>
+      
+      <guid>http://example.org/posts/2014-02-16-my-first-post/</guid>
+      <description>One of the more interesting featuers of F# is the Code Quotation. Though I do find this interesting now, it has taken over a year before I saw any reason I might have even slight interest. Even now, as I have taken a much greater interest in the topic, it&amp;rsquo;s been difficult finding anything detailed on the topic.
+Anyone familiar with Lisp or one of its dialects, such as Clojure, will find Quotations familiar.</description>
+    </item>
+    
+  </channel>
+</rss>

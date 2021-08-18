@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Odin on Erich&#39;s Site</title>
+    <link>http://example.org/categories/odin/</link>
+    <description>Recent content in Odin on Erich&#39;s Site</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 07 Mar 2014 23:32:30 +0000</lastBuildDate><atom:link href="http://example.org/categories/odin/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Odin Prototype</title>
+      <link>http://example.org/posts/2014-03-07-odin-prototype/</link>
+      <pubDate>Fri, 07 Mar 2014 23:32:30 +0000</pubDate>
+      
+      <guid>http://example.org/posts/2014-03-07-odin-prototype/</guid>
+      <description>In my previous post, I described a distributed monitoring system called Odin. Which I am building because it will help me learn and explore topics in distributed computing independent of work.
+I&amp;rsquo;ve been slowly working on it when I get a chance and have put together a very basic prototype: https://github.com/erichgess/OdinPrototype
+This prototype is some hacking I did over a few, very spread out days, to try out some concepts. It has a very simple agent, which reads %CPU used and sends a message to a receiver.</description>
+    </item>
+    
+    <item>
+      <title>Odin - Learning Distributed Computing</title>
+      <link>http://example.org/posts/2014-03-07-odin-learning-distributed-computing/</link>
+      <pubDate>Fri, 07 Mar 2014 22:39:00 +0000</pubDate>
+      
+      <guid>http://example.org/posts/2014-03-07-odin-learning-distributed-computing/</guid>
+      <description>Over the last two years, I&amp;rsquo;ve really become interested in distributed computing and things like big data. My interest in these topics grew in coincidence with my falling in love with F#. I do a lot of different projects at work and not all of them involve any of those three topics. So, to provide a motive for learning more about distributed computing and sharpening my F# skills I have decided to start working on a small side project (currently, by myself but several friends are interested).</description>
+    </item>
+    
+  </channel>
+</rss>

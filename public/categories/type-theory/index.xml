@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Type Theory on Erich&#39;s Site</title>
+    <link>http://example.org/categories/type-theory/</link>
+    <description>Recent content in Type Theory on Erich&#39;s Site</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 01 Nov 2015 09:38:55 +0000</lastBuildDate><atom:link href="http://example.org/categories/type-theory/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Zippers 2: Building a Rose Tree Zipper</title>
+      <link>http://example.org/posts/2015-11-01-zippers-2-building-a-rose-tree-zipper/</link>
+      <pubDate>Sun, 01 Nov 2015 09:38:55 +0000</pubDate>
+      
+      <guid>http://example.org/posts/2015-11-01-zippers-2-building-a-rose-tree-zipper/</guid>
+      <description>As a follow up to my post about Zippers for lists and binary trees, I wanted to create a zipper for a slightly more complex data structure. The Rose Tree is a tree structure where the number of branches a node may have is variable. An example of a rose tree would be the directory structure on your computer: each directory may contain 0 or more sub directories which, in turn, may contain addition subdirectories.</description>
+    </item>
+    
+    <item>
+      <title>F# Zippers</title>
+      <link>http://example.org/posts/2015-08-17-f-number-zippers/</link>
+      <pubDate>Mon, 17 Aug 2015 13:16:40 +0000</pubDate>
+      
+      <guid>http://example.org/posts/2015-08-17-f-number-zippers/</guid>
+      <description>One of the coolest things about working with F# (and other ML languages) is the incredibly elegant way that mathematics intersects with programming, to inform powerful tools for our toolbox. Algebraic Data Types (ADTs) are the source of a large amount of this mathematical invention. Recently, I&amp;rsquo;ve been exploring the algebra and calculus of types and what happens when you take the derivative of a type.
+Zippers are a type pattern which provide a functional way to interact with and transform data structures: linked lists, binary trees, rose trees, etc.</description>
+    </item>
+    
+  </channel>
+</rss>

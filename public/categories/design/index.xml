@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Design on Erich&#39;s Site</title>
+    <link>http://example.org/categories/design/</link>
+    <description>Recent content in Design on Erich&#39;s Site</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 06 Mar 2014 07:44:30 +0000</lastBuildDate><atom:link href="http://example.org/categories/design/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Building a RabbitMQ Library in F#</title>
+      <link>http://example.org/posts/2014-03-06-building-a-rabbitmq-library-in-f-number/</link>
+      <pubDate>Thu, 06 Mar 2014 07:44:30 +0000</pubDate>
+      
+      <guid>http://example.org/posts/2014-03-06-building-a-rabbitmq-library-in-f-number/</guid>
+      <description>I&amp;rsquo;ve been doing a lot of experimenting with F# and distributed computing via messaging. As evidenced by my previous, I&amp;rsquo;m using RabbitMQ as my messaging platform, for a couple of reasons: it&amp;rsquo;s easy to use, it&amp;rsquo;s free and open source, and I might decide to switch to RabbitMQ at work. I&amp;rsquo;ve been having a lot of fun experimenting with RabbitMQ and F#. However, I spend a lot of my time just writing and copy/pasting the boilerplate code needed to configure the RabbitMQ client libraries, add the fact that the .</description>
+    </item>
+    
+  </channel>
+</rss>
