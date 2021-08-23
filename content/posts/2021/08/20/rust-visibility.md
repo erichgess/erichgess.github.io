@@ -130,7 +130,8 @@ use deconstruction whenever and whereever they want. Two, it allows me to valida
 the user is providing strictly legal values for each field.  Three, it increases the
 expressivity of my code: the fields have types which explicitly name what that field
 can represent. It would be really nice to capture these things at compile time rather
-than runtime; but it is what it is.
+than runtime; but it is what it is.  This, of course, can be made even more expressive
+by defining an Error value that clearly names what the valid range is.
 
 What I don't like about this design, is it creates a little more clunkiness when creating
 new values of the `UnitSquare` type. At least for values which are basically just a single
