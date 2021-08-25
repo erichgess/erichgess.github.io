@@ -1,7 +1,7 @@
 ---
 title: "The Painful Experience of Learning"
 date: 2021-08-05T17:05:06-04:00
-draft: true
+draft: false
 ---
 
 The experience of learning a new language. Around the beginning of the year, I began to teach myself

@@ -1,7 +1,7 @@
 ---
 title: "Rust Visibility"
 date: 2021-08-20T20:24:52-04:00
-draft: true
+draft: false
 ---
 
 Understanding whether or not I should make struct fields public was one of the hardest
