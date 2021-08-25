@@ -1,0 +1,177 @@
+<!doctype html><html lang=en-us>
+<head>
+<meta charset=utf-8>
+<meta http-equiv=x-ua-compatible content="IE=edge,chrome=1">
+<title>RabbitMQ | Elegant Architecture</title>
+<meta name=viewport content="width=device-width,minimum-scale=1">
+<meta name=description content>
+<meta name=generator content="Hugo 0.87.0">
+<meta name=ROBOTS content="NOINDEX, NOFOLLOW">
+<link rel=stylesheet href=/ananke/css/main.min.css>
+<link href=/categories/rabbitmq/index.xml rel=alternate type=application/rss+xml title="Elegant Architecture">
+<link href=/categories/rabbitmq/index.xml rel=feed type=application/rss+xml title="Elegant Architecture">
+<meta property="og:title" content="RabbitMQ">
+<meta property="og:description" content>
+<meta property="og:type" content="website">
+<meta property="og:url" content="http://example.org/categories/rabbitmq/">
+<meta itemprop=name content="RabbitMQ">
+<meta itemprop=description content><meta name=twitter:card content="summary">
+<meta name=twitter:title content="RabbitMQ">
+<meta name=twitter:description content>
+</head>
+<body class="ma0 avenir bg-near-white">
+<header>
+<div class="pb3-m pb6-l bg-black">
+<nav class="pv3 ph3 ph4-ns" role=navigation>
+<div class="flex-l justify-between items-center center">
+<a href=/ class="f3 fw2 hover-white no-underline white-90 dib">
+Elegant Architecture
+</a>
+<div class="flex-l items-center">
+</div>
+</div>
+</nav>
+<div class="tc-l pv3 ph3 ph4-ns">
+<h1 class="f2 f-subheadline-l fw2 light-silver mb0 lh-title">
+RabbitMQ
+</h1>
+</div>
+</div>
+</header>
+<main class=pb7 role=main>
+<article class="cf pa3 pa4-m pa4-l">
+<div class="measure-wide-l center f4 lh-copy nested-copy-line-height nested-links nested-img mid-gray">
+<p>Below you will find pages that utilize the taxonomy term “RabbitMQ”</p>
+</div>
+</article>
+<div class="mw8 center">
+<section class="flex-ns flex-wrap justify-around mt5">
+<div class="relative w-100 mb4 bg-white">
+<div class="relative w-100 mb4 bg-white nested-copy-line-height">
+<div class="bg-white mb3 pa4 gray overflow-hidden">
+<span class="f6 db">Posts</span>
+<h1 class="f3 near-black">
+<a href=/posts/2014-03-08-rabbitmq-and-f-number-part-6/ class="link black dim">
+RabbitMQ and F# - Part 6
+</a>
+</h1>
+<div class="nested-links f5 lh-copy nested-copy-line-height">
+A final round of polish. Now that I have the layout and flow for using my RabbitMQ library defined, it&rsquo;s time to go through and do a bit of clean up on my names. There&rsquo;s a lot I can do to make it so that code you write with this library becomes as readable and literate as possible.
+Here&rsquo;s the code you write to do the initial setup:
+let connection = openConnection "localhost" let myChannel = openChannel connection If I just look at this, I have to ask: open connection to what?
+</div>
+</div>
+</div>
+</div>
+<div class="relative w-100 mb4 bg-white">
+<div class="relative w-100 mb4 bg-white nested-copy-line-height">
+<div class="bg-white mb3 pa4 gray overflow-hidden">
+<span class="f6 db">Posts</span>
+<h1 class="f3 near-black">
+<a href=/posts/2014-03-08-rabbitmq-and-f-number-part-5/ class="link black dim">
+RabbitMQ and F# - Part 5
+</a>
+</h1>
+<div class="nested-links f5 lh-copy nested-copy-line-height">
+Alright, I now have a simple usable RabbitMQ client library which fits comfortably with F#. However, there&rsquo;s still some inconsistency in the design which I want to polish out:
+To create a consumer on a queue, you call: createQueueConsumer myChannel "myQueue" To create a read function for a queue, you call: let (readFrom,_) = createQueueFuntions myChannel let readFromMyQueue = readFrom "myQueue" To create a write function for a queue, you call: let (_,writeTo) = createQueueFuntions myChannel let writeToMyQueue = writeTo "myQueue" Why have a function which manages both the read AND the writes for a channel?
+</div>
+</div>
+</div>
+</div>
+<div class="relative w-100 mb4 bg-white">
+<div class="relative w-100 mb4 bg-white nested-copy-line-height">
+<div class="bg-white mb3 pa4 gray overflow-hidden">
+<span class="f6 db">Posts</span>
+<h1 class="f3 near-black">
+<a href=/posts/2014-03-08-rabbitmq-and-f-number-part-4/ class="link black dim">
+RabbitMQ and F# - Part 4
+</a>
+</h1>
+<div class="nested-links f5 lh-copy nested-copy-line-height">
+In my previous post, I made my RabbitMQ client library a bit more functional by removing the Queue record type and replacing it with higher order functions. These higher order functions are used for creating functions for reading/writing queues. If you want to use &ldquo;MyQueue&rdquo; for writing, you use the &ldquo;writeTo&rdquo; higher order function to create a function for writing to &ldquo;MyQueue&rdquo;. It&rsquo;s sounds more complex than it really is.
+</div>
+</div>
+</div>
+</div>
+<div class="relative w-100 mb4 bg-white">
+<div class="relative w-100 mb4 bg-white nested-copy-line-height">
+<div class="bg-white mb3 pa4 gray overflow-hidden">
+<span class="f6 db">Posts</span>
+<h1 class="f3 near-black">
+<a href=/posts/2014-03-08-rabbitmq-and-f-number-part-3/ class="link black dim">
+RabbitMQ and F# - Part 3
+</a>
+</h1>
+<div class="nested-links f5 lh-copy nested-copy-line-height">
+I now have a functioning RabbitMQ Library! Though, there is a lot more to be done to make it satisfactory.
+There are two problems:
+Missing the Queue Consumer functionality. This makes it a lot easier to deal with RabbitMQ so I definitely want to get this in. I&rsquo;m not happy with using the record type to capture the Read and Publish functions for a queue. After all, how often are you going to be writing to and reading from a specific queue in the same process?
+</div>
+</div>
+</div>
+</div>
+<div class="relative w-100 mb4 bg-white">
+<div class="relative w-100 mb4 bg-white nested-copy-line-height">
+<div class="bg-white mb3 pa4 gray overflow-hidden">
+<span class="f6 db">Posts</span>
+<h1 class="f3 near-black">
+<a href=/posts/2014-03-08-rabbitmq-and-f-number-part-2/ class="link black dim">
+RabbitMQ and F# - Part 2
+</a>
+</h1>
+<div class="nested-links f5 lh-copy nested-copy-line-height">
+Notes about RabbitMQ: - You should have one connection per application and one channel per thread (http://stackoverflow.com/a/10501593)
+I was able to build and run my sender and receiver, both using my client.
+However, something odd happened. The receiver was only printing out every other message which the Sender sent.
+Here&rsquo;s the secret of what&rsquo;s happening:
+OH SNAP! There are two consumers on the queue and RabbitMQ is splitting the messages evenly between the two consumers.
+</div>
+</div>
+</div>
+</div>
+<div class="relative w-100 mb4 bg-white">
+<div class="relative w-100 mb4 bg-white nested-copy-line-height">
+<div class="bg-white mb3 pa4 gray overflow-hidden">
+<span class="f6 db">Posts</span>
+<h1 class="f3 near-black">
+<a href=/posts/2014-03-06-building-a-rabbitmq-library-in-f-number/ class="link black dim">
+Building a RabbitMQ Library in F#
+</a>
+</h1>
+<div class="nested-links f5 lh-copy nested-copy-line-height">
+I&rsquo;ve been doing a lot of experimenting with F# and distributed computing via messaging. As evidenced by my previous, I&rsquo;m using RabbitMQ as my messaging platform, for a couple of reasons: it&rsquo;s easy to use, it&rsquo;s free and open source, and I might decide to switch to RabbitMQ at work. I&rsquo;ve been having a lot of fun experimenting with RabbitMQ and F#. However, I spend a lot of my time just writing and copy/pasting the boilerplate code needed to configure the RabbitMQ client libraries, add the fact that the .
+</div>
+</div>
+</div>
+</div>
+<div class="relative w-100 mb4 bg-white">
+<div class="relative w-100 mb4 bg-white nested-copy-line-height">
+<div class="bg-white mb3 pa4 gray overflow-hidden">
+<span class="f6 db">Posts</span>
+<h1 class="f3 near-black">
+<a href=/posts/2014-03-04-using-rabbitmq-with-f-number/ class="link black dim">
+Using RabbitMQ with F#
+</a>
+</h1>
+<div class="nested-links f5 lh-copy nested-copy-line-height">
+Over the last few years, one of the topics on which I have done much of my work has been distributed computing using message queues. Recently, I&rsquo;ve been playing around with RabbitMQ, not for any reason other than that I wanted a simple, easy to setup, and easy to use messaging framework, which I could use for little experiments at home.
+I&rsquo;m not going to talk much about using RabbitMQ. What I am going to talk about is one of the many ways in which F# makes programming just an absolute blast.
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<footer class="bg-black bottom-0 w-100 pa3" role=contentinfo>
+<div class="flex justify-between">
+<a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href=http://example.org/>
+&copy; Elegant Architecture 2021
+</a>
+<div>
+</div>
+</div>
+</footer>
+</body>
+</html>

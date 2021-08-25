@@ -1,0 +1,88 @@
+<!doctype html><html lang=en-us>
+<head>
+<meta charset=utf-8>
+<meta http-equiv=x-ua-compatible content="IE=edge,chrome=1">
+<title>Type Providers - Tutorial Part 1 - Concepts | Elegant Architecture</title>
+<meta name=viewport content="width=device-width,minimum-scale=1">
+<meta name=description content="I&rsquo;ve only been working with the F# language for the last year. Which means that all of my learning has been with version 3.x of the F# language. One of the biggest features of 3.x, and something which I have yet to work with, is the Type Provider. Type Providers dynamically generate new types, usually from some data source (e.g. databases, XML documents, web services), which a developer can use in their code.">
+<meta name=generator content="Hugo 0.87.0">
+<meta name=ROBOTS content="NOINDEX, NOFOLLOW">
+<link rel=stylesheet href=/ananke/css/main.min.css>
+<meta property="og:title" content="Type Providers - Tutorial Part 1 - Concepts">
+<meta property="og:description" content="I&rsquo;ve only been working with the F# language for the last year. Which means that all of my learning has been with version 3.x of the F# language. One of the biggest features of 3.x, and something which I have yet to work with, is the Type Provider. Type Providers dynamically generate new types, usually from some data source (e.g. databases, XML documents, web services), which a developer can use in their code.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="http://example.org/posts/2014-04-03-type-providers-tutorial-part-1/"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2014-04-03T20:36:12+00:00">
+<meta property="article:modified_time" content="2014-04-03T20:36:12+00:00">
+<meta itemprop=name content="Type Providers - Tutorial Part 1 - Concepts">
+<meta itemprop=description content="I&rsquo;ve only been working with the F# language for the last year. Which means that all of my learning has been with version 3.x of the F# language. One of the biggest features of 3.x, and something which I have yet to work with, is the Type Provider. Type Providers dynamically generate new types, usually from some data source (e.g. databases, XML documents, web services), which a developer can use in their code."><meta itemprop=datePublished content="2014-04-03T20:36:12+00:00">
+<meta itemprop=dateModified content="2014-04-03T20:36:12+00:00">
+<meta itemprop=wordCount content="687">
+<meta itemprop=keywords content><meta name=twitter:card content="summary">
+<meta name=twitter:title content="Type Providers - Tutorial Part 1 - Concepts">
+<meta name=twitter:description content="I&rsquo;ve only been working with the F# language for the last year. Which means that all of my learning has been with version 3.x of the F# language. One of the biggest features of 3.x, and something which I have yet to work with, is the Type Provider. Type Providers dynamically generate new types, usually from some data source (e.g. databases, XML documents, web services), which a developer can use in their code.">
+</head>
+<body class="ma0 avenir bg-near-white">
+<header>
+<div class=bg-black>
+<nav class="pv3 ph3 ph4-ns" role=navigation>
+<div class="flex-l justify-between items-center center">
+<a href=/ class="f3 fw2 hover-white no-underline white-90 dib">
+Elegant Architecture
+</a>
+<div class="flex-l items-center">
+</div>
+</div>
+</nav>
+</div>
+</header>
+<main class=pb7 role=main>
+<article class="flex-l flex-wrap justify-between mw8 center ph3">
+<header class="mt4 w-100">
+<aside class="instapaper_ignoref b helvetica tracked">
+POSTS
+</aside>
+<div id=sharing class=mt3>
+<a href="https://www.facebook.com/sharer.php?u=http://example.org/posts/2014-04-03-type-providers-tutorial-part-1/" class="facebook no-underline" aria-label="share on Facebook"><svg height="32" style="enable-background:new 0 0 67 67" viewBox="0 0 67 67" width="32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M28.765 50.32h6.744V33.998h4.499l.596-5.624h-5.095l.007-2.816c0-1.466.14-2.253 2.244-2.253h2.812V17.68h-4.5c-5.405.0-7.307 2.729-7.307 7.317v3.377h-3.369v5.625h3.369V50.32zM33 64C16.432 64 3 50.569 3 34S16.432 4 33 4s30 13.431 30 30S49.568 64 33 64z" style="fill-rule:evenodd;clip-rule:evenodd"/></svg>
+</a>
+<a href="https://twitter.com/share?url=http://example.org/posts/2014-04-03-type-providers-tutorial-part-1/&text=Type%20Providers%20-%20Tutorial%20Part%201%20-%20Concepts" class="twitter no-underline" aria-label="share on Twitter"><svg height="32" style="enable-background:new 0 0 67 67" viewBox="0 0 67 67" width="32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M37.167 22.283c-2.619.953-4.274 3.411-4.086 6.101l.063 1.038-1.048-.127c-3.813-.487-7.145-2.139-9.974-4.915l-1.383-1.377-.356 1.017c-.754 2.267-.272 4.661 1.299 6.271.838.89.649 1.017-.796.487-.503-.169-.943-.296-.985-.233-.146.149.356 2.076.754 2.839.545 1.06 1.655 2.097 2.871 2.712l1.027.487-1.215.021c-1.173.0-1.215.021-1.089.467.419 1.377 2.074 2.839 3.918 3.475l1.299.444-1.131.678c-1.676.976-3.646 1.526-5.616 1.568C19.775 43.256 19 43.341 19 43.405c0 .211 2.557 1.397 4.044 1.864 4.463 1.377 9.765.783 13.746-1.568 2.829-1.673 5.657-5 6.978-8.221.713-1.716 1.425-4.851 1.425-6.354.0-.975.063-1.102 1.236-2.267.692-.678 1.341-1.419 1.467-1.631.21-.403.188-.403-.88-.043-1.781.636-2.033.551-1.152-.402.649-.678 1.425-1.907 1.425-2.267.0-.063-.314.042-.671.233-.377.212-1.215.53-1.844.72l-1.131.361-1.027-.7c-.566-.381-1.361-.805-1.781-.932C39.766 21.902 38.131 21.944 37.167 22.283zM33 64C16.432 64 3 50.569 3 34S16.432 4 33 4s30 13.431 30 30S49.568 64 33 64z" style="fill-rule:evenodd;clip-rule:evenodd;fill:"/></svg>
+</a>
+<a href="https://www.linkedin.com/shareArticle?mini=true&url=http://example.org/posts/2014-04-03-type-providers-tutorial-part-1/&title=Type%20Providers%20-%20Tutorial%20Part%201%20-%20Concepts" class="linkedin no-underline" aria-label="share on LinkedIn"><svg height="32" style="enable-background:new 0 0 65 65" viewBox="0 0 65 65" width="32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M50.837 48.137V36.425c0-6.275-3.35-9.195-7.816-9.195-3.604.0-5.219 1.983-6.119 3.374V27.71h-6.79c.09 1.917.0 20.427.0 20.427h6.79V36.729c0-.609.044-1.219.224-1.655.49-1.22 1.607-2.483 3.482-2.483 2.458.0 3.44 1.873 3.44 4.618v10.929H50.837zM22.959 24.922c2.367.0 3.842-1.57 3.842-3.531-.044-2.003-1.475-3.528-3.797-3.528s-3.841 1.524-3.841 3.528c0 1.961 1.474 3.531 3.753 3.531H22.959zM34 64C17.432 64 4 50.568 4 34 4 17.431 17.432 4 34 4s30 13.431 30 30c0 16.568-13.432 30-30 30zM26.354 48.137V27.71h-6.789v20.427h6.789z" style="fill-rule:evenodd;clip-rule:evenodd;fill:"/></svg>
+</a>
+</div>
+<h1 class="f1 athelas mt3 mb1">Type Providers - Tutorial Part 1 - Concepts</h1>
+<time class="f6 mv4 dib tracked" datetime=2014-04-03T20:36:12Z>April 3, 2014</time>
+</header>
+<div class="nested-copy-line-height lh-copy serif f4 nested-links nested-img mid-gray pr4-l w-two-thirds-l"><p>I&rsquo;ve only been working with the F# language for the last year. Which means that all of my learning has been with version 3.x of the F# language. One of the biggest features of 3.x, and something which I have yet to work with, is the Type Provider. Type Providers dynamically generate new types, usually from some data source (e.g. databases, XML documents, web services), which a developer can use in their code. For C# developers this is analogous to the Entity Framework or the &ldquo;Add Service Reference&rdquo; in VS, both of which take a database or WSDL, respectively, and generate classes and functions that can be used in code. For Java this would be similar to Hibernate or wsdl2java. Just to be clear, when you create a Type Provider, what you&rsquo;ve built is an Entity Framework or a wsdl2java. What F# provides is a framework for building your own Type Providers as easily as possible.</p>
+<p>In order to learn how to build Type Providers, I decided to try my hand at writing a tutorial. This will, I think, be the first tutorial I&rsquo;ve ever written. I&rsquo;m going to break this tutorial into several phases. The first phase will be building a very simple &ldquo;Hello World&rdquo; type provider, which just creates a type which can be referenced in code (it won&rsquo;t do anything). The next phase will be to add static and instance methods, fields, and properties, but, again, the type will be predefined. Finally, I want to do a true type provider for a data source (I&rsquo;m thinking Cassandra) which will take the schema for a database and generate a set of types from that schema.</p>
+<h3 id=important-things>Important Things</h3>
+<h4 id=providedtypesfs>ProvidedTypes.fs</h4>
+<p>This is an F# source code file provided by the F# team. It includes a bunch of things for simplifying the construction of Type Providers. I&rsquo;ll be making heavy use of this in my tutorial. If you plan on writing your own Type Provider, you definitely want to get this: it can be found in the F# 3.0 sample pack (<a href=http://fsharp3sample.codeplex.com/)>http://fsharp3sample.codeplex.com/)</a>.</p>
+<h4 id=erased-types>Erased Types</h4>
+<p>Most of the time, when building Type Providers, you&rsquo;ll be creating erased types: although this type may have members and functions when compiled it will be convered into an Object type by the compiler. With the type provider, you are creating a set of methods, fields, properties, and constructors which enable a developer to work with your type, but, when compiled, all of that is &ldquo;erased&rdquo; and it just becomes and Object. There&rsquo;s a section in the Type Provider MSDN article which explains erased types (<a href=http://msdn.microsoft.com/en-us/library/hh361034.aspx#BK_Erased)>http://msdn.microsoft.com/en-us/library/hh361034.aspx#BK_Erased)</a>.</p>
+<p>What&rsquo;s important is that this means there will be a lot of casting to and from the <code>obj</code> type in Type Provider code. This also means that if the Type Provider is going to work with any kind of meaningful data sources, an underlying type (on which the generated types are built) must be defined. If you look at the MSDN Type Provider Tutorial (<a href=http://msdn.microsoft.com/en-us/library/hh361034.aspx),>http://msdn.microsoft.com/en-us/library/hh361034.aspx),</a> the underlying type is <code>string</code>.</p>
+<h4 id=developing-type-providers>Developing Type Providers</h4>
+<p>A Type Provider cannot be defined in anything except a Library project. This seems like a pain but it does make sense: if you are going to use a Type Provider in your code it must be fully compiled before you use it.</p>
+<h4 id=debugging-type-providers>Debugging Type Providers</h4>
+<p>This is probably the biggest pain point of developing Type Providers, in my humble opinion. Do not create a console project in your Type Provider solution and try to use that console project to test your Type Providers. The problem is that when you build the console project, VS will lock the DLLs from the Type Provider library project. Once the DLLs are locked you won&rsquo;t be able to build the Type Provider library until you restart VS.</p>
+<p>Use the F# Interactive Console. Build the library project then right click on it in the Solution Explorer and choose &ldquo;Send to F# Interactive&rdquo;. In the interactive console you can test out your type provider. IMPORTANT: Before you try building your project again make sure to reset the interactive console, otherwise it will lock the DLLs and your build will fail.</p>
+<ul class=pa0>
+</ul>
+<div class="mt6 instapaper_ignoref">
+</div>
+</div>
+<aside class="w-30-l mt6-l">
+</aside>
+</article>
+</main>
+<footer class="bg-black bottom-0 w-100 pa3" role=contentinfo>
+<div class="flex justify-between">
+<a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href=http://example.org/>
+&copy; Elegant Architecture 2021
+</a>
+<div>
+</div>
+</div>
+</footer>
+</body>
+</html>
