@@ -25,6 +25,9 @@
 <meta name=twitter:title content="RabbitMQ and F# - Part 5">
 <meta name=twitter:description content="Alright, I now have a simple usable RabbitMQ client library which fits comfortably with F#. However, there&rsquo;s still some inconsistency in the design which I want to polish out:
  To create a consumer on a queue, you call:  createQueueConsumer myChannel &#34;myQueue&#34; To create a read function for a queue, you call:  let (readFrom,_) = createQueueFuntions myChannel let readFromMyQueue = readFrom &#34;myQueue&#34; To create a write function for a queue, you call:  let (_,writeTo) = createQueueFuntions myChannel let writeToMyQueue = writeTo &#34;myQueue&#34; Why have a function which manages both the read AND the writes for a channel?">
+<script>MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:!0,processEnvironments:!0},options:{skipHtmlTags:['script','noscript','style','textarea','pre']}},window.addEventListener('load',a=>{document.querySelectorAll("mjx-container").forEach(function(a){a.parentElement.classList+='has-jax'})})</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script type=text/javascript id=MathJax-script async src=https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js></script>
 </head>
 <body class="ma0 avenir bg-near-white">
 <header>

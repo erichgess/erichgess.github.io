@@ -21,6 +21,9 @@
 <meta itemprop=keywords content><meta name=twitter:card content="summary">
 <meta name=twitter:title content="RavenDB, MapReduce, and Logging">
 <meta name=twitter:description content="Working with a system which is distributed and uses messaging for communication presents some interesting challenges. One frequent challenge I&rsquo;ve gotten to deal with a few times is: how to tell what&rsquo;s happening to a request as the system is processing it. A request comes into the my system, which wakes one service up and it does some work, then it sends off commands to two other services which both do some work, and then, when both are done, a final service does some work and completes the task.">
+<script>MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:!0,processEnvironments:!0},options:{skipHtmlTags:['script','noscript','style','textarea','pre']}},window.addEventListener('load',a=>{document.querySelectorAll("mjx-container").forEach(function(a){a.parentElement.classList+='has-jax'})})</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script type=text/javascript id=MathJax-script async src=https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js></script>
 </head>
 <body class="ma0 avenir bg-near-white">
 <header>

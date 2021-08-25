@@ -37,6 +37,9 @@ I was able to build and run my sender and receiver, both using my client.
 However, something odd happened. The receiver was only printing out every other message which the Sender sent.
 Here&rsquo;s the secret of what&rsquo;s happening:
 OH SNAP! There are two consumers on the queue and RabbitMQ is splitting the messages evenly between the two consumers.">
+<script>MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:!0,processEnvironments:!0},options:{skipHtmlTags:['script','noscript','style','textarea','pre']}},window.addEventListener('load',a=>{document.querySelectorAll("mjx-container").forEach(function(a){a.parentElement.classList+='has-jax'})})</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script type=text/javascript id=MathJax-script async src=https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js></script>
 </head>
 <body class="ma0 avenir bg-near-white">
 <header>
