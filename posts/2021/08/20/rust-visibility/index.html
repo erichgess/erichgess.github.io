@@ -1,0 +1,214 @@
+<!doctype html><html lang=en-us>
+<head>
+<meta charset=utf-8>
+<meta http-equiv=x-ua-compatible content="IE=edge,chrome=1">
+<title>Rust Visibility | Elegant Architecture</title>
+<meta name=viewport content="width=device-width,minimum-scale=1">
+<meta name=description content="Understanding whether or not I should make struct fields public was one of the hardest challenges in learning Rust. With OO languages such as Java and C# the rule is incredibly easy: always make fields private and use getters and setters for access. And when starting with Rust, my immediate impulse was to follow this same rule, but it quickly becomes clear that that simple rule is not right for Rust.">
+<meta name=generator content="Hugo 0.87.0">
+<meta name=ROBOTS content="NOINDEX, NOFOLLOW">
+<link rel=stylesheet href=/ananke/css/main.min.css>
+<meta property="og:title" content="Rust Visibility">
+<meta property="og:description" content="Understanding whether or not I should make struct fields public was one of the hardest challenges in learning Rust. With OO languages such as Java and C# the rule is incredibly easy: always make fields private and use getters and setters for access. And when starting with Rust, my immediate impulse was to follow this same rule, but it quickly becomes clear that that simple rule is not right for Rust.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="http://example.org/posts/2021/08/20/rust-visibility/"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2021-08-20T20:24:52-04:00">
+<meta property="article:modified_time" content="2021-08-20T20:24:52-04:00">
+<meta itemprop=name content="Rust Visibility">
+<meta itemprop=description content="Understanding whether or not I should make struct fields public was one of the hardest challenges in learning Rust. With OO languages such as Java and C# the rule is incredibly easy: always make fields private and use getters and setters for access. And when starting with Rust, my immediate impulse was to follow this same rule, but it quickly becomes clear that that simple rule is not right for Rust."><meta itemprop=datePublished content="2021-08-20T20:24:52-04:00">
+<meta itemprop=dateModified content="2021-08-20T20:24:52-04:00">
+<meta itemprop=wordCount content="1358">
+<meta itemprop=keywords content><meta name=twitter:card content="summary">
+<meta name=twitter:title content="Rust Visibility">
+<meta name=twitter:description content="Understanding whether or not I should make struct fields public was one of the hardest challenges in learning Rust. With OO languages such as Java and C# the rule is incredibly easy: always make fields private and use getters and setters for access. And when starting with Rust, my immediate impulse was to follow this same rule, but it quickly becomes clear that that simple rule is not right for Rust.">
+<script>MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:!0,processEnvironments:!0},options:{skipHtmlTags:['script','noscript','style','textarea','pre']}},window.addEventListener('load',a=>{document.querySelectorAll("mjx-container").forEach(function(a){a.parentElement.classList+='has-jax'})})</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script type=text/javascript id=MathJax-script async src=https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js></script>
+</head>
+<body class="ma0 avenir bg-near-white">
+<header>
+<div class=bg-black>
+<nav class="pv3 ph3 ph4-ns" role=navigation>
+<div class="flex-l justify-between items-center center">
+<a href=/ class="f3 fw2 hover-white no-underline white-90 dib">
+Elegant Architecture
+</a>
+<div class="flex-l items-center">
+</div>
+</div>
+</nav>
+</div>
+</header>
+<main class=pb7 role=main>
+<article class="flex-l flex-wrap justify-between mw8 center ph3">
+<header class="mt4 w-100">
+<aside class="instapaper_ignoref b helvetica tracked">
+POSTS
+</aside>
+<div id=sharing class=mt3>
+<a href="https://www.facebook.com/sharer.php?u=http://example.org/posts/2021/08/20/rust-visibility/" class="facebook no-underline" aria-label="share on Facebook"><svg height="32" style="enable-background:new 0 0 67 67" viewBox="0 0 67 67" width="32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M28.765 50.32h6.744V33.998h4.499l.596-5.624h-5.095l.007-2.816c0-1.466.14-2.253 2.244-2.253h2.812V17.68h-4.5c-5.405.0-7.307 2.729-7.307 7.317v3.377h-3.369v5.625h3.369V50.32zM33 64C16.432 64 3 50.569 3 34S16.432 4 33 4s30 13.431 30 30S49.568 64 33 64z" style="fill-rule:evenodd;clip-rule:evenodd"/></svg>
+</a>
+<a href="https://twitter.com/share?url=http://example.org/posts/2021/08/20/rust-visibility/&text=Rust%20Visibility" class="twitter no-underline" aria-label="share on Twitter"><svg height="32" style="enable-background:new 0 0 67 67" viewBox="0 0 67 67" width="32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M37.167 22.283c-2.619.953-4.274 3.411-4.086 6.101l.063 1.038-1.048-.127c-3.813-.487-7.145-2.139-9.974-4.915l-1.383-1.377-.356 1.017c-.754 2.267-.272 4.661 1.299 6.271.838.89.649 1.017-.796.487-.503-.169-.943-.296-.985-.233-.146.149.356 2.076.754 2.839.545 1.06 1.655 2.097 2.871 2.712l1.027.487-1.215.021c-1.173.0-1.215.021-1.089.467.419 1.377 2.074 2.839 3.918 3.475l1.299.444-1.131.678c-1.676.976-3.646 1.526-5.616 1.568C19.775 43.256 19 43.341 19 43.405c0 .211 2.557 1.397 4.044 1.864 4.463 1.377 9.765.783 13.746-1.568 2.829-1.673 5.657-5 6.978-8.221.713-1.716 1.425-4.851 1.425-6.354.0-.975.063-1.102 1.236-2.267.692-.678 1.341-1.419 1.467-1.631.21-.403.188-.403-.88-.043-1.781.636-2.033.551-1.152-.402.649-.678 1.425-1.907 1.425-2.267.0-.063-.314.042-.671.233-.377.212-1.215.53-1.844.72l-1.131.361-1.027-.7c-.566-.381-1.361-.805-1.781-.932C39.766 21.902 38.131 21.944 37.167 22.283zM33 64C16.432 64 3 50.569 3 34S16.432 4 33 4s30 13.431 30 30S49.568 64 33 64z" style="fill-rule:evenodd;clip-rule:evenodd;fill:"/></svg>
+</a>
+<a href="https://www.linkedin.com/shareArticle?mini=true&url=http://example.org/posts/2021/08/20/rust-visibility/&title=Rust%20Visibility" class="linkedin no-underline" aria-label="share on LinkedIn"><svg height="32" style="enable-background:new 0 0 65 65" viewBox="0 0 65 65" width="32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M50.837 48.137V36.425c0-6.275-3.35-9.195-7.816-9.195-3.604.0-5.219 1.983-6.119 3.374V27.71h-6.79c.09 1.917.0 20.427.0 20.427h6.79V36.729c0-.609.044-1.219.224-1.655.49-1.22 1.607-2.483 3.482-2.483 2.458.0 3.44 1.873 3.44 4.618v10.929H50.837zM22.959 24.922c2.367.0 3.842-1.57 3.842-3.531-.044-2.003-1.475-3.528-3.797-3.528s-3.841 1.524-3.841 3.528c0 1.961 1.474 3.531 3.753 3.531H22.959zM34 64C17.432 64 4 50.568 4 34 4 17.431 17.432 4 34 4s30 13.431 30 30c0 16.568-13.432 30-30 30zM26.354 48.137V27.71h-6.789v20.427h6.789z" style="fill-rule:evenodd;clip-rule:evenodd;fill:"/></svg>
+</a>
+</div>
+<h1 class="f1 athelas mt3 mb1">Rust Visibility</h1>
+<time class="f6 mv4 dib tracked" datetime=2021-08-20T20:24:52-04:00>August 20, 2021</time>
+</header>
+<div class="nested-copy-line-height lh-copy serif f4 nested-links nested-img mid-gray pr4-l w-two-thirds-l"><p>Understanding whether or not I should make struct fields public was one of the hardest
+challenges in learning Rust. With OO languages such as Java and C# the rule is incredibly
+easy: always make fields private and use getters and setters for access. And when
+starting with Rust, my immediate impulse was to follow this same rule, but it quickly
+becomes clear that that simple rule is not right for Rust.</p>
+<p>My philosophy is only a little more complex than &ldquo;always make all fields private&rdquo;:</p>
+<ol>
+<li>If the struct is the state for a process, then make the fields private.</li>
+<li>If the struct is the definition for a type of data, then make the fields public.</li>
+</ol>
+<p>There are nuances. For example, a <code>Vec</code> actually is the state for a process, not a data
+definition. And, at first, you may think that the ability to control the range of values
+a field can have is lost; but I propose a solution that allows fields to be public while
+still giving you the ability to validate the values they are given.</p>
+<p>Structure variants in enums were the first clue that &ldquo;hiding data&rdquo; was not simpatico with
+Rust. When you create an enumeration in Rust, the variants can be a unitary valued label,
+or they can be associated with tuples, or the variant can be a structure with named
+fields (which are always public). Enumerations mean <code>match</code> expressions and
+deconstrution: where the elements of a tuple variant or the fields of a struct variant
+are bound to labels for easy access in the branches of the <code>match</code> expression. Through
+this, the power of using deconstruction and <code>match</code> expressions to build code around
+enumerations made the benefits of public fields obvious.</p>
+<p>There&rsquo;s a lot of value to making fields private. One benefit, that I&rsquo;ve always loved, is
+that the struct completely controls setting a field&rsquo;s value. A &ldquo;setter&rdquo; function can
+validate the proposed value and make it impossible for the field to be set to something
+invalid. Making fields public, makes this kind of defensive programming much harder.</p>
+<p>The experience with enumerations and deconstruction created a sense of conflict between
+structs and the enumeration&rsquo;s struct variant. My instinct was to always make the fields
+of a struct private, but the struct variant made this rule obviously inconsistent within
+Rust itself. Further, the ability to deconstruct a struct into a small set of locally
+defined bindings is incredibly expressive syntactic sugar, especially when coupled with
+the <code>match</code>. So, for my first few months writing Rust, I found myself frequently making
+fields public, because making them private and using getters & setters and losing
+deconstruction was often too painful.</p>
+<p>Trying to figure out what the idioms were around field visibility in Rust was the first
+design question I could not solve on my own. Asking on the Rust community forum, gave
+a mixed set of answers. Some people saying that fields should always be private and some
+saying that either is fine. But no one giving a clear philosophy on how to make such a
+decision. What I needed was a way to answer the question &ldquo;why is this public&rdquo; or &ldquo;why is
+this private&rdquo;.</p>
+<p>It turns out the answer is simple: if the structure represents the state of some process
+then the fields are private and if the structure represents a value or data make the
+fields public. And a free lemma: a structure can represent the state of a process or
+represent a value/data but <em>not</em> both.</p>
+<p>Examples of stateful structs, the <code>BufWriter</code> is a process which
+writes bytes to some physical destination, its fields are private because they are the
+state of the writing process and tampering with them will break the writer. A <code>Vec</code> is
+another example of a stateful structure: it uses state to help manage memory as it
+grows and shrinks.</p>
+<p>Structs where fields should be public are structs which is itself a single value. For
+example, a struct for Cartessian coordinates or a structure representing an RGB color.
+An address may also be another example of a struct which is a value not a state and so
+all fields should be public, but then you seemingly use the value of validating all
+fields for correctness.</p>
+<p>Trying to get the best of both worlds: while writing this essay, I realized that there
+may be a way to get the best of both worlds. The problem with making fields private is
+that you lose the power of deconstruction. The problem with makign fields public is that
+you lose the power of validation. So, define expressive types for those fields which
+want validation and make those types use getters and setters. Then a multi-field type
+can be deconstructed but the individual fields can only be set through a method that can
+perform validation.</p>
+<div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-rust data-lang=rust><span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>main</span>() {
+    <span style=color:#66d9ef>let</span> <span style=color:#66d9ef>mut</span> us <span style=color:#f92672>=</span> Example::UnitSquare {
+        x: <span style=color:#a6e22e>Example</span>::UnitLine::default(),
+        y: <span style=color:#a6e22e>Example</span>::UnitLine::default(),
+    };
+    
+    <span style=color:#75715e>// I can deconstruct UnitSquare and get references to individual 
+</span><span style=color:#75715e></span>    <span style=color:#75715e>// fields
+</span><span style=color:#75715e></span>    <span style=color:#66d9ef>let</span> Example::UnitSquare { x, y } <span style=color:#f92672>=</span> <span style=color:#f92672>&amp;</span><span style=color:#66d9ef>mut</span> us;
+
+    <span style=color:#75715e>// But using the wrapper type UnitLine lets me force a user to 
+</span><span style=color:#75715e></span>    <span style=color:#75715e>// go through a setter function to set the value of the field.  
+</span><span style=color:#75715e></span>    <span style=color:#75715e>// Wherein, validation is done.
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>!</span>(<span style=color:#e6db74>&#34;{}&#34;</span>, x.set(<span style=color:#ae81ff>0.5</span>).is_ok());    <span style=color:#75715e>// Succeeds, will print &#34;true&#34;
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>!</span>(<span style=color:#e6db74>&#34;{}&#34;</span>, y.set(<span style=color:#ae81ff>50.0</span>).is_ok());   <span style=color:#75715e>// Fails, will print &#34;false&#34;
+</span><span style=color:#75715e></span>
+    <span style=color:#75715e>// us.x was successfully changed, but us.y remains the same
+</span><span style=color:#75715e></span>    println<span style=color:#f92672>!</span>(<span style=color:#e6db74>&#34;{:?}&#34;</span>, us);
+    <span style=color:#75715e>// Prints:
+</span><span style=color:#75715e></span>    <span style=color:#75715e>// UnitSquare { x: UnitLine(0.5), y: UnitLine(0.0) }
+</span><span style=color:#75715e></span>}
+
+<span style=color:#66d9ef>mod</span> Example {
+    <span style=color:#75715e>#[derive(Debug, Default)]</span>
+    <span style=color:#66d9ef>pub</span> <span style=color:#66d9ef>struct</span> <span style=color:#a6e22e>UnitSquare</span> {
+        <span style=color:#66d9ef>pub</span> x: <span style=color:#a6e22e>UnitLine</span>,
+        <span style=color:#66d9ef>pub</span> y: <span style=color:#a6e22e>UnitLine</span>,
+    }
+
+    <span style=color:#75715e>#[derive(Debug, Default)]</span>
+    <span style=color:#66d9ef>pub</span> <span style=color:#66d9ef>struct</span> <span style=color:#a6e22e>UnitLine</span>(<span style=color:#66d9ef>f32</span>);
+
+    <span style=color:#66d9ef>impl</span> UnitLine {
+        <span style=color:#66d9ef>pub</span> <span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>set</span>(<span style=color:#f92672>&amp;</span><span style=color:#66d9ef>mut</span> self, f: <span style=color:#66d9ef>f32</span>) -&gt; Result<span style=color:#f92672>&lt;</span>(), ()<span style=color:#f92672>&gt;</span> {
+            <span style=color:#66d9ef>if</span> <span style=color:#ae81ff>0.</span> <span style=color:#f92672>&lt;=</span> f <span style=color:#f92672>&amp;&amp;</span> f <span style=color:#f92672>&lt;=</span> <span style=color:#ae81ff>1.</span> {
+                self.<span style=color:#ae81ff>0</span> <span style=color:#f92672>=</span> f;
+                Ok(())
+            } <span style=color:#66d9ef>else</span> {
+                Err(())
+            }
+        }
+
+        <span style=color:#75715e>#[inline]</span>
+        <span style=color:#66d9ef>pub</span> <span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>get</span>(<span style=color:#f92672>&amp;</span>self) -&gt; <span style=color:#66d9ef>f32</span> {
+            self.<span style=color:#ae81ff>0</span>
+        }
+    }
+}
+</code></pre></div><p>There are three things that I really like about this tactic. One, it allows the user to
+use deconstruction whenever and whereever they want. Two, it allows me to validate that
+the user is providing strictly legal values for each field. Three, it increases the
+expressivity of my code: the fields have types which explicitly name what that field
+can represent. It would be really nice to capture these things at compile time rather
+than runtime; but it is what it is. This, of course, can be made even more expressive
+by defining an Error value that clearly names what the valid range is.</p>
+<p>What I don&rsquo;t like about this design, is it creates a little more clunkiness when creating
+new values of the <code>UnitSquare</code> type. At least for values which are basically just a single
+primitive, it adds a little extra boilerplate code: you need to call a <code>new</code> function
+and then deal with the fact that you get a <code>Result</code> back. I will need to try this out in
+some of my own code before I come to an opinion, but I have high hopes.</p>
+<p>Also, remember that Rust gives you more fidelity when setting the visibility of a field.
+One common idiom I use is making a field <code>pub(mod)</code>; so within a submodule where a struct
+is used heavily, I can easily access any field and use deconstruction to my hearts content.
+But outside of the submodule, where there is a separation of concerns, the fields are
+not visible.</p>
+<p>Rust provides many new syntactic tools that make the question of field visibility much
+more complex. I have found that by understanding if the struct represents the state of
+a process or if it defines the syntax of a type of value is the most important question.
+For a process, the user sees and cares about the process (what it is doing) and the user
+should only have the methods which control that process. For a value definition, the user cares
+about the data itself and using that data, so they will want simple and flexible access
+to that data. The latter case is more complex, because improving access to the data
+could cost you the ability to define acceptable values for primitive fields. However,
+the proposed method above solves that problem while increasing the expressiveness of
+your code.</p>
+<ul class=pa0>
+</ul>
+<div class="mt6 instapaper_ignoref">
+</div>
+</div>
+<aside class="w-30-l mt6-l">
+</aside>
+</article>
+</main>
+<footer class="bg-black bottom-0 w-100 pa3" role=contentinfo>
+<div class="flex justify-between">
+<a class="f4 fw4 hover-white no-underline white-70 dn dib-ns pv2 ph3" href=http://example.org/>
+&copy; Elegant Architecture 2021
+</a>
+<div>
+</div>
+</div>
+</footer>
+</body>
+</html>
