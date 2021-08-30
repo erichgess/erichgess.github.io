@@ -1,5 +1,6 @@
 ---
 title: "Away From Abstraction"
+subtitle: "Amplification in Languages"
 date: 2021-08-21T01:18:12-04:00
 draft: true
 ---

@@ -116,3 +116,12 @@ any helper functions to work with my errors. One problem is that it had a little
 tentacleness: with needing line numbers for every error, which meant that I had to always
 get a line number from a AST node and thread it down threw every place that I threw
 an error.
+1. Begin with a simple Error enumeration.
+1. Use helper functions and macros to simplify creating error values.
+
+What's great about just diving in and using a mediocre design for my error handling
+rather than just copying a strategy, is that I built a much more effective intuition
+of what good error types need to capture. Mediocrity meant that I put a lot more thought
+into what I was doing so that I could make it better in the future. If we want to get
+good at something, we must be willing to do it poorly; that's the only way to build
+intuition and become great.
