@@ -13,6 +13,8 @@ So, we should take time to appreciate our mediocre code; as that's the code we w
 we're growing. And a lot can be learned by thinking about what decisions were made that
 sacrificed great code for mediocre code and why.
 
+// Throw in error code from Braid
+
 Writing the Braid Compiler was my first large project in Rust and presented a lot of design
 trade offs driven by balancing lack of knowledge of Rust and getting features done. This
 leads to writing code that is often not idiomatic even when it's clean and easy to use.
@@ -43,6 +45,8 @@ that I didn't have time to do a lot of reading about different error handling st
 lacking experience would make my judgements on the strategies untrustworthy and I would gain
 more knowledge focusing on filling in other gaps in my Rust knowledge.
 
+// Throw in error code from Braid
+
 At the time, I felt unsatisfied with this decision, but I was also happy to make it. I
 knew that I would make much better judgements on what error handling strategies and designs
 would work best in `braidc`.  Being new to Rust and have very little intuition for the 
@@ -55,6 +59,8 @@ used needed to be simple, so that they would be easily replaced with a better so
 once I knew more Rust.
 
 So, throughout `braidc` everything returns `Result<_, String>`. 
+
+// Throw in error code from Braid
 
 Why am I happy with this mediocre design?  It didn't consume a large amount of my time
 to design and use.  I was able to write enough errors to get a sense of what I wanted
@@ -69,6 +75,9 @@ I started Braid:
 1. What error type design pattern fits best with my style?
 1. What do I want to include in the error information?
 1. How will error handling influence the code around it?
+1. The support functions and syntactic sugar that Rust provides to help with error handling.
+(e.g. the `?` operator will implicitly call `into` to convert an error from the call site
+to the surrounding functions error type).
 
 I now have an answer to the first question. I can create an enum that covers the different
 classes of errors that will happen in my code. Each submodule represents a key domain within
@@ -87,3 +96,23 @@ I want the error information to have as little impact on the surrounding code as
 The biggest problem with my use of `String` is that I have to write `format!` expressions
 in my code and deal with injecting the line number into the string. Ideally, creating an
 error value would simply extract the line information from contextual data.
+
+## What Will I Do In The Future?
+1. Think within submodules.  Submodules provide a nice boundary for defining what the 
+types of errors will be.
+1. What information needs to be provided in each error? Errors are used when there is
+something wrong with the input or an external dependency.  Enough information needs to
+be provided to the user so they know exactly how to fix the problem. If the problem,
+is input, then the user needs to know exactly what is wrong with the input. If it's a
+dependency then the user needs to know what's wrong with the dependency (probalby the
+best we can do here is propagate the error message the dependency threw). So, in the
+future, Error types I design will be heavily grown from the structure of the input
+interface between my module and the user. In the case of Braid, that input interface
+is the source code: the struture of which is lines and columns and lexemes.
+1. Start simple and minimize tentacles into surrounding code.  What I liked about 
+`Result<_, String>` is that it was simple and I could easily use it anywhere and I
+could easily make changes to errors to improve clarity.  I also did not have to write
+any helper functions to work with my errors. One problem is that it had a little bit of
+tentacleness: with needing line numbers for every error, which meant that I had to always
+get a line number from a AST node and thread it down threw every place that I threw
+an error.
