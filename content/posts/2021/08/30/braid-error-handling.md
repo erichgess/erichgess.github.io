@@ -50,7 +50,7 @@ Rust. <Why is it not idiomatic? Point out the importance of the types used for e
 From the very start of my compiler, errors cases had to be handled; after all, giving
 errors is the most important job of a compiler. I made
 a deliberate choice to use the simplest possible design for my Error types: just strings.
-<Why was this simple and why was it mediocre? (Is this a repitition of above and is that wrong?)>
+<Why was this simple and why was it mediocre? (Is this a repetition of above and is that wrong?)>
 Why? One, I did not know enough Rust to make good judgements on how more complex design
 choices might shape my productivity and code. Two, with so much Rust to learn, I made a choice
 that I didn't have time to do a lot of reading about different error handling strategies:
@@ -81,7 +81,7 @@ would work best in `braidc`.  Being new to Rust and have very little intuition f
 language meant that my choices would probably be wrong. The
 design that left the smallest footprint on the code base would also be the design
 that's the easiest to change. The design needed to maintain the `Result` type for propagating
-error information, because the structure that creates is what's _fundamental_ to Rusts's
+error information, because the structure that creates is what's _fundamental_ to Rust's
 error handling.
 
 Right now, in `braidc` everything returns `Result<_, String>`. 
