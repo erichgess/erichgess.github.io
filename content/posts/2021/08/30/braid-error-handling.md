@@ -13,7 +13,9 @@ So, we should take time to appreciate our mediocre code; as that's the code we w
 we're growing. And a lot can be learned by thinking about what decisions were made that
 sacrificed great code for mediocre code and why.
 
-// Throw in error code from Braid
+```rust
+_ => Err(format!("L{}: {} is not a unary operator", line, op)),
+```
 
 Writing the Braid Compiler was my first large project in Rust and presented a lot of design
 trade offs driven by balancing lack of knowledge of Rust and getting features done. This
@@ -45,7 +47,23 @@ that I didn't have time to do a lot of reading about different error handling st
 lacking experience would make my judgements on the strategies untrustworthy and I would gain
 more knowledge focusing on filling in other gaps in my Rust knowledge.
 
-// Throw in error code from Braid
+```rust
+pub fn unary_op(
+    line: u32,
+    op: &Lex,
+    operand: Box<Self>,
+) -> ParserResult<Expression<ParserContext>> {
+    match op {
+        Lex::Minus => Ok(Some(Expression::UnaryOp(
+            line,
+            UnaryOperator::Negate,
+            operand,
+        ))),
+        Lex::Not => Ok(Some(Expression::UnaryOp(line, UnaryOperator::Not, operand))),
+        _ => Err(format!("L{}: {} is not a unary operator", line, op)),
+    }
+}
+```
 
 At the time, I felt unsatisfied with this decision, but I was also happy to make it. I
 knew that I would make much better judgements on what error handling strategies and designs
@@ -60,7 +78,34 @@ once I knew more Rust.
 
 So, throughout `braidc` everything returns `Result<_, String>`. 
 
-// Throw in error code from Braid
+```rust
+fn extern_def(stream: &mut TokenStream) -> ParserResult<Extern<u32>> {
+    match stream.next_if(&Lex::Extern) {
+        Some(token) => match function_decl(stream, true)? {
+            Some((fn_line, fn_name, params, has_varargs, fn_type)) => {
+                if has_varargs && params.len() == 0 {
+                    return Err("An extern declaration must have at least one \\
+                     parameter before a VarArgs (...) parameter"
+                        .into());
+                }
+                stream.next_must_be(&Lex::Semicolon)?;
+                Ok(Some(Extern::new(
+                    &fn_name,
+                    fn_line,
+                    params,
+                    has_varargs,
+                    fn_type,
+                )))
+            }
+            None => Err(format!(
+                "L{}: expected function declaration after extern",
+                token.l
+            )),
+        },
+        None => Ok(None),
+    }
+}
+```
 
 Why am I happy with this mediocre design?  It didn't consume a large amount of my time
 to design and use.  I was able to write enough errors to get a sense of what I wanted
@@ -78,6 +123,7 @@ I started Braid:
 1. The support functions and syntactic sugar that Rust provides to help with error handling.
 (e.g. the `?` operator will implicitly call `into` to convert an error from the call site
 to the surrounding functions error type).
+1. How do I aggregate multiple errors together?
 
 I now have an answer to the first question. I can create an enum that covers the different
 classes of errors that will happen in my code. Each submodule represents a key domain within
