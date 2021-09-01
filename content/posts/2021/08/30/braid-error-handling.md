@@ -22,7 +22,7 @@ a lot of ways to balance devoting time to _learn_ how to write really good idiom
 Rust and actually building features for my compiler. Leading me to write code that I
 judged as mediocre but acceptable and moving on. On my best days, I am a perfectionist
 and want my code to be as efficiently communicative as possible. The silly result of
-this is that I hate my mediocre code and unneccessarily feel a bit ashamed about it.
+this is that I hate my mediocre code and unnecessarily feel a bit ashamed about it.
 
 But there's nothing _wrong_ with writing mediocre code. In fact, it's unavoidable when
 you're first learning something that's far outside of your comfort zone. Writing great
