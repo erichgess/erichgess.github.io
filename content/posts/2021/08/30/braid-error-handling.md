@@ -18,7 +18,7 @@ _ => Err(format!("L{}: {} is not a unary operator", line, op)),
 
 Writing the Braid Compiler was my first large project in Rust. So, I had a lot to
 learned while also designing my language and my compiler. This led to me figuring out
-a lot of ways to balance devoting time to _learn_ how to write really good idiotmatic
+a lot of ways to balance devoting time to _learn_ how to write really good idiomatic
 Rust and actually building features for my compiler. Leading me to write code that I
 judged as mediocre but acceptable and moving on. On my best days, I am a perfectionist
 and want my code to be as efficiently communicative as possible. The silly result of
