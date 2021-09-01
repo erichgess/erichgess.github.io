@@ -149,7 +149,8 @@ message should include the variable name.
 
 The error information should have as little impact on the surrounding code as possible.
 The biggest problem with my use of `String` is that I have to write `format!` expressions
-in my code and deal with injecting the line number into the string. Ideally, creating an
+in my code and deal with injecting the line number into the string.  Which is tedious
+and fills my code with lots of error messages. Ideally, creating an
 error value would simply extract the line information from contextual data.
 
 ## What Will I Do In The Future?
