@@ -4,23 +4,18 @@ date: 2021-08-30T14:19:21-04:00
 draft: true
 ---
 
-I need love the mediocre code that I write. Unless you
-stop pushing your boundaries it's impossible to not occasionally write mediocre code.
-If you're learning a new language, you'll write a _lot_ of mediocre code, or you're 
-working in a completely new domain of engineering, or you've got a tight deadline, etc.
+I need love my mediocre code. Mediocre code is what you write when no intuition about 
+what you're doing or what you're using: in other words, when you're outside your comfort
+zone. Unless you stop pushing your boundaries it's impossible to not occasionally write mediocre code.
+If you're learning a new language, you'll write a _lot_ of mediocre code.
 So, we should take time to appreciate our mediocre code; as that's the code we write when
 we're growing. And a lot can be learned by thinking about what decisions were made that
 sacrificed great code for mediocre code and why.
 
-```rust
-_ => Err(format!("L{}: {} is not a unary operator", line, op)),
-```
-
-Writing the Braid Compiler was my first large project in Rust. So, I had a lot to
-learned while also designing my language and my compiler. This led to me figuring out
-a lot of ways to balance devoting time to _learn_ how to write really good idiomatic
-Rust and actually building features for my compiler. Leading me to write code that I
-judged as mediocre but acceptable and moving on. On my best days, I am a perfectionist
+Personally, I've always found a sense of slight shame and embarrassment when I 
+write mediocre code.  But that, I've come to realize, is a hindrance and waste of
+time and emotional energy. And to get over those feelings, I wrote this essay to
+force me to expose some of my own mediocre code to the world. On my best days, I am a perfectionist
 and want my code to be as efficiently communicative as possible. The silly result of
 this is that I hate my mediocre code and unnecessarily feel a bit ashamed about it.
 
@@ -39,16 +34,23 @@ past experience and your awareness of your current gaps in knowledge to mitigate
 cost of mediocrity and provide a path for turning the code into great code in the 
 future.
 
-To help me spend less time worrying about writing mediocre code and stressing about 
-other people judging my code. I will review one of my mediocre designs and think about:
-why it's mediocre (IMO), why I made certain decisions, what I got by making those
-decisions, and what I learned and would do instead with that learning.
+```rust
+_ => Err(format!("L{}: {} is not a unary operator", line, op)),
+```
 
-The design for error handling in `braidc` is very basic and not idiomatic 
-Rust. <Why is it not idiomatic? Point out the importance of the types used for errors> 
+Writing the Braid Compiler was my first large project in Rust. So, I had a lot to
+learn about it, while also learning about language design and compiler construction. 
+I was working in a world with essentially no intuition about anything: when I wasn't
+trying to figure out what features needed to be added to my compiler and how to 
+design them in Rust, I was being baffled by lifetimes and trying to remember how 
+to use the std. Everyday was a balancing act between figuring out how to do something
+right way in Rust, how to fit compiler components in the Rust semantics, and just 
+getting things done. The perfect situation that can only be solved by biting the 
+bullet and _choosing_ to write some mediocre code.
 
 From the very start of my compiler, errors cases had to be handled; after all, giving
-errors is the most important job of a compiler. I made
+errors is the most important job of a compiler. The `Result` type is one of my favorite
+tools, but there's the thorny question of what the error type ought to be. I made
 a deliberate choice to use the simplest possible design for my Error types: just strings.
 <Why was this simple and why was it mediocre? (Is this a repetition of above and is that wrong?)>
 Why? One, I did not know enough Rust to make good judgements on how more complex design
@@ -78,13 +80,12 @@ pub fn unary_op(
 At the time, I felt unsatisfied with this decision, but I was also happy to make it. I
 knew that I would make much better judgements on what error handling strategies and designs
 would work best in `braidc`.  Being new to Rust and have very little intuition for the 
-language meant that my choices would probably be wrong. The
+language meant that my choices would probably be wrong; no matter how much I learned about
+error type strategies at _that_ moment. The
 design that left the smallest footprint on the code base would also be the design
 that's the easiest to change. The design needed to maintain the `Result` type for propagating
 error information, because the structure that creates is what's _fundamental_ to Rust's
 error handling.
-
-Right now, in `braidc` everything returns `Result<_, String>`. 
 
 ```rust
 fn extern_def(stream: &mut TokenStream) -> ParserResult<Extern<u32>> {
@@ -115,17 +116,12 @@ fn extern_def(stream: &mut TokenStream) -> ParserResult<Extern<u32>> {
 }
 ```
 
-Why do I love this mediocre design?  It was fast to design and use in my code _and_
+Why do I love this mediocre design?  It got `braidc` what it needed  _and_
 it still imposed the _structure_ in my code that even the best Rust error handling idioms
-would impose; therefore, making a more idiomatic set of Error types would be contained to
-just the parts of my code that created the Error value. And I was able to write 
-enough errors to learn what my error types need to capture. I didn't find myself going back and rewriting or
-redesigning my error handling for a very long time.  I always knew it was a "just fine"
-design, but it never impacted my productivity or my code quality. So, I was able to focus
-on getting the other parts of my code good to great.
+would impose. And, because I knew it was mediocre, I paid extra attention whenever I wrote
+error handling into my code to _really_ understand what would make it great. 
 
-I now know that these are the key questions I need to answer:
-
+And from that experience, came a set of goals that would lead me to a great design:
 1. What error type design pattern fits best with my style?
 1. What information do the error types need to capture?
 1. How will error handling influence the code around it?
@@ -133,25 +129,6 @@ I now know that these are the key questions I need to answer:
 (e.g. the `?` operator will implicitly call `into` to convert an error from the call site
 to the surrounding functions error type). <This was not touched upon earlier>
 1. How do I aggregate multiple errors together?
-
-For the first question: I can create an enum that covers the different
-classes of errors that will happen in my code. Each submodule represents a key domain within
-the compiler and will have very different types of errors from other modules: so I will create
-an error enum for each module. One pattern that I've seen is the use of an `ErrorKind` inner
-value, but I do not yet know if this will be used in my code.
-
-An error needs to provide enough information that a user can fix what caused the error with
-minimal effort. Obviously, this will include a text message explaining the nature of the
-error.  And this will also need to tell the user where the source of the error is in the
-input file.  The error also should include any lexemes, syntacts, or semantic
-information that is related to the error: e.g., if a undeclared variable is used then the error
-message should include the variable name.
-
-The error information should have as little impact on the surrounding code as possible.
-The biggest problem with my use of `String` is that I have to write `format!` expressions
-in my code and deal with injecting the line number into the string.  Which is tedious
-and fills my code with lots of error messages. Ideally, creating an
-error value would simply extract the line information from contextual data.
 
 ## What Will I Do In The Future?
 1. Think within submodules.  Submodules provide a nice boundary for defining what the 
