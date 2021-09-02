@@ -122,7 +122,6 @@ would impose. And, because I knew it was mediocre, I paid extra attention whenev
 error handling into my code to _really_ understand what would make it great. 
 
 And from that experience, came a set of goals that would lead me to a great design:
-1. What error type design pattern fits best with my style?
 1. What information do the error types need to capture?
 1. How will error handling influence the code around it?
 1. The support functions and syntactic sugar that Rust provides to help with error handling.
@@ -130,32 +129,10 @@ And from that experience, came a set of goals that would lead me to a great desi
 to the surrounding functions error type). <This was not touched upon earlier>
 1. How do I aggregate multiple errors together?
 
-## What Will I Do In The Future?
-1. Think within submodules.  Submodules provide a nice boundary for defining what the 
-types of errors will be.
-1. What information needs to be provided in each error? Errors are used when there is
-something wrong with the input or an external dependency.  Enough information needs to
-be provided to the user so they know exactly how to fix the problem. If the problem,
-is input, then the user needs to know exactly what is wrong with the input. If it's a
-dependency then the user needs to know what's wrong with the dependency (probalby the
-best we can do here is propagate the error message the dependency threw). So, in the
-future, Error types I design will be heavily grown from the structure of the input
-interface between my module and the user. In the case of Braid, that input interface
-is the source code: the struture of which is lines and columns and lexemes.
-<This is way too long, shorten by a lot>
-1. Start simple and minimize tentacles into surrounding code.  What I liked about 
-`Result<_, String>` is that it was simple and I could easily use it anywhere and I
-could easily make changes to errors to improve clarity.  I also did not have to write
-any helper functions to work with my errors. One problem is that it had a little bit of
-tentacleness: with needing line numbers for every error, which meant that I had to always
-get a line number from a AST node and thread it down threw every place that I threw
-an error.
-1. Begin with a simple Error enumeration.
-1. Use helper functions and macros to simplify creating error values.
-
-What's great about just diving in and using a mediocre design for my error handling
-rather than just copying a strategy, is that I built a much more effective intuition
-of what good error types need to capture. Mediocrity meant that I put a lot more thought
-into what I was doing so that I could make it better in the future. If we want to get
+What's great about just plowing forward and writing some mediocre code, is that I 
+focused on building intuition for Rust and compilers. And intuition, I an convinced
+can only be built by doing not with reading. And knowing I was writing mediocrity 
+meant that I could consciously pay attention to how it interacted with its surroundings:
+massively increasing the speed my intuition developed. If we want to get
 good at something, we must be willing to do it poorly; that's the only way to build
 intuition and become great.
