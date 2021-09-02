@@ -1,5 +1,5 @@
 ---
-title: "Learning to Love Mediocre Code"
+title: "Learning to Love My Mediocre Code"
 date: 2021-08-30T14:19:21-04:00
 draft: true
 ---
