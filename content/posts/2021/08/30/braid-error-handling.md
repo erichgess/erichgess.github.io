@@ -52,7 +52,7 @@ bullet and _choosing_ to write some mediocre code.
 From the very start of my compiler, errors cases had to be handled; after all, giving
 errors is the most important job of a compiler. The `Result` type is one of my favorite
 tools, but there's the thorny question of what the error type ought to be. I made
-a deliberate choice to use the simplest possible design for my Error types: just strings.
+a deliberate choice to use the simplest possible design for my Error types: just strings[^1].
 <Why was this simple and why was it mediocre? (Is this a repetition of above and is that wrong?)>
 Why? One, I did not know enough Rust to make good judgements on how more complex design
 choices might shape my productivity and code. Two, with so much Rust to learn, I made a choice
@@ -133,3 +133,6 @@ code will let you focus on designing the code such that its mediocrity is contai
 
 If we want to get good at something, we must be willing to do it poorly; that's the only way to build
 intuition and become great. 
+
+[^1]: Mediocrity is, of course, subjective. This particular example may not seem
+like much, but I can say it's been an itch since I first started working on Braid.
