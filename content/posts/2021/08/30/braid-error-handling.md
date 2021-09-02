@@ -121,6 +121,7 @@ it still imposed the _structure_ in my code that even the best Rust error handli
 would impose. And, because I knew it was mediocre, I paid extra attention whenever I wrote
 error handling into my code to _really_ understand what would make it great. 
 
+<Do I need this section here?>
 And from that experience, came a set of goals that would lead me to a great design:
 1. What information do the error types need to capture?
 1. How will error handling influence the code around it?
@@ -135,4 +136,5 @@ can only be built by doing not with reading. And knowing I was writing mediocrit
 meant that I could consciously pay attention to how it interacted with its surroundings:
 massively increasing the speed my intuition developed. If we want to get
 good at something, we must be willing to do it poorly; that's the only way to build
-intuition and become great.
+intuition and become great. Finally, knowingly making the choice to write some mediocre
+code will let you focus on designing the code such that its mediocrity is contained.
