@@ -55,7 +55,8 @@ tools, but there's the thorny question of what the error type ought to be. I mad
 a deliberate choice to use the simplest possible design for my Error types: just strings[^1].
 <Why was this simple and why was it mediocre? (Is this a repetition of above and is that wrong?)>
 Why? One, I did not know enough Rust to make good judgements on how more complex design
-choices might shape my productivity and code. Two, with so much Rust to learn, I made a choice
+choices might shape my productivity and code. Two, my time and energy are finite and
+should be allocated with towards maximizing the results, I made a choice
 that I didn't have time to do a lot of reading about different error handling strategies:
 lacking experience would make my judgements on the strategies untrustworthy and I would gain
 more knowledge focusing on filling in other gaps in my Rust knowledge.
