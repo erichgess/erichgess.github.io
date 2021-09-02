@@ -6,7 +6,7 @@
 <meta name=viewport content="width=device-width,minimum-scale=1">
 <meta name=description content="In Part 3 of this Tutorial, I talked a little about erased types and how the types we generate are actually built on top of a obj. Previously, I just used a plan obj type and cast an integer to and from the obj types.
 InvokeCode= (fun args -> <@@ 0 :> obj @@>)) Using just the basic obj works well enough for a very simple generated type (like the simple integer from part 3).">
-<meta name=generator content="Hugo 0.87.0">
+<meta name=generator content="Hugo 0.88.0">
 <meta name=ROBOTS content="NOINDEX, NOFOLLOW">
 <link rel=stylesheet href=/ananke/css/main.min.css>
 <meta property="og:title" content="Type Providers Tutorial Part 4 - Base Types">
@@ -14,12 +14,12 @@ InvokeCode= (fun args -> <@@ 0 :> obj @@>)) Using just the basic obj works well 
 InvokeCode= (fun args -> <@@ 0 :> obj @@>)) Using just the basic obj works well enough for a very simple generated type (like the simple integer from part 3).">
 <meta property="og:type" content="article">
 <meta property="og:url" content="http://example.org/posts/2014-04-16-type-providers-tutorial-part-4/"><meta property="article:section" content="posts">
-<meta property="article:published_time" content="2014-04-16T22:09:16+00:00">
-<meta property="article:modified_time" content="2014-04-16T22:09:16+00:00">
+<meta property="article:published_time" content="2014-04-16T22:09:16-07:00">
+<meta property="article:modified_time" content="2014-04-16T22:09:16-07:00">
 <meta itemprop=name content="Type Providers Tutorial Part 4 - Base Types">
 <meta itemprop=description content="In Part 3 of this Tutorial, I talked a little about erased types and how the types we generate are actually built on top of a obj. Previously, I just used a plan obj type and cast an integer to and from the obj types.
-InvokeCode= (fun args -> <@@ 0 :> obj @@>)) Using just the basic obj works well enough for a very simple generated type (like the simple integer from part 3)."><meta itemprop=datePublished content="2014-04-16T22:09:16+00:00">
-<meta itemprop=dateModified content="2014-04-16T22:09:16+00:00">
+InvokeCode= (fun args -> <@@ 0 :> obj @@>)) Using just the basic obj works well enough for a very simple generated type (like the simple integer from part 3)."><meta itemprop=datePublished content="2014-04-16T22:09:16-07:00">
+<meta itemprop=dateModified content="2014-04-16T22:09:16-07:00">
 <meta itemprop=wordCount content="1346">
 <meta itemprop=keywords content><meta name=twitter:card content="summary">
 <meta name=twitter:title content="Type Providers Tutorial Part 4 - Base Types">
@@ -58,7 +58,7 @@ POSTS
 </a>
 </div>
 <h1 class="f1 athelas mt3 mb1">Type Providers Tutorial Part 4 - Base Types</h1>
-<time class="f6 mv4 dib tracked" datetime=2014-04-16T22:09:16Z>April 16, 2014</time>
+<time class="f6 mv4 dib tracked" datetime=2014-04-16T22:09:16-07:00>April 16, 2014</time>
 </header>
 <div class="nested-copy-line-height lh-copy serif f4 nested-links nested-img mid-gray pr4-l w-two-thirds-l"><p>In Part 3 of this Tutorial, I talked a little about erased types and how the types we generate are actually built on top of a <code>obj</code>. Previously, I just used a plan <code>obj</code> type and cast an integer to and from the <code>obj</code> types.</p>
 <div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fsharp data-lang=fsharp>InvokeCode<span style=color:#f92672>=</span> <span style=color:#f92672>(</span><span style=color:#66d9ef>fun</span> args <span style=color:#f92672>-&gt;</span> <span style=color:#f92672>&lt;@@</span> 0 <span style=color:#f92672>:&gt;</span> <span style=color:#66d9ef>obj</span> <span style=color:#f92672>@@&gt;))</span>
@@ -149,7 +149,7 @@ POSTS
 </code></pre></div><p>Now, just for this test, update the call to create type to look like this:</p>
 <div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fsharp data-lang=fsharp>    <span style=color:#66d9ef>let</span> types <span style=color:#f92672>=</span> <span style=color:#f92672>[</span> CreateType<span style=color:#f92672>(</span>[]<span style=color:#f92672>)</span> <span style=color:#f92672>]</span> 
 </code></pre></div><p>Build and send the project output to the FSI. You should get an output that looks like:</p>
-<pre><code>stdin(2,1): error FS3053: The type provider 'Samples.FSharp.TutorialTypeProvider.TutorialTypeProvider' reported an error: The type provider constructor has thrown an exception: The column list is empty
+<pre tabindex=0><code>stdin(2,1): error FS3053: The type provider 'Samples.FSharp.TutorialTypeProvider.TutorialTypeProvider' reported an error: The type provider constructor has thrown an exception: The column list is empty
 </code></pre><p>Make sure to change the call to <code>CreateType</code> back to:</p>
 <div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-fsharp data-lang=fsharp>    <span style=color:#66d9ef>let</span> types <span style=color:#f92672>=</span> <span style=color:#f92672>[</span> CreateType<span style=color:#f92672>([</span><span style=color:#e6db74>&#34;Tom&#34;</span><span style=color:#f92672>;</span> <span style=color:#e6db74>&#34;Dick&#34;</span><span style=color:#f92672>;</span> <span style=color:#e6db74>&#34;Harry&#34;</span><span style=color:#f92672>])</span> <span style=color:#f92672>]</span> 
 </code></pre></div><h3 id=summary>Summary</h3>

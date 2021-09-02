@@ -5,18 +5,18 @@
 <title>Type Providers - Tutorial Part 1 - Concepts | Elegant Architecture</title>
 <meta name=viewport content="width=device-width,minimum-scale=1">
 <meta name=description content="I&rsquo;ve only been working with the F# language for the last year. Which means that all of my learning has been with version 3.x of the F# language. One of the biggest features of 3.x, and something which I have yet to work with, is the Type Provider. Type Providers dynamically generate new types, usually from some data source (e.g. databases, XML documents, web services), which a developer can use in their code.">
-<meta name=generator content="Hugo 0.87.0">
+<meta name=generator content="Hugo 0.88.0">
 <meta name=ROBOTS content="NOINDEX, NOFOLLOW">
 <link rel=stylesheet href=/ananke/css/main.min.css>
 <meta property="og:title" content="Type Providers - Tutorial Part 1 - Concepts">
 <meta property="og:description" content="I&rsquo;ve only been working with the F# language for the last year. Which means that all of my learning has been with version 3.x of the F# language. One of the biggest features of 3.x, and something which I have yet to work with, is the Type Provider. Type Providers dynamically generate new types, usually from some data source (e.g. databases, XML documents, web services), which a developer can use in their code.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="http://example.org/posts/2014-04-03-type-providers-tutorial-part-1/"><meta property="article:section" content="posts">
-<meta property="article:published_time" content="2014-04-03T20:36:12+00:00">
-<meta property="article:modified_time" content="2014-04-03T20:36:12+00:00">
+<meta property="article:published_time" content="2014-04-03T20:36:12-07:00">
+<meta property="article:modified_time" content="2014-04-03T20:36:12-07:00">
 <meta itemprop=name content="Type Providers - Tutorial Part 1 - Concepts">
-<meta itemprop=description content="I&rsquo;ve only been working with the F# language for the last year. Which means that all of my learning has been with version 3.x of the F# language. One of the biggest features of 3.x, and something which I have yet to work with, is the Type Provider. Type Providers dynamically generate new types, usually from some data source (e.g. databases, XML documents, web services), which a developer can use in their code."><meta itemprop=datePublished content="2014-04-03T20:36:12+00:00">
-<meta itemprop=dateModified content="2014-04-03T20:36:12+00:00">
+<meta itemprop=description content="I&rsquo;ve only been working with the F# language for the last year. Which means that all of my learning has been with version 3.x of the F# language. One of the biggest features of 3.x, and something which I have yet to work with, is the Type Provider. Type Providers dynamically generate new types, usually from some data source (e.g. databases, XML documents, web services), which a developer can use in their code."><meta itemprop=datePublished content="2014-04-03T20:36:12-07:00">
+<meta itemprop=dateModified content="2014-04-03T20:36:12-07:00">
 <meta itemprop=wordCount content="687">
 <meta itemprop=keywords content><meta name=twitter:card content="summary">
 <meta name=twitter:title content="Type Providers - Tutorial Part 1 - Concepts">
@@ -54,7 +54,7 @@ POSTS
 </a>
 </div>
 <h1 class="f1 athelas mt3 mb1">Type Providers - Tutorial Part 1 - Concepts</h1>
-<time class="f6 mv4 dib tracked" datetime=2014-04-03T20:36:12Z>April 3, 2014</time>
+<time class="f6 mv4 dib tracked" datetime=2014-04-03T20:36:12-07:00>April 3, 2014</time>
 </header>
 <div class="nested-copy-line-height lh-copy serif f4 nested-links nested-img mid-gray pr4-l w-two-thirds-l"><p>I&rsquo;ve only been working with the F# language for the last year. Which means that all of my learning has been with version 3.x of the F# language. One of the biggest features of 3.x, and something which I have yet to work with, is the Type Provider. Type Providers dynamically generate new types, usually from some data source (e.g. databases, XML documents, web services), which a developer can use in their code. For C# developers this is analogous to the Entity Framework or the &ldquo;Add Service Reference&rdquo; in VS, both of which take a database or WSDL, respectively, and generate classes and functions that can be used in code. For Java this would be similar to Hibernate or wsdl2java. Just to be clear, when you create a Type Provider, what you&rsquo;ve built is an Entity Framework or a wsdl2java. What F# provides is a framework for building your own Type Providers as easily as possible.</p>
 <p>In order to learn how to build Type Providers, I decided to try my hand at writing a tutorial. This will, I think, be the first tutorial I&rsquo;ve ever written. I&rsquo;m going to break this tutorial into several phases. The first phase will be building a very simple &ldquo;Hello World&rdquo; type provider, which just creates a type which can be referenced in code (it won&rsquo;t do anything). The next phase will be to add static and instance methods, fields, and properties, but, again, the type will be predefined. Finally, I want to do a true type provider for a data source (I&rsquo;m thinking Cassandra) which will take the schema for a database and generate a set of types from that schema.</p>

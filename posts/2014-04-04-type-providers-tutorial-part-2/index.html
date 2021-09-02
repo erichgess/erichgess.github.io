@@ -5,18 +5,18 @@
 <title>Type Providers - Tutorial Part 2 | Elegant Architecture</title>
 <meta name=viewport content="width=device-width,minimum-scale=1">
 <meta name=description content="In Part 1 of this series, I briefly explained what a Type Provider was and some of the main concepts which you would need to know. In Part 2, I am going to build a very simple Type Provider. The purpose of Part 2 is to cover the basics of developing Type Providers, how to test them with F# Interactive, and the support tools which make developing Type Providers easy.">
-<meta name=generator content="Hugo 0.87.0">
+<meta name=generator content="Hugo 0.88.0">
 <meta name=ROBOTS content="NOINDEX, NOFOLLOW">
 <link rel=stylesheet href=/ananke/css/main.min.css>
 <meta property="og:title" content="Type Providers - Tutorial Part 2">
 <meta property="og:description" content="In Part 1 of this series, I briefly explained what a Type Provider was and some of the main concepts which you would need to know. In Part 2, I am going to build a very simple Type Provider. The purpose of Part 2 is to cover the basics of developing Type Providers, how to test them with F# Interactive, and the support tools which make developing Type Providers easy.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="http://example.org/posts/2014-04-04-type-providers-tutorial-part-2/"><meta property="article:section" content="posts">
-<meta property="article:published_time" content="2014-04-04T17:51:36+00:00">
-<meta property="article:modified_time" content="2014-04-04T17:51:36+00:00">
+<meta property="article:published_time" content="2014-04-04T17:51:36-07:00">
+<meta property="article:modified_time" content="2014-04-04T17:51:36-07:00">
 <meta itemprop=name content="Type Providers - Tutorial Part 2">
-<meta itemprop=description content="In Part 1 of this series, I briefly explained what a Type Provider was and some of the main concepts which you would need to know. In Part 2, I am going to build a very simple Type Provider. The purpose of Part 2 is to cover the basics of developing Type Providers, how to test them with F# Interactive, and the support tools which make developing Type Providers easy."><meta itemprop=datePublished content="2014-04-04T17:51:36+00:00">
-<meta itemprop=dateModified content="2014-04-04T17:51:36+00:00">
+<meta itemprop=description content="In Part 1 of this series, I briefly explained what a Type Provider was and some of the main concepts which you would need to know. In Part 2, I am going to build a very simple Type Provider. The purpose of Part 2 is to cover the basics of developing Type Providers, how to test them with F# Interactive, and the support tools which make developing Type Providers easy."><meta itemprop=datePublished content="2014-04-04T17:51:36-07:00">
+<meta itemprop=dateModified content="2014-04-04T17:51:36-07:00">
 <meta itemprop=wordCount content="1011">
 <meta itemprop=keywords content><meta name=twitter:card content="summary">
 <meta name=twitter:title content="Type Providers - Tutorial Part 2">
@@ -54,7 +54,7 @@ POSTS
 </a>
 </div>
 <h1 class="f1 athelas mt3 mb1">Type Providers - Tutorial Part 2</h1>
-<time class="f6 mv4 dib tracked" datetime=2014-04-04T17:51:36Z>April 4, 2014</time>
+<time class="f6 mv4 dib tracked" datetime=2014-04-04T17:51:36-07:00>April 4, 2014</time>
 </header>
 <div class="nested-copy-line-height lh-copy serif f4 nested-links nested-img mid-gray pr4-l w-two-thirds-l"><p>In Part 1 of this series, I briefly explained what a Type Provider was and some of the main concepts which you would need to know. In Part 2, I am going to build a very simple Type Provider. The purpose of Part 2 is to cover the basics of developing Type Providers, how to test them with F# Interactive, and the support tools which make developing Type Providers easy.</p>
 <p>I will make a Type Provider which generates a single type named &ldquo;Hello&rdquo;. At first it will just have a static property which returns the string <code>"World"</code>. Then I will add a static method which takes no parameters. Finally, I will add a static method which takes a parameter.</p>
@@ -118,7 +118,7 @@ POSTS
 <p>Build the library. When the build is complete, right click on the project in the Solution Explorer and choose &ldquo;Send Project Output To F# Interactive&rdquo;:</p>
 <p><img src=/images/typeprov_tut_p2/5-firstbuild.png alt="First Build"></p>
 <p>In F# Interactive run:</p>
-<pre><code>&gt; open Tutorial;;
+<pre tabindex=0><code>&gt; open Tutorial;;
 &gt; Tutorial.Hello;;
 </code></pre><p>When you run <code>Tutorial.Hello</code> you&rsquo;ll get an error about not having a constructor. This is a good thing. The compiler can find the type, but there&rsquo;s no constructor so it bombs out.</p>
 <p>** Before Proceeding make sure to reset F# Interactive **

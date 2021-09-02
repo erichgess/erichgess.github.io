@@ -5,18 +5,18 @@
 <title>RavenDB, MapReduce, and Logging | Elegant Architecture</title>
 <meta name=viewport content="width=device-width,minimum-scale=1">
 <meta name=description content="Working with a system which is distributed and uses messaging for communication presents some interesting challenges. One frequent challenge I&rsquo;ve gotten to deal with a few times is: how to tell what&rsquo;s happening to a request as the system is processing it. A request comes into the my system, which wakes one service up and it does some work, then it sends off commands to two other services which both do some work, and then, when both are done, a final service does some work and completes the task.">
-<meta name=generator content="Hugo 0.87.0">
+<meta name=generator content="Hugo 0.88.0">
 <meta name=ROBOTS content="NOINDEX, NOFOLLOW">
 <link rel=stylesheet href=/ananke/css/main.min.css>
 <meta property="og:title" content="RavenDB, MapReduce, and Logging">
 <meta property="og:description" content="Working with a system which is distributed and uses messaging for communication presents some interesting challenges. One frequent challenge I&rsquo;ve gotten to deal with a few times is: how to tell what&rsquo;s happening to a request as the system is processing it. A request comes into the my system, which wakes one service up and it does some work, then it sends off commands to two other services which both do some work, and then, when both are done, a final service does some work and completes the task.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="http://example.org/posts/2014-03-11-ravendb/"><meta property="article:section" content="posts">
-<meta property="article:published_time" content="2014-03-11T08:38:11+00:00">
-<meta property="article:modified_time" content="2014-03-11T08:38:11+00:00">
+<meta property="article:published_time" content="2014-03-11T08:38:11-07:00">
+<meta property="article:modified_time" content="2014-03-11T08:38:11-07:00">
 <meta itemprop=name content="RavenDB, MapReduce, and Logging">
-<meta itemprop=description content="Working with a system which is distributed and uses messaging for communication presents some interesting challenges. One frequent challenge I&rsquo;ve gotten to deal with a few times is: how to tell what&rsquo;s happening to a request as the system is processing it. A request comes into the my system, which wakes one service up and it does some work, then it sends off commands to two other services which both do some work, and then, when both are done, a final service does some work and completes the task."><meta itemprop=datePublished content="2014-03-11T08:38:11+00:00">
-<meta itemprop=dateModified content="2014-03-11T08:38:11+00:00">
+<meta itemprop=description content="Working with a system which is distributed and uses messaging for communication presents some interesting challenges. One frequent challenge I&rsquo;ve gotten to deal with a few times is: how to tell what&rsquo;s happening to a request as the system is processing it. A request comes into the my system, which wakes one service up and it does some work, then it sends off commands to two other services which both do some work, and then, when both are done, a final service does some work and completes the task."><meta itemprop=datePublished content="2014-03-11T08:38:11-07:00">
+<meta itemprop=dateModified content="2014-03-11T08:38:11-07:00">
 <meta itemprop=wordCount content="898">
 <meta itemprop=keywords content><meta name=twitter:card content="summary">
 <meta name=twitter:title content="RavenDB, MapReduce, and Logging">
@@ -54,7 +54,7 @@ POSTS
 </a>
 </div>
 <h1 class="f1 athelas mt3 mb1">RavenDB, MapReduce, and Logging</h1>
-<time class="f6 mv4 dib tracked" datetime=2014-03-11T08:38:11Z>March 11, 2014</time>
+<time class="f6 mv4 dib tracked" datetime=2014-03-11T08:38:11-07:00>March 11, 2014</time>
 </header>
 <div class="nested-copy-line-height lh-copy serif f4 nested-links nested-img mid-gray pr4-l w-two-thirds-l"><p>Working with a system which is distributed and uses messaging for communication presents some interesting challenges. One frequent challenge I&rsquo;ve gotten to deal with a few times is: how to tell what&rsquo;s happening to a request as the system is processing it. A request comes into the my system, which wakes one service up and it does some work, then it sends off commands to two other services which both do some work, and then, when both are done, a final service does some work and completes the task. A little vague, but the scenario should illustrate that when trying to figure out what happened to the initial request, I&rsquo;ve got to dig through at least 4 services worth of logs. That&rsquo;s assuming everything has only one instance; multiple instances on multiple servers and it becomes a huge chore.</p>
 <p>The solution to this is fairly simple: use a log aggregator like splunk or roll your own with ElasticSearch. However, I want to have some fun and learn something new and this is a perfect situation for learning and experimentation: the problem isn&rsquo;t that complex and if I get the solution wrong, no one really cares, so the risk is low. What I decided to do was build something up using RavenDB and its built in MapReduce index system.</p>
