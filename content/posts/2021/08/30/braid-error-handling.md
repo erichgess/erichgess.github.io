@@ -35,6 +35,7 @@ cost of mediocrity and provide a path for turning the code into great code in th
 future.
 
 ```rust
+// My mediocre error design
 _ => Err(format!("L{}: {} is not a unary operator", line, op)),
 ```
 
@@ -60,6 +61,7 @@ lacking experience would make my judgements on the strategies untrustworthy and 
 more knowledge focusing on filling in other gaps in my Rust knowledge.
 
 ```rust
+// Showing an example of my error design in context
 pub fn unary_op(
     line: u32,
     op: &Lex,
@@ -88,6 +90,9 @@ error information, because the structure that creates is what's _fundamental_ to
 error handling.
 
 ```rust
+// Some code from the Braid parser showing two errors in context with
+// of the code used to parse an extern declaration.  This gives a larger example
+// with some more complex code.
 fn extern_def(stream: &mut TokenStream) -> ParserResult<Extern<u32>> {
     match stream.next_if(&Lex::Extern) {
         Some(token) => match function_decl(stream, true)? {
@@ -121,20 +126,10 @@ it still imposed the _structure_ in my code that even the best Rust error handli
 would impose. And, because I knew it was mediocre, I paid extra attention whenever I wrote
 error handling into my code to _really_ understand what would make it great. 
 
-<Do I need this section here?>
-And from that experience, came a set of goals that would lead me to a great design:
-1. What information do the error types need to capture?
-1. How will error handling influence the code around it?
-1. The support functions and syntactic sugar that Rust provides to help with error handling.
-(e.g. the `?` operator will implicitly call `into` to convert an error from the call site
-to the surrounding functions error type). <This was not touched upon earlier>
-1. How do I aggregate multiple errors together?
-
 What's great about just plowing forward and writing some mediocre code, is that I 
-focused on building intuition for Rust and compilers. And intuition, I an convinced
-can only be built by doing not with reading. And knowing I was writing mediocrity 
-meant that I could consciously pay attention to how it interacted with its surroundings:
-massively increasing the speed my intuition developed. If we want to get
-good at something, we must be willing to do it poorly; that's the only way to build
-intuition and become great. Finally, knowingly making the choice to write some mediocre
+could focus on building intuition for Rust and compiler design. And intuition, I am convinced
+can only be built by doing. Finally, knowingly making the choice to write some mediocre
 code will let you focus on designing the code such that its mediocrity is contained.
+
+If we want to get good at something, we must be willing to do it poorly; that's the only way to build
+intuition and become great. 
