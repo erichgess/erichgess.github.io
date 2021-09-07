@@ -6,7 +6,7 @@
 <meta name=viewport content="width=device-width,minimum-scale=1">
 <meta name=description content="Alright, I now have a simple usable RabbitMQ client library which fits comfortably with F#. However, there&rsquo;s still some inconsistency in the design which I want to polish out:
  To create a consumer on a queue, you call:  createQueueConsumer myChannel &#34;myQueue&#34; To create a read function for a queue, you call:  let (readFrom,_) = createQueueFuntions myChannel let readFromMyQueue = readFrom &#34;myQueue&#34; To create a write function for a queue, you call:  let (_,writeTo) = createQueueFuntions myChannel let writeToMyQueue = writeTo &#34;myQueue&#34; Why have a function which manages both the read AND the writes for a channel?">
-<meta name=generator content="Hugo 0.88.0">
+<meta name=generator content="Hugo 0.88.1">
 <meta name=ROBOTS content="NOINDEX, NOFOLLOW">
 <link rel=stylesheet href=/ananke/css/main.min.css>
 <meta property="og:title" content="RabbitMQ and F# - Part 5">
