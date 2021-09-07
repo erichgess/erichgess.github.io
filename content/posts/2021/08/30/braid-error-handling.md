@@ -1,7 +1,7 @@
 ---
 title: "Learning to Love My Mediocre Code"
 date: 2021-08-30T14:19:21-04:00
-draft: true
+draft: false
 ---
 
 I need love my mediocre code. Mediocre code is what you write when no intuition about 
