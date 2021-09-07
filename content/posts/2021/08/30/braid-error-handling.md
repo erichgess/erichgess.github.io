@@ -137,3 +137,5 @@ intuition and become great.
 
 [^1]: Mediocrity is, of course, subjective. This particular example may not seem
 like much, but I can say it's been an itch since I first started working on Braid.
+It's also very small and easy to explain, other mediocre code I wrote in Braid would
+a lot more writing on the code itself, but the focus of this essay is on the "mediocrity".
